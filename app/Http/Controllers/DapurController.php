@@ -1,0 +1,213 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\Meja;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+
+class DapurController extends Controller
+{
+    // ═══════════════════════════════
+    // PESANAN MASUK
+    // ═══════════════════════════════
+
+    public function index()
+    {
+        $orders = Order::with(['items.menu'])
+            ->where('status', 'pending')
+            ->whereDate('created_at', today())
+            ->latest()
+            ->get();
+
+        return view(
+            'dapur.pesanan',
+            compact('orders')
+        );
+    }
+
+    // ═══════════════════════════════
+    // SEDANG DIPROSES
+    // ═══════════════════════════════
+
+    public function proses()
+    {
+        $orders = Order::with(['items.menu'])
+            ->where('status', 'process')
+            ->whereDate('created_at', today())
+            ->orderBy('process_at', 'asc')
+            ->get();
+
+        return view(
+            'dapur.proses',
+            compact('orders')
+        );
+    }
+
+    // ═══════════════════════════════
+    // PESANAN SELESAI
+    // ═══════════════════════════════
+
+    public function selesaiView()
+    {
+        $orders = Order::with(['items.menu'])
+            ->where('status', 'done')
+            ->whereDate('created_at', today())
+            ->orderBy('done_at', 'desc')
+            ->get();
+
+        return view(
+            'dapur.selesai',
+            compact('orders')
+        );
+    }
+
+    // ═══════════════════════════════
+    // TANDAI SELESAI
+    // ═══════════════════════════════
+
+    public function selesai(int $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $order->update([
+
+            'status' => 'done',
+
+            'done_at' => now(),
+
+        ]);
+
+        // AUTO KOSONGKAN MEJA
+
+        if ($order->table_number) {
+
+            Meja::where(
+                'nomor_meja',
+                $order->table_number
+            )->update([
+
+                'status' => 'kosong'
+
+            ]);
+        }
+
+        return back()->with(
+
+            'success',
+
+            "Pesanan {$order->queue_number} selesai dimasak!"
+
+        );
+    }
+
+    // ═══════════════════════════════
+    // PROFIL
+    // ═══════════════════════════════
+
+    public function profil()
+    {
+        return view('dapur.account.profil');
+    }
+
+    public function updateProfil(Request $request)
+    {
+        $request->validate([
+
+            'name' => 'required|string|max:100',
+
+            'email' =>
+                'required|email|unique:users,email,' . Auth::id(),
+
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        $user->name = $request->name;
+
+        $user->email = $request->email;
+
+        // USERNAME
+
+        if ($request->filled('username')) {
+
+            $user->username = $request->username;
+        }
+
+        // PHONE
+
+        if ($request->filled('phone')) {
+
+            $user->phone = $request->phone;
+        }
+
+        $user->save();
+
+        return redirect('/dapur/account/profil')
+            ->with(
+                'success',
+                'Profil berhasil diperbarui!'
+            );
+    }
+
+    // ═══════════════════════════════
+    // GANTI PASSWORD
+    // ═══════════════════════════════
+
+    public function gantiSandi()
+    {
+        return view('dapur.account.ganti-sandi');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+
+            'current_password' => 'required',
+
+            'new_password' =>
+                'required|min:8|confirmed',
+
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        // CEK PASSWORD LAMA
+
+        if (
+            !Hash::check(
+                $request->current_password,
+                $user->password
+            )
+        ) {
+
+            return back()->withErrors([
+
+                'current_password' =>
+                    'Password lama yang kamu masukkan salah!'
+
+            ]);
+        }
+
+        // UPDATE PASSWORD BARU
+
+        $user->update([
+
+            'password' => Hash::make(
+                $request->new_password
+            )
+
+        ]);
+
+        return redirect('/dapur/proses')
+            ->with(
+                'success',
+                'Password berhasil diubah!'
+            );
+    }
+}
