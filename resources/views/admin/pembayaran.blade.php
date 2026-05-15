@@ -411,6 +411,10 @@ select.form-control { cursor: pointer; }
         <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
 
+    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
+        <i data-lucide="clipboard-list"></i> Order
+    </a>
+
     <div class="menu-section">KATALOG</div>
     <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
         <i data-lucide="utensils"></i> Menu

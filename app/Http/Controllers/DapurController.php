@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Meja;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,7 @@ class DapurController extends Controller
     public function index()
     {
         $orders = Order::with(['items.menu'])
-            ->where('status', 'pending')
+            ->where('status', 'process')
             ->whereDate('created_at', today())
             ->latest()
             ->get();
@@ -28,6 +29,7 @@ class DapurController extends Controller
             compact('orders')
         );
     }
+
 
     // ═══════════════════════════════
     // SEDANG DIPROSES
@@ -47,6 +49,7 @@ class DapurController extends Controller
         );
     }
 
+
     // ═══════════════════════════════
     // PESANAN SELESAI
     // ═══════════════════════════════
@@ -65,6 +68,7 @@ class DapurController extends Controller
         );
     }
 
+
     // ═══════════════════════════════
     // TANDAI SELESAI
     // ═══════════════════════════════
@@ -73,27 +77,45 @@ class DapurController extends Controller
     {
         $order = Order::findOrFail($id);
 
+        // VALIDASI
+
+        abort_if(
+            $order->status !== 'process',
+            422,
+            'Pesanan belum diproses.'
+        );
+
+        // UPDATE STATUS
+
         $order->update([
 
-            'status' => 'done',
+            'status'  => 'done',
 
             'done_at' => now(),
 
         ]);
 
-        // AUTO KOSONGKAN MEJA
 
-        if ($order->table_number) {
+        // NOTIF KE PELAYAN
 
-            Meja::where(
-                'nomor_meja',
-                $order->table_number
-            )->update([
+        Notification::kirim(
 
-                'status' => 'kosong'
+            'pelayan',
 
-            ]);
-        }
+            'order_done',
+
+            '🍽️ Makanan Siap Diantar',
+
+            "Pesanan {$order->queue_number}" .
+            ($order->table_number
+                ? " meja {$order->table_number}"
+                : '') .
+            " sudah selesai dimasak.",
+
+            $order
+
+        );
+
 
         return back()->with(
 
@@ -104,6 +126,7 @@ class DapurController extends Controller
         );
     }
 
+
     // ═══════════════════════════════
     // PROFIL
     // ═══════════════════════════════
@@ -112,6 +135,7 @@ class DapurController extends Controller
     {
         return view('dapur.account.profil');
     }
+
 
     public function updateProfil(Request $request)
     {
@@ -131,18 +155,22 @@ class DapurController extends Controller
 
         $user->email = $request->email;
 
+
         // USERNAME
 
         if ($request->filled('username')) {
 
             $user->username = $request->username;
+
         }
+
 
         // PHONE
 
         if ($request->filled('phone')) {
 
             $user->phone = $request->phone;
+
         }
 
         $user->save();
@@ -154,6 +182,7 @@ class DapurController extends Controller
             );
     }
 
+
     // ═══════════════════════════════
     // GANTI PASSWORD
     // ═══════════════════════════════
@@ -162,6 +191,7 @@ class DapurController extends Controller
     {
         return view('dapur.account.ganti-sandi');
     }
+
 
     public function updatePassword(Request $request)
     {
@@ -176,6 +206,7 @@ class DapurController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
+
 
         // CEK PASSWORD LAMA
 
@@ -192,7 +223,9 @@ class DapurController extends Controller
                     'Password lama yang kamu masukkan salah!'
 
             ]);
+
         }
+
 
         // UPDATE PASSWORD BARU
 
@@ -203,6 +236,7 @@ class DapurController extends Controller
             )
 
         ]);
+
 
         return redirect('/dapur/proses')
             ->with(

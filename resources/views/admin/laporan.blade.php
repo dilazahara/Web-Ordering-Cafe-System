@@ -7,7 +7,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- ICONS -->
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
@@ -66,129 +65,72 @@ body {
 }
 
 /* =======================
-   SIDEBAR - CLEAN DARK
+   SIDEBAR — sama persis menu
 ======================= */
 .sidebar {
-    width: 240px;
-    height: 100vh;
-    position: fixed;
+    width: 240px; height: 100vh; position: fixed;
     background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px;
-    padding-top: 100px;
-    color: white;
-    overflow-y: auto;
+    padding: 30px; padding-top: 100px;
+    color: white; overflow-y: auto;
     transform: translateX(-100%);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 999;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; gap: 8px;
 }
-
 .menu-section {
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: #a78bfa;
-    margin: 18px 10px 8px;
-    opacity: 0.7;
+    font-size: 11px; letter-spacing: 1px;
+    color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
 }
-
-.sidebar.show {
-    transform: translateX(0);
-}
-
-.sidebar h2 {
-    margin-bottom: 20px;
-    font-weight: 700;
-    font-size: 20px;
-}
+.sidebar.show { transform: translateX(0); }
 
 /* =======================
-   SIDEBAR MENU
+   SIDEBAR MENU — sama persis menu
 ======================= */
 .sidebar a,
 .menu-parent {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #94a3b8;
-    font-weight: 400;
-    font-size: 15px;
+    display: flex; align-items: center; gap: 15px;
+    padding: 12px 14px; border-radius: 12px;
+    text-decoration: none; color: #94a3b8;
+    font-weight: 400; font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .sidebar i {
-    width: 20px;
-    height: 20px;
-    stroke-width: 2.5;
-    color: #c4b5fd;
+    width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd;
 }
-
-.menu-parent {
-    cursor: pointer;
-}
-
+.menu-parent { cursor: pointer; }
 .menu-parent:hover,
 .sidebar a:hover {
-    background: rgba(255,255,255,0.06);
-    color: white;
-    transform: translateX(4px);
+    background: rgba(255,255,255,0.06); color: white; transform: translateX(4px);
 }
-
 .sidebar a.active {
-    background: rgba(139, 92, 246, 0.25);
-    color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
     box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
 }
 
 /* =======================
-   SUBMENU
+   SUBMENU — sama persis menu
 ======================= */
 .submenu {
-    display: none;
-    flex-direction: column;
-    margin-left: 35px;
-    gap: 5px;
+    display: none; flex-direction: column;
+    margin-left: 35px; gap: 5px;
     animation: slideDown 0.3s ease;
 }
-
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-
 .submenu-item {
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    color: #cbd5e1;
-    transition: all 0.3s ease;
+    padding: 12px 16px; border-radius: 12px;
+    font-size: 14px; color: #cbd5e1;
+    text-decoration: none; transition: all 0.3s ease;
+    display: block;
 }
+.submenu-item:hover { background: #334155; color: white; padding-left: 20px; }
+.submenu-item.active { background: #3b82f6; color: white; }
 
-.submenu-item:hover {
-    background: #334155;
-    color: white;
-    padding-left: 20px;
-}
-
-.submenu-item.active {
-    background: #3b82f6;
-    color: white;
-}
-
-/* ARROW */
-.arrow {
-    margin-left: auto;
-    transition: all 0.4s ease;
-}
-
-.arrow.rotate {
-    transform: rotate(180deg);
-}
+/* ARROW — sama persis */
+.arrow { margin-left: auto; transition: all 0.4s ease; }
+.arrow.rotate { transform: rotate(180deg); }
 
 /* =======================
    MAIN CONTENT
@@ -405,7 +347,6 @@ tbody tr:hover {
 
 <body>
 
-<!-- HEADER -->
 <div class="topbar">
     <div class="topbar-left">
         <i data-lucide="menu" onclick="toggleSidebar()"></i>
@@ -413,12 +354,15 @@ tbody tr:hover {
     </div>
 </div>
 
-<!-- ══ SIDEBAR ══ -->
 <div class="sidebar" id="sidebar">
 
     <div class="menu-section">MAIN</div>
     <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
         <i data-lucide="layout-dashboard"></i> Dashboard
+    </a>
+    
+    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
+        <i data-lucide="receipt"></i> Orders
     </a>
 
     <div class="menu-section">KATALOG</div>
@@ -459,14 +403,12 @@ tbody tr:hover {
 
 </div>
 
-<!-- MAIN -->
 <div class="main">
     <div class="header">
         <h1>Laporan Penjualan</h1>
         <p style="color: #64748b; font-size: 16px;">Filter dan export data penjualan dengan mudah</p>
     </div>
 
-    <!-- FILTER -->
     <div class="filter-box">
         <form method="GET" action="/admin/laporan" style="display: flex; gap: 15px; flex: 1; flex-wrap: wrap; align-items: center;">
             <div class="filter-group">
@@ -496,7 +438,6 @@ tbody tr:hover {
         </a>
     </div>
 
-    <!-- TABLE -->
     <div class="table-box">
         <div class="table-title">
             <i data-lucide="table"></i>
@@ -562,14 +503,16 @@ tbody tr:hover {
 lucide.createIcons();
 
 function toggleSidebar() {
-    document.querySelector(".sidebar").classList.toggle("show");
+    document.getElementById("sidebar").classList.toggle("show");
 }
 
 function toggleMejaMenu(){
     const menu = document.getElementById('submenuMeja');
     const arrow = document.getElementById('arrowMeja');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    arrow.classList.toggle('rotate');
+    if(menu && arrow) {
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        arrow.classList.toggle('rotate');
+    }
 }
 </script>
 

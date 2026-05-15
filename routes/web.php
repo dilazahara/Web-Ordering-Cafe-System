@@ -67,7 +67,7 @@ Route::get(
 Route::post(
     '/login',
     [LoginController::class, 'login']
-);
+)->name('login.post');
 
 Route::get(
     '/register',
@@ -523,21 +523,19 @@ Route::middleware(['auth', 'role:dapur'])
     ->name('dapur.')
     ->group(function () {
 
-    Route::get(
-        '/pesanan',
-        [DapurController::class, 'index']
-    )->name('pesanan');
-
+    // HALAMAN UTAMA DAPUR
     Route::get(
         '/proses',
         [DapurController::class, 'proses']
     )->name('proses');
 
+    // RIWAYAT SELESAI
     Route::get(
         '/selesai',
         [DapurController::class, 'selesaiView']
     )->name('selesai');
 
+    // TANDAI SELESAI
     Route::post(
         '/selesai/{id}',
         [DapurController::class, 'selesai']

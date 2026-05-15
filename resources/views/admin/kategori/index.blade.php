@@ -197,6 +197,10 @@ tbody tr:hover { background: #f8fafc; }
         <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
 
+    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
+        <i data-lucide="clipboard-list"></i> Order
+    </a>
+
     <div class="menu-section">KATALOG</div>
 
     <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">

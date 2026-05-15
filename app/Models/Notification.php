@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Notification extends Model
 {
@@ -24,12 +26,6 @@ class Notification extends Model
 
     /**
      * Kirim notifikasi ke satu atau beberapa role.
-     *
-     * @param string|array $roles   e.g. 'kasir' atau ['kasir','admin']
-     * @param string       $type    order_new | order_confirmed | order_done | order_delivered
-     * @param string       $title
-     * @param string       $message
-     * @param Order|null   $order
      */
     public static function kirim(
         string|array $roles,
@@ -38,8 +34,11 @@ class Notification extends Model
         string $message,
         ?Order $order = null
     ): void {
+
         foreach ((array) $roles as $role) {
+
             static::create([
+
                 'type'         => $type,
                 'target_role'  => $role,
                 'title'        => $title,
@@ -47,19 +46,31 @@ class Notification extends Model
                 'order_id'     => $order?->id,
                 'queue_number' => $order?->queue_number,
                 'is_read'      => false,
+
             ]);
         }
     }
 
     // ── Scope helpers ─────────────────────────────────────
 
-    public function scopeForRole($query, string $role)
+    public function scopeForRole(
+        Builder $query,
+        string $role
+    )
     {
-        return $query->where('target_role', $role);
+        return $query->where(
+            'target_role',
+            $role
+        );
     }
 
-    public function scopeUnread($query)
+    public function scopeUnread(
+        Builder $query
+    )
     {
-        return $query->where('is_read', false);
+        return $query->where(
+            'is_read',
+            false
+        );
     }
 }

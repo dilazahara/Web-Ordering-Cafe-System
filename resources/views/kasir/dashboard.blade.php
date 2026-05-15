@@ -214,106 +214,191 @@ tr:hover td { background: var(--surface-2); }
     <div class="logo-text">Kasir<span></span></div>
   </div>
   <div class="header-right">
+
+    {{-- NOTIFICATION BELL --}}
+    <x-notification-bell />
+
+    {{-- CLOCK --}}
     <div class="header-clock">
-  <svg viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12 6 12 12 16 14"/>
-  </svg>
 
-  <span id="liveClock">00:00:00</span>
-</div>
+        <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
 
-    <a
-    href="/kasir/pesanan"
-    class="hdr-btn"
->
+        <span id="liveClock">00:00:00</span>
 
-    <svg viewBox="0 0 24 24">
+    </div>
 
-        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-
-        <path d="M13.73 21a2 2 0 01-3.46 0"/>
-
-    </svg>
-
-    <span
-        class="notif-badge"
-        id="notifBadge"
-    >
-
-        0
-
-    </span>
-
-</a>
     <div class="divider-v"></div>
 
-    <!-- PROFILE DROPDOWN -->
+    {{-- PROFILE DROPDOWN --}}
     <div class="profile-wrap">
-      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">
-    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
-</div>
-        <div class="user-info">
-          <div class="user-name">
-    {{ auth()->user()->name }}
-</div>
-          <div class="user-role">
-    {{ ucfirst(auth()->user()->role) }}
-</div>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
 
-      <div class="dropdown" id="profileDropdown">
-        <!-- Header -->
-        <div class="dropdown-header">
-          <div class="dropdown-avatar">
-    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
-</div>
-          <div>
-            <div class="dropdown-name">
-    {{ auth()->user()->name }}
-</div>
-            <div class="dropdown-role">
-    {{ ucfirst(auth()->user()->role) }} · Online
-</div>
-          </div>
-        </div>
+        <div
+            class="user-btn"
+            id="profileBtn"
+            onclick="toggleDropdown()"
+        >
 
-        <!-- Menu Items -->
-        <div class="dropdown-body">
-          <a href="/kasir/account/profil" class="dropdown-item">
-            <div class="item-icon">
-              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <div class="avatar">
+
+                {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+
             </div>
-            Profil Saya
-          </a>
-        
-          <a href="/kasir/account/ganti-sandi" class="dropdown-item">
-            <div class="item-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+
+            <div class="user-info">
+
+                <div class="user-name">
+
+                    {{ auth()->user()->name }}
+
+                </div>
+
+                <div class="user-role">
+
+                    {{ ucfirst(auth()->user()->role) }}
+
+                </div>
+
             </div>
-            Ganti Password
-          </a>
 
-          <div class="dropdown-divider"></div>
+            <svg class="chevron" viewBox="0 0 24 24">
 
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item danger">
-              <div class="item-icon">
-                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              </div>
-              Logout
-            </button>
-          </form>
+                <polyline points="6 9 12 15 18 9"/>
+
+            </svg>
+
         </div>
-      </div>
+
+        <div
+            class="dropdown"
+            id="profileDropdown"
+        >
+
+            {{-- DROPDOWN HEADER --}}
+            <div class="dropdown-header">
+
+                <div class="dropdown-avatar">
+
+                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+
+                </div>
+
+                <div>
+
+                    <div class="dropdown-name">
+
+                        {{ auth()->user()->name }}
+
+                    </div>
+
+                    <div class="dropdown-role">
+
+                        {{ ucfirst(auth()->user()->role) }} · Online
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {{-- DROPDOWN BODY --}}
+            <div class="dropdown-body">
+
+                {{-- PROFIL --}}
+                <a
+                    href="/kasir/account/profil"
+                    class="dropdown-item"
+                >
+
+                    <div class="item-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+
+                            <circle cx="12" cy="7" r="4"/>
+
+                        </svg>
+
+                    </div>
+
+                    Profil Saya
+
+                </a>
+
+                {{-- PASSWORD --}}
+                <a
+                    href="/kasir/account/ganti-sandi"
+                    class="dropdown-item"
+                >
+
+                    <div class="item-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="11"
+                                width="18"
+                                height="11"
+                                rx="2"
+                                ry="2"
+                            />
+
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+
+                        </svg>
+
+                    </div>
+
+                    Ganti Password
+
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                {{-- LOGOUT --}}
+                <form
+                    method="POST"
+                    action="{{ route('logout') }}"
+                >
+
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="dropdown-item danger"
+                    >
+
+                        <div class="item-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+
+                                <polyline points="16 17 21 12 16 7"/>
+
+                                <line x1="21" y1="12" x2="9" y2="12"/>
+
+                            </svg>
+
+                        </div>
+
+                        Logout
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
     </div>
-    <!-- END PROFILE DROPDOWN -->
 
-  </div>
+</div>
 </header>
 
 <nav class="topnav">

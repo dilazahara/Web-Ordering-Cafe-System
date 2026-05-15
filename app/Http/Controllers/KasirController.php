@@ -125,6 +125,21 @@ class KasirController extends Controller
 
         $order->update(['status' => 'delivered']);
 
+        // =====================================
+        // AUTO STATUS MEJA = KOSONG
+        // =====================================
+
+        if ($order->table_number) {
+
+            Meja::where(
+                'nomor_meja',
+                $order->table_number
+            )->update([
+                'status' => 'kosong'
+            ]);
+
+        }
+
         // Notifikasi ke admin: transaksi selesai
         Notification::kirim(
             'admin',

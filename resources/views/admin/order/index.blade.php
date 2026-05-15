@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orders</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,102 +36,90 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
     color: white; font-size: 13px; font-weight: 700;
 }
 
-/* ══ SIDEBAR ══ */
+/* =======================
+   SIDEBAR — sama persis menu
+======================= */
 .sidebar {
-    width: 240px;
-    height: 100vh;
-    position: fixed;
-    top: 0; left: 0;
+    width: 240px; height: 100vh; position: fixed; top: 0; left: 0;
     background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px 20px;
-    padding-top: 100px;
-    color: white;
-    overflow-y: auto;           /* bisa di-scroll */
-    overflow-x: hidden;
+    padding: 30px; padding-top: 100px;
+    color: white; overflow-y: auto;
     transform: translateX(-100%);
-    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-    z-index: 999;
-    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
-    /* scrollbar tipis */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(139,92,246,0.3) transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; gap: 8px;
 }
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.35); border-radius: 99px; }
-
+.menu-section {
+    font-size: 11px; letter-spacing: 1px;
+    color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
+    font-weight: normal; /* Disamakan dengan menu */
+}
 .sidebar.show { transform: translateX(0); }
 
-/* overlay */
-.sidebar-overlay {
-    display: none; position: fixed; inset: 0; z-index: 998;
-    background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);
-}
-.sidebar-overlay.show { display: block; }
-
-/* ══ SIDEBAR SECTIONS ══ */
-.menu-section {
-    font-size: 11px; letter-spacing: 1px; font-weight: 600;
-    color: #a78bfa; margin: 18px 10px 6px; opacity: 0.8;
-    text-transform: uppercase; flex-shrink: 0;
-}
-
-.sidebar a, .menu-parent {
-    display: flex; align-items: center; gap: 14px;
-    padding: 11px 14px; border-radius: 12px;
+/* =======================
+   SIDEBAR MENU — sama persis menu
+======================= */
+.sidebar a,
+.menu-parent {
+    display: flex; align-items: center; gap: 15px;
+    padding: 12px 14px; border-radius: 12px;
     text-decoration: none; color: #94a3b8;
-    font-weight: 400; font-size: 14.5px;
-    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    font-weight: 400; font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar i {
+    width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd;
     flex-shrink: 0;
 }
-.sidebar a i, .menu-parent i {
-    width: 18px; height: 18px; stroke-width: 2.2;
-    color: #c4b5fd; flex-shrink: 0;
-}
 .menu-parent { cursor: pointer; }
-.menu-parent:hover, .sidebar a:hover {
+.menu-parent:hover,
+.sidebar a:hover {
     background: rgba(255,255,255,0.06); color: white; transform: translateX(4px);
 }
 .sidebar a.active {
-    background: rgba(139,92,246,0.25); color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
     box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
 }
 
-/* ══ SUBMENU ══ */
+/* =======================
+   SUBMENU — sama persis menu
+======================= */
 .submenu {
     display: none; flex-direction: column;
-    margin-left: 32px; gap: 3px; margin-top: 3px;
-    animation: slideDown 0.25s ease;
+    margin-left: 35px; gap: 5px;
+    animation: slideDown 0.3s ease;
 }
 @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
+    from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 .submenu-item {
-    padding: 10px 14px; border-radius: 10px;
-    font-size: 13.5px; color: #cbd5e1;
-    text-decoration: none; transition: all 0.25s ease; display: block;
+    padding: 12px 16px; border-radius: 12px;
+    font-size: 14px; color: #cbd5e1;
+    text-decoration: none; transition: all 0.3s ease;
+    display: block;
 }
-.submenu-item:hover { background: #334155; color: white; padding-left: 18px; }
+.submenu-item:hover { background: #334155; color: white; padding-left: 20px; }
 .submenu-item.active { background: #3b82f6; color: white; }
 
-.s-arrow {
-    margin-left: auto; transition: all 0.35s ease;
-    width: 16px !important; height: 16px !important;
-}
-.s-arrow.open { transform: rotate(180deg); }
+/* ARROW — sama persis */
+.arrow { margin-left: auto; transition: all 0.4s ease; }
+.arrow.rotate { transform: rotate(180deg); }
 
-/* ══ MAIN ══ */
-.main { padding: 110px 30px 40px; }
+/* ══ OVERLAY SIDEBAR (Dipertahankan untuk mobile Orders) ══ */
+.overlay {
+    display: none; position: fixed; inset: 0; z-index: 998;
+    background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);
+}
+.overlay.show { display: block; }
+
+/* ══ MAIN KONTEN UTAMA ══ */
+.main { padding: 110px 30px 40px; max-width: 1100px; margin: 0 auto; }
 
 /* ══ PAGE HEADER ══ */
 .page-header { margin-bottom: 28px; }
 .page-title { font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-.page-subtitle { color: #64748b; font-size: 15px; }
+.page-subtitle { color: #64748b; font-size: 14px; }
 
 /* ══ CARD ══ */
 .table-box {
@@ -148,7 +136,7 @@ table { width: 100%; border-collapse: collapse; }
 thead { background: #f8fafc; }
 th {
     padding: 16px 18px; text-align: left;
-    font-size: 12px; font-weight: 700; color: #475569;
+    font-size: 12px; font-weight: 600; color: #475569;
     text-transform: uppercase; letter-spacing: 0.6px;
     border-bottom: 2px solid #e2e8f0; white-space: nowrap;
 }
@@ -205,7 +193,6 @@ tbody tr:hover { background: #f8fafc; }
 </head>
 <body>
 
-<!-- ══ TOPBAR ══ -->
 <div class="topbar">
     <div class="topbar-left">
         <button class="menu-icon-btn" onclick="toggleSidebar()">
@@ -214,63 +201,58 @@ tbody tr:hover { background: #f8fafc; }
     </div>
 </div>
 
-<!-- ══ SIDEBAR OVERLAY ══ -->
-<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
-<!-- ══ SIDEBAR ══ -->
 <div class="sidebar" id="sidebar">
 
     <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin') ? 'active' : '' }}">
+    
+    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
         <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
-    <a href="/admin/order" class="{{ request()->is('admin/order') ? 'active' : '' }}">
+
+    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
         <i data-lucide="receipt"></i> Orders
     </a>
 
     <div class="menu-section">KATALOG</div>
+
     <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
         <i data-lucide="utensils"></i> Menu
     </a>
+
     <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
         <i data-lucide="folder"></i> Kategori
     </a>
+
     <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
         <i data-lucide="plus-circle"></i> Add-ons
     </a>
 
     <div class="menu-section">OPERASIONAL</div>
-    <div class="menu-parent" onclick="toggleMejaMenu()">
-        <div style="display:flex;align-items:center;gap:14px;flex:1;">
-            <i data-lucide="armchair"></i>
-            <span>Meja</span>
-        </div>
-        <i data-lucide="chevron-down" class="s-arrow" id="arrowMeja"></i>
-    </div>
-    <div class="submenu" id="submenuMeja">
-        <a href="/admin/meja" class="submenu-item {{ request()->is('admin/meja') ? 'active' : '' }}">Data Meja</a>
-        <a href="/admin/meja/monitor" class="submenu-item {{ request()->is('admin/meja/monitor') ? 'active' : '' }}">Monitor Meja</a>
-    </div>
+
+    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
+        <i data-lucide="armchair"></i> Meja
+    </a>
+
     <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
         <i data-lucide="credit-card"></i> Pembayaran
     </a>
 
     <div class="menu-section">ANALITIK</div>
+
     <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
         <i data-lucide="bar-chart-3"></i> Laporan
     </a>
 
     <div class="menu-section">SYSTEM</div>
+
     <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
         <i data-lucide="users"></i> User
-    </a>
-    <a href="/admin/settings" class="{{ request()->is('admin/settings*') ? 'active' : '' }}">
-        <i data-lucide="settings"></i> Settings
     </a>
 
 </div>
 
-<!-- ══ MAIN ══ -->
 <div class="main">
 
     <div class="page-header">
@@ -347,12 +329,6 @@ function toggleSidebar(){
 function closeSidebar(){
     document.getElementById('sidebar').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
-}
-function toggleMejaMenu(){
-    const menu  = document.getElementById('submenuMeja');
-    const arrow = document.getElementById('arrowMeja');
-    menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    arrow.classList.toggle('open');
 }
 </script>
 </body>

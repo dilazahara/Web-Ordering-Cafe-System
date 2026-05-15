@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Meja;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 
@@ -141,7 +142,8 @@ class PelayanController extends Controller
 
         );
 
-        // UPDATE STATUS
+
+        // UPDATE STATUS ORDER
 
         $order->update([
 
@@ -149,16 +151,45 @@ class PelayanController extends Controller
 
         ]);
 
-        // Notifikasi ke kasir & admin: order selesai diantar
+
+        // =====================================
+        // AUTO STATUS MEJA = KOSONG
+        // =====================================
+
+        if ($order->table_number) {
+
+            Meja::where(
+                'nomor_meja',
+                $order->table_number
+            )->update([
+                'status' => 'kosong'
+            ]);
+
+        }
+
+
+        // NOTIF KE KASIR
+
         Notification::kirim(
-            ['kasir', 'admin'],
+
+            'kasir',
+
             'order_delivered',
+
             '✅ Pesanan Berhasil Diantar',
+
             "Pesanan {$order->queue_number}" .
-                ($order->table_number ? " Meja {$order->table_number}" : '') .
+
+                ($order->table_number
+                    ? " Meja {$order->table_number}"
+                    : '') .
+
                 " sudah diantar ke pelanggan.",
+
             $order
+
         );
+
 
         return back()->with(
 

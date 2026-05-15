@@ -44,7 +44,7 @@ class AuthController extends Controller
 
             if(Auth::user()->role == 'dapur')
             {
-                return redirect('/dapur/dashboard');
+                return redirect('/dapur/proses');
             }
         }
 

@@ -179,6 +179,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 
   <div class="header-right">
+    <x-notification-bell />
     <div class="header-clock">
   <svg viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="10"/>
