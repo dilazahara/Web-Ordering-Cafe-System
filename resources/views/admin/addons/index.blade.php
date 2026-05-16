@@ -320,7 +320,6 @@ tbody tr:hover { background: #f8fafc; }
                             </a>
                             <form action="/admin/addons/delete/{{ $addon->id }}" method="POST">
                                 @csrf
-                                @method('DELETE')
                                 <button type="submit" class="act-btn act-delete" title="Hapus"
                                     onclick="return confirm('Yakin mau hapus?')">
                                     <i data-lucide="trash-2" style="width:15px;height:15px;"></i>

@@ -3,518 +3,844 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Laporan - Clean Modern</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Laporan Analytics</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background: #f8fafc;
-    color: #1e293b;
+body{
+    font-family:'Inter',sans-serif;
+    background:#f1f5f9;
+    color:#0f172a;
 }
 
-/* =======================
-   HEADER - CLEAN GLASS
-======================= */
-.topbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30px;
-    z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+/* TOPBAR */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    height:80px;
+    background:rgba(255,255,255,.95);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid #e2e8f0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    z-index:1000;
 }
 
-.topbar-left {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:18px;
 }
 
-.topbar-left i {
-    width: 24px;
-    height: 24px;
-    padding: 8px;
-    border-radius: 12px;
-    color: #475569;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.topbar-left i{
+    width:24px;
+    height:24px;
+    cursor:pointer;
+    color:#475569;
 }
 
-.topbar-left i:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-    transform: scale(1.05);
+/* SIDEBAR */
+
+.sidebar{
+    width:240px;
+    height:100vh;
+    position:fixed;
+    top:0;
+    left:0;
+    background:linear-gradient(180deg,#0f172a,#1e1b4b);
+    padding:30px;
+    padding-top:100px;
+    overflow-y:auto;
+    transform:translateX(-100%);
+    transition:.3s;
+    z-index:999;
 }
 
-/* =======================
-   SIDEBAR — sama persis menu
-======================= */
-.sidebar {
-    width: 240px; height: 100vh; position: fixed;
-    background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px; padding-top: 100px;
-    color: white; overflow-y: auto;
-    transform: translateX(-100%);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-    display: flex; flex-direction: column; gap: 8px;
-}
-.menu-section {
-    font-size: 11px; letter-spacing: 1px;
-    color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
-}
-.sidebar.show { transform: translateX(0); }
-
-/* =======================
-   SIDEBAR MENU — sama persis menu
-======================= */
-.sidebar a,
-.menu-parent {
-    display: flex; align-items: center; gap: 15px;
-    padding: 12px 14px; border-radius: 12px;
-    text-decoration: none; color: #94a3b8;
-    font-weight: 400; font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar i {
-    width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd;
-}
-.menu-parent { cursor: pointer; }
-.menu-parent:hover,
-.sidebar a:hover {
-    background: rgba(255,255,255,0.06); color: white; transform: translateX(4px);
-}
-.sidebar a.active {
-    background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
-    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
+.sidebar.show{
+    transform:translateX(0);
 }
 
-/* =======================
-   SUBMENU — sama persis menu
-======================= */
-.submenu {
-    display: none; flex-direction: column;
-    margin-left: 35px; gap: 5px;
-    animation: slideDown 0.3s ease;
-}
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.submenu-item {
-    padding: 12px 16px; border-radius: 12px;
-    font-size: 14px; color: #cbd5e1;
-    text-decoration: none; transition: all 0.3s ease;
-    display: block;
-}
-.submenu-item:hover { background: #334155; color: white; padding-left: 20px; }
-.submenu-item.active { background: #3b82f6; color: white; }
-
-/* ARROW — sama persis */
-.arrow { margin-left: auto; transition: all 0.4s ease; }
-.arrow.rotate { transform: rotate(180deg); }
-
-/* =======================
-   MAIN CONTENT
-======================= */
-.main {
-    margin-left: 0;
-    padding: 120px 30px 30px;
-    min-height: 100vh;
+.menu-section{
+    font-size:11px;
+    letter-spacing:1px;
+    color:#a78bfa;
+    margin:18px 10px 8px;
 }
 
-/* =======================
-   PAGE HEADER
-======================= */
-.header {
-    margin-bottom: 30px;
+.sidebar a{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:12px 14px;
+    border-radius:12px;
+    color:#94a3b8;
+    text-decoration:none;
+    transition:.2s;
+    margin-bottom:6px;
 }
 
-.header h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 8px;
+.sidebar a:hover{
+    background:rgba(255,255,255,.05);
+    color:white;
 }
 
-/* =======================
-   FILTER BAR - MODERN
-======================= */
-.filter-box {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0,0, 0.1);
-    border: 1px solid #f1f5f9;
-    margin-bottom: 30px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
+.sidebar a.active{
+    background:rgba(139,92,246,.20);
+    color:#c4b5fd;
 }
 
-.filter-group {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+/* MAIN */
+
+.main{
+    padding:120px 30px 40px;
 }
 
-select, input[type="date"] {
-    padding: 12px 16px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 14px;
-    background: white;
-    transition: all 0.3s ease;
-    min-width: 160px;
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:28px;
+    gap:20px;
+    flex-wrap:wrap;
 }
 
-select:focus, input[type="date"]:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.page-header h1{
+    font-size:34px;
+    font-weight:800;
+    margin-bottom:8px;
 }
 
-.btn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
+.page-header p{
+    color:#64748b;
+    font-size:15px;
 }
 
-.btn-filter {
-    background: #3b82f6;
-    color: white;
+/* ANALYTICS */
+
+.analytics-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:30px;
 }
 
-.btn-filter:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+.analytics-card{
+    background:white;
+    border-radius:22px;
+    padding:24px;
+    box-shadow:0 4px 10px rgba(0,0,0,.04);
+    position:relative;
+    overflow:hidden;
+    border:1px solid #e2e8f0;
 }
 
-.btn-pdf {
-    background: #ef4444;
-    color: white;
+.analytics-card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
 }
 
-.btn-pdf:hover {
-    background: #dc2626;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+/* WARNA CARD */
+
+.analytics-card.orange::before{
+    background:#f97316;
 }
 
-/* =======================
-   TABLE CONTAINER
-======================= */
-.table-box {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0,0, 0.1);
-    border: 1px solid #f1f5f9;
-    overflow: hidden;
+.analytics-card.blue::before{
+    background:#3b82f6;
 }
 
-.table-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.analytics-card.cyan::before{
+    background:#06b6d4;
 }
 
-/* =======================
-   TABLE - ENHANCED
-======================= */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+.analytics-card.green::before{
+    background:#22c55e;
 }
 
-thead {
-    background: #f8fafc;
+/* ICON BOX */
+
+.icon-box{
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:18px;
 }
 
-th {
-    text-align: left;
-    font-weight: 600;
-    color: #475569;
-    padding: 18px 16px;
-    font-size: 14px;
-    border-bottom: 2px solid #e2e8f0;
+.icon-box i{
+    width:24px;
+    height:24px;
 }
 
-td {
-    padding: 18px 16px;
-    font-size: 14px;
-    color: #334155;
-    border-bottom: 1px solid #f1f5f9;
+/* ICON COLOR */
+
+.orange .icon-box{
+    background:#fff7ed;
+    color:#f97316;
 }
 
-tbody tr {
-    transition: all 0.2s ease;
+.blue .icon-box{
+    background:#eff6ff;
+    color:#3b82f6;
 }
 
-tbody tr:hover {
-    background: #f8fafc;
-    transform: scale(1.01);
+.cyan .icon-box{
+    background:#ecfeff;
+    color:#06b6d4;
 }
 
-.total {
-    font-weight: 700;
-    background: linear-gradient(90deg, #f8fafc 0%, #e2e8f0 100%);
-    font-size: 16px;
+.green .icon-box{
+    background:#f0fdf4;
+    color:#22c55e;
 }
 
-.total td {
-    padding: 20px 16px;
-    border-top: 3px solid #3b82f6;
+.analytics-label{
+    font-size:14px;
+    color:#64748b;
+    margin-bottom:10px;
+    font-weight:700;
 }
 
-/* EMPTY STATE */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #64748b;
+.analytics-value{
+    font-size:36px;
+    font-weight:800;
+    color:#0f172a;
 }
 
-.empty-state i {
-    width: 64px;
-    height: 64px;
-    stroke-width: 1;
-    opacity: 0.5;
-    margin-bottom: 20px;
+.analytics-sub{
+    margin-top:8px;
+    font-size:13px;
+    font-weight:600;
 }
 
-/* =======================
-   RESPONSIVE
-======================= */
-@media (max-width: 768px) {
-    .sidebar { width: 260px; }
-    .main { padding: 110px 20px 20px; }
-    .filter-box { flex-direction: column; align-items: stretch; }
-    .filter-group { width: 100%; justify-content: space-between; }
-    select, input[type="date"] { min-width: auto; flex: 1; }
-    .table-box { padding: 20px; }
-    
-    table {
-        font-size: 13px;
+.orange .analytics-sub{
+    color:#f97316;
+}
+
+.blue .analytics-sub{
+    color:#3b82f6;
+}
+
+.cyan .analytics-sub{
+    color:#06b6d4;
+}
+
+.green .analytics-sub{
+    color:#22c55e;
+}
+
+/* FILTER */
+
+.filter-box{
+    background:white;
+    padding:25px;
+    border-radius:24px;
+    margin-bottom:30px;
+    box-shadow:0 4px 10px rgba(0,0,0,.04);
+}
+
+.filter-form{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    align-items:center;
+}
+
+.filter-form select,
+.filter-form input{
+    padding:12px 16px;
+    border:1px solid #dbe2ea;
+    border-radius:14px;
+    font-size:14px;
+    min-width:160px;
+    background:white;
+}
+
+.filter-form button,
+.export-btn{
+    padding:12px 20px;
+    border:none;
+    border-radius:14px;
+    color:white;
+    cursor:pointer;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    text-decoration:none;
+}
+
+.filter-btn{
+    background:#3b82f6;
+}
+
+.export-btn{
+    background:#ef4444;
+}
+
+/* TABLE */
+
+.table-box{
+    background:white;
+    border-radius:24px;
+    padding:25px;
+    box-shadow:0 4px 10px rgba(0,0,0,.04);
+}
+
+.table-title{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:24px;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:950px;
+}
+
+thead{
+    background:#f8fafc;
+}
+
+th{
+    padding:18px 16px;
+    font-size:12px;
+    text-transform:uppercase;
+    color:#64748b;
+    text-align:left;
+    border-bottom:2px solid #e2e8f0;
+}
+
+td{
+    padding:18px 16px;
+    border-bottom:1px solid #f1f5f9;
+    vertical-align:middle;
+}
+
+tbody tr:hover{
+    background:#f8fafc;
+}
+
+/* STATUS */
+
+.status{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.status.pending{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.status.process{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.status.done{
+    background:#dcfce7;
+    color:#166534;
+}
+
+/* TOTAL */
+
+.total-row td{
+    border-top:2px solid #3b82f6;
+    font-weight:800;
+    font-size:15px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+    .main{
+        padding:110px 18px 30px;
     }
-    
-    th, td {
-        padding: 12px 8px;
+
+    .analytics-grid{
+        grid-template-columns:1fr;
     }
+
+    .filter-form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .filter-form select,
+    .filter-form input{
+        width:100%;
+    }
+
 }
 
-@media (max-width: 480px) {
-    .sidebar { width: 100%; }
-    .topbar { padding: 0 20px; }
-}
 </style>
 </head>
 
 <body>
 
 <div class="topbar">
-    <div class="topbar-left">
-        <i data-lucide="menu" onclick="toggleSidebar()"></i>
-        <span style="font-weight: 600; font-size: 20px;">Laporan</span>
-    </div>
+
+<div class="topbar-left">
+
+<i data-lucide="menu"
+   onclick="toggleSidebar()"></i>
+
+</div>
+
 </div>
 
 <div class="sidebar" id="sidebar">
 
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-    
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="receipt"></i> Orders
-    </a>
+<div class="menu-section">MAIN</div>
 
-    <div class="menu-section">KATALOG</div>
+<a href="/admin/dashboard">
+<i data-lucide="layout-dashboard"></i>
+Dashboard
+</a>
 
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
+<a href="/admin/order">
+<i data-lucide="receipt"></i>
+Orders
+</a>
 
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
+<div class="menu-section">KATALOG</div>
 
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
+<a href="/admin/menu">
+<i data-lucide="utensils"></i>
+Menu
+</a>
 
-    <div class="menu-section">OPERASIONAL</div>
+<a href="/admin/kategori">
+<i data-lucide="folder"></i>
+Kategori
+</a>
 
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
+<a href="/admin/addons">
+<i data-lucide="plus-circle"></i>
+Add-ons
+</a>
 
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
+<div class="menu-section">OPERASIONAL</div>
 
-    <div class="menu-section">ANALITIK</div>
+<a href="/admin/meja">
+<i data-lucide="armchair"></i>
+Meja
+</a>
 
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
+<a href="/admin/pembayaran">
+<i data-lucide="credit-card"></i>
+Pembayaran
+</a>
 
-    <div class="menu-section">SYSTEM</div>
+<div class="menu-section">ANALYTICS</div>
 
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
+<a href="/admin/laporan" class="active">
+<i data-lucide="bar-chart-3"></i>
+Laporan
+</a>
+
+<div class="menu-section">SYSTEM</div>
+
+<a href="/admin/user">
+<i data-lucide="users"></i>
+User
+</a>
 
 </div>
 
 <div class="main">
-    <div class="header">
-        <h1>Laporan Penjualan</h1>
-        <p style="color: #64748b; font-size: 16px;">Filter dan export data penjualan dengan mudah</p>
-    </div>
 
-    <div class="filter-box">
-        <form method="GET" action="/admin/laporan" style="display: flex; gap: 15px; flex: 1; flex-wrap: wrap; align-items: center;">
-            <div class="filter-group">
-                <label style="font-weight: 500; color: #475569; font-size: 14px; white-space: nowrap;">Filter:</label>
-                <select name="filter">
-                    <option value="">Semua Periode</option>
-                    <option value="hari" {{ request('filter')=='hari' ? 'selected' : '' }}>Hari Ini</option>
-                    <option value="bulan" {{ request('filter')=='bulan' ? 'selected' : '' }}>Bulan Ini</option>
-                    <option value="tahun" {{ request('filter')=='tahun' ? 'selected' : '' }}>Tahun Ini</option>
-                </select>
-            </div>
+@php
 
-            <div class="filter-group">
-                <label style="font-weight: 500; color: #475569; font-size: 14px; white-space: nowrap;">Tanggal:</label>
-                <input type="date" name="tanggal" value="{{ request('tanggal') }}">
-            </div>
+$totalPendapatan = $orders->sum('total');
 
-            <button type="submit" class="btn btn-filter">
-                <i data-lucide="search"></i>
-                Filter Data
-            </button>
-        </form>
+$cash = $orders
+->where('payment_method','cash')
+->sum('total');
 
-        <a href="{{ route('admin.laporan.pdf') }}" class="btn btn-pdf">
-            <i data-lucide="file-down"></i>
-            Export PDF
-        </a>
-    </div>
+$qris = $orders
+->where('payment_method','qris')
+->sum('total');
 
-    <div class="table-box">
-        <div class="table-title">
-            <i data-lucide="table"></i>
-            Data Laporan
-        </div>
+$totalOrder = $orders->count();
 
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Tanggal</th>
-                    <th>Order ID</th>
-                    <th>Meja</th>
-                    <th>Total</th>
-                    <th>Metode Bayar</th>
-                </tr>
-            </thead>
+@endphp
 
-            <tbody>
-            @php $totalSemua = 0; @endphp
+<div class="page-header">
 
-            @foreach($data as $index => $item)
-            @php $totalSemua += $item['total'] ?? 0; @endphp
+<div>
 
-            <tr>
-                <td style="font-weight: 600;">{{ $index + 1 }}</td>
-                <td>{{ $item['tanggal'] ?? '-' }}</td>
-                <td style="font-weight: 600; color: #3b82f6;">{{ $item['kode'] ?? '-' }}</td>
-                <td>{{ $item['meja'] ?? '-' }}</td>
-                <td style="font-weight: 600; color: #059669;">Rp {{ number_format($item['total'] ?? 0, 0, ',', '.') }}</td>
-                <td>
-                    <span style="padding: 4px 12px; background: #f1f5f9; border-radius: 20px; font-size: 12px; font-weight: 500;">
-                        {{ $item['metode'] ?? '-' }}
-                    </span>
-                </td>
-            </tr>
-            @endforeach
+<h1>Laporan Penjualan</h1>
 
-            @if(count($data) == 0)
-            <tr>
-                <td colspan="6">
-                    <div class="empty-state">
-                        <i data-lucide="inbox"></i>
-                        <h3 style="margin-bottom: 8px; color: #475569;">Belum ada data</h3>
-                        <p>Gunakan filter di atas untuk melihat laporan penjualan</p>
-                    </div>
-                </td>
-            </tr>
-            @endif
+<p>
+Pantau performa bisnis dan transaksi penjualan secara realtime
+</p>
 
-            <tr class="total">
-                <td colspan="4" style="text-align: right; font-size: 16px;">TOTAL PENJUALAN</td>
-                <td colspan="2" style="color: #059669; font-size: 20px;">
-                    Rp {{ number_format($totalSemua, 0, ',', '.') }}
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+</div>
+
+</div>
+
+<!-- ANALYTICS -->
+
+<div class="analytics-grid">
+
+<div class="analytics-card orange">
+
+<div class="icon-box">
+<i data-lucide="wallet"></i>
+</div>
+
+<div class="analytics-label">
+Total Pendapatan
+</div>
+
+<div class="analytics-value">
+Rp {{ number_format($totalPendapatan,0,',','.') }}
+</div>
+
+<div class="analytics-sub">
+🔥 Semua transaksi berhasil
+</div>
+
+</div>
+
+<div class="analytics-card blue">
+
+<div class="icon-box">
+<i data-lucide="shopping-bag"></i>
+</div>
+
+<div class="analytics-label">
+Total Transaksi
+</div>
+
+<div class="analytics-value">
+{{ $totalOrder }}
+</div>
+
+<div class="analytics-sub">
+📦 Order masuk
+</div>
+
+</div>
+
+<div class="analytics-card cyan">
+
+<div class="icon-box">
+<i data-lucide="badge-dollar-sign"></i>
+</div>
+
+<div class="analytics-label">
+Pembayaran Cash
+</div>
+
+<div class="analytics-value">
+Rp {{ number_format($cash,0,',','.') }}
+</div>
+
+<div class="analytics-sub">
+💵 Pembayaran tunai
+</div>
+
+</div>
+
+<div class="analytics-card green">
+
+<div class="icon-box">
+<i data-lucide="smartphone"></i>
+</div>
+
+<div class="analytics-label">
+Pembayaran QRIS
+</div>
+
+<div class="analytics-value">
+Rp {{ number_format($qris,0,',','.') }}
+</div>
+
+<div class="analytics-sub">
+📱 Pembayaran digital
+</div>
+
+</div>
+
+</div>
+
+<!-- FILTER -->
+
+<div class="filter-box">
+
+<form method="GET"
+action="/admin/laporan"
+class="filter-form">
+
+<select name="filter">
+
+<option value="">
+Semua Periode
+</option>
+
+<option value="hari"
+{{ request('filter') == 'hari' ? 'selected' : '' }}>
+Hari Ini
+</option>
+
+<option value="bulan"
+{{ request('filter') == 'bulan' ? 'selected' : '' }}>
+Bulan Ini
+</option>
+
+<option value="tahun"
+{{ request('filter') == 'tahun' ? 'selected' : '' }}>
+Tahun Ini
+</option>
+
+</select>
+
+<input type="date"
+name="tanggal"
+value="{{ request('tanggal') }}">
+
+<button type="submit"
+class="filter-btn">
+
+<i data-lucide="search"></i>
+
+Filter
+
+</button>
+
+<a href="{{ route('admin.laporan.pdf') }}"
+class="export-btn">
+
+<i data-lucide="file-down"></i>
+
+Export PDF
+
+</a>
+
+</form>
+
+</div>
+
+<!-- TABLE -->
+
+<div class="table-box">
+
+<div class="table-title">
+Data Transaksi
+</div>
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+<th>No</th>
+<th>Waktu</th>
+<th>ID Order</th>
+<th>Meja</th>
+<th>Detail Pesanan</th>
+<th>Status</th>
+<th>Pembayaran</th>
+<th style="text-align:right;">
+Total
+</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+@forelse($orders as $index => $order)
+
+<tr>
+
+<td>
+{{ $index + 1 }}
+</td>
+
+<td>
+
+<div style="font-weight:700;">
+{{ $order->created_at->format('d M Y') }}
+</div>
+
+<div style="font-size:12px;color:#64748b;">
+{{ $order->created_at->format('H:i') }} WIB
+</div>
+
+</td>
+
+<td style="font-weight:800;color:#7c3aed;">
+
+{{ $order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT) }}
+
+</td>
+
+<td>
+
+{{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
+
+</td>
+
+<td style="min-width:220px;">
+
+@foreach($order->items->take(2) as $item)
+
+<div>
+
+{{ $item->qty }}x
+{{ $item->menu->name ?? '-' }}
+
+</div>
+
+@endforeach
+
+</td>
+
+<td>
+
+@if($order->status == 'pending')
+
+<span class="status pending">
+Pending
+</span>
+
+@elseif($order->status == 'process')
+
+<span class="status process">
+Diproses
+</span>
+
+@else
+
+<span class="status done">
+Selesai
+</span>
+
+@endif
+
+</td>
+
+<td>
+
+@if($order->payment_method == 'cash')
+
+💵 Cash
+
+@else
+
+📱 QRIS
+
+@endif
+
+</td>
+
+<td style="text-align:right;font-weight:800;">
+
+Rp {{ number_format($order->total,0,',','.') }}
+
+</td>
+
+</tr>
+
+@empty
+
+<tr>
+
+<td colspan="8"
+style="text-align:center;padding:50px;color:#94a3b8;">
+
+Tidak ada data transaksi
+
+</td>
+
+</tr>
+
+@endforelse
+
+@if(count($orders) > 0)
+
+<tr class="total-row">
+
+<td colspan="7"
+style="text-align:right;">
+
+TOTAL PENDAPATAN
+
+</td>
+
+<td style="text-align:right;color:#059669;">
+
+Rp {{ number_format($totalPendapatan,0,',','.') }}
+
+</td>
+
+</tr>
+
+@endif
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
+
 lucide.createIcons();
 
-function toggleSidebar() {
-    document.getElementById("sidebar").classList.toggle("show");
+function toggleSidebar(){
+
+document
+.getElementById('sidebar')
+.classList
+.toggle('show');
+
 }
 
-function toggleMejaMenu(){
-    const menu = document.getElementById('submenuMeja');
-    const arrow = document.getElementById('arrowMeja');
-    if(menu && arrow) {
-        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-        arrow.classList.toggle('rotate');
-    }
-}
 </script>
 
 </body>
 </html>
+

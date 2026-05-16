@@ -1,6 +1,3 @@
-{{-- ╔══════════════════════════════════════════╗
-     ║   ADMIN DASHBOARD — FULL BLADE           ║
-     ╚══════════════════════════════════════════╝ --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -61,12 +58,24 @@
             transition: all 0.18s; user-select: none;
         }
         .user-btn.open { border-color: #7c3aed; background: #f5f3ff; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+
+        /* ── USER AVATAR (topbar) ── */
         .user-avatar {
             width: 30px; height: 30px; border-radius: 9px;
-            background: linear-gradient(135deg, #818cf8, #4f46e5);
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 12px; font-weight: 800; flex-shrink: 0;
+            overflow: hidden;
         }
+        .user-avatar.has-photo {
+            background: none;
+        }
+        .user-avatar:not(.has-photo) {
+            background: linear-gradient(135deg, #818cf8, #4f46e5);
+        }
+        .user-avatar img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 9px;
+        }
+
         .user-name { font-size: 13px; font-weight: 700; color: #0f172a; }
         .user-role { font-size: 11px; color: #94a3b8; }
         .chevron { width: 14px; height: 14px; stroke: #94a3b8; fill: none; stroke-width: 2.5; transition: transform .2s; }
@@ -84,13 +93,25 @@
             padding: 14px 16px; background: linear-gradient(135deg,#eef2ff,#f5f3ff);
             border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 11px;
         }
+
+        /* ── DROPDOWN AVATAR ── */
         .dp-av {
             width: 38px; height: 38px; border-radius: 11px;
-            background: linear-gradient(135deg,#818cf8,#4f46e5);
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 14px; font-weight: 800;
             box-shadow: 0 2px 8px rgba(79,70,229,.28);
+            overflow: hidden; flex-shrink: 0;
         }
+        .dp-av.has-photo {
+            background: none;
+        }
+        .dp-av:not(.has-photo) {
+            background: linear-gradient(135deg,#818cf8,#4f46e5);
+        }
+        .dp-av img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 11px;
+        }
+
         .dp-nm { font-size: 13px; font-weight: 800; color: #0f172a; }
         .dp-rl { font-size: 11px; color: #64748b; margin-top: 1px; }
         .dp-body { padding: 7px; }
@@ -227,7 +248,13 @@
         /* ════════════════════════════
            TABLE PESANAN TERBARU
         ════════════════════════════ */
-        .rtable { width: 100%; border-collapse: collapse; }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .rtable { width: 100%; min-width: 800px; border-collapse: collapse; white-space: nowrap; }
         .rtable thead th {
             background: #f8fafc; padding: 11px 16px; font-size: 11px;
             font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
@@ -235,7 +262,7 @@
         }
         .rtable tbody tr { border-bottom: 1px solid #f8fafc; transition: background .15s; }
         .rtable tbody tr:hover { background: #fafbff; }
-        .rtable td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; }
+        .rtable td { padding: 13px 16px; font-size: 13.5px; color: #334155; vertical-align: middle; text-align: left; }
 
         /* Status Badges */
         .badge {
@@ -258,7 +285,6 @@
         .dataTables_wrapper {
             padding: 0 0 18px;
         }
-        /* Search & Length — hidden karena kita tidak pakai */
         .dataTables_filter,
         .dataTables_length { display: none !important; }
 
@@ -303,10 +329,7 @@
             color: #cbd5e1 !important;
             cursor: default !important;
         }
-        .dataTables_scrollBody {
-            border-bottom: none !important;
-        }
-        /* Scrollbar halaman order */
+        .dataTables_scrollBody { border-bottom: none !important; }
         .dataTables_scrollBody::-webkit-scrollbar { height: 5px; }
         .dataTables_scrollBody::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 99px; }
         .dataTables_scrollBody::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
@@ -342,20 +365,23 @@
         .rank-sub  { font-size: 11px; color: #94a3b8; margin-top: 3px; }
         .rank-qty  { font-size: 14px; font-weight: 800; color: #7c3aed; flex-shrink: 0; }
 
-        /* Responsive */
         @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
         @media (max-width: 780px) {
             .content-grid { grid-template-columns: 1fr; }
             .main { padding: 88px 16px 30px; }
         }
         @media (max-width: 540px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+        
     </style>
 </head>
 <body>
 
-{{-- ══════════════════════════════════════════
-     TOPBAR
-══════════════════════════════════════════ --}}
+@php
+    $userAvatar = auth()->user()->avatar ?? null;
+    $avatarUrl  = $userAvatar ? asset('storage/' . $userAvatar) : null;
+    $userInitial = strtoupper(substr(auth()->user()->name, 0, 1));
+@endphp
+
 <div class="topbar">
     <div class="topbar-left">
         <button class="menu-btn" onclick="toggleSidebar()">
@@ -364,25 +390,42 @@
     </div>
 
     <div class="topbar-right">
-        {{-- Clock --}}
         <div class="live-clock">
             <i data-lucide="clock" style="width:14px;height:14px;color:#7c3aed;"></i>
             <span id="clock">--:--:--</span>
         </div>
 
-        {{-- Profile --}}
         <div class="profile-wrap">
             <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-                <div class="user-avatar">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
+
+                {{-- Avatar Topbar --}}
+                @if($avatarUrl)
+                    <div class="user-avatar has-photo">
+                        <img src="{{ $avatarUrl }}" alt="{{ auth()->user()->name }}">
+                    </div>
+                @else
+                    <div class="user-avatar">{{ $userInitial }}</div>
+                @endif
+
                 <div>
                     <div class="user-name">{{ auth()->user()->name }}</div>
                     <div class="user-role">{{ ucfirst(auth()->user()->role) }}</div>
                 </div>
                 <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
+
             <div class="dropdown" id="dropdownMenu">
                 <div class="dp-head">
-                    <div class="dp-av">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
+
+                    {{-- Avatar Dropdown --}}
+                    @if($avatarUrl)
+                        <div class="dp-av has-photo">
+                            <img src="{{ $avatarUrl }}" alt="{{ auth()->user()->name }}">
+                        </div>
+                    @else
+                        <div class="dp-av">{{ $userInitial }}</div>
+                    @endif
+
                     <div>
                         <div class="dp-nm">{{ auth()->user()->name }}</div>
                         <div class="dp-rl">{{ ucfirst(auth()->user()->role) }} · Online</div>
@@ -417,24 +460,16 @@
     </div>
 </div>
 
-{{-- ══════════════════════════════════════════
-     SIDEBAR
-══════════════════════════════════════════ --}}
 <div class="sidebar" id="sidebar">
-
     <div class="menu-section">MAIN</div>
-
     <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
         <i data-lucide="layout-dashboard"></i> Dashboard
     </a>
-
-    {{-- ★ MENU ORDER BARU — tepat di bawah Dashboard --}}
     <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
         <i data-lucide="clipboard-list"></i> Order
     </a>
 
     <div class="menu-section">KATALOG</div>
-
     <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
         <i data-lucide="utensils"></i> Menu
     </a>
@@ -446,7 +481,6 @@
     </a>
 
     <div class="menu-section">OPERASIONAL</div>
-
     <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
         <i data-lucide="armchair"></i> Meja
     </a>
@@ -455,37 +489,27 @@
     </a>
 
     <div class="menu-section">ANALITIK</div>
-
     <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
         <i data-lucide="bar-chart-3"></i> Laporan
     </a>
 
     <div class="menu-section">SYSTEM</div>
-
     <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
         <i data-lucide="users"></i> User
     </a>
 </div>
 
-{{-- Overlay --}}
 <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-{{-- ══════════════════════════════════════════
-     MAIN CONTENT
-══════════════════════════════════════════ --}}
 <div class="main">
 
-    {{-- Page Title --}}
     <div class="page-title">
         <h1>Selamat datang, {{ auth()->user()->name }}! 👋</h1>
         <p>Berikut ringkasan aktivitas cafe hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
     </div>
 
-    {{-- ══════════════════
-         STATS GRID
-    ══════════════════ --}}
+    {{-- Stats Grid --}}
     <div class="stats-grid">
-
         <div class="stat-card orange">
             <div class="stat-icon orange"><i data-lucide="banknote"></i></div>
             <div>
@@ -494,7 +518,6 @@
                 <div class="stat-trend neutral">💰 Kumulatif transaksi selesai</div>
             </div>
         </div>
-
         <div class="stat-card blue">
             <div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div>
             <div>
@@ -503,7 +526,6 @@
                 <div class="stat-trend up">📦 Semua status</div>
             </div>
         </div>
-
         <div class="stat-card cyan">
             <div class="stat-icon cyan"><i data-lucide="chef-hat"></i></div>
             <div>
@@ -512,7 +534,6 @@
                 <div class="stat-trend neutral">🔥 Di dapur sekarang</div>
             </div>
         </div>
-
         <div class="stat-card green">
             <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
             <div>
@@ -521,7 +542,6 @@
                 <div class="stat-trend up">✅ Berhasil diantar</div>
             </div>
         </div>
-
         <div class="stat-card purple">
             <div class="stat-icon purple"><i data-lucide="armchair"></i></div>
             <div>
@@ -530,7 +550,6 @@
                 <div class="stat-trend neutral">🪑 Meja tersedia</div>
             </div>
         </div>
-
         <div class="stat-card red">
             <div class="stat-icon red"><i data-lucide="receipt"></i></div>
             <div>
@@ -539,7 +558,6 @@
                 <div class="stat-trend up">💳 Semua transaksi</div>
             </div>
         </div>
-
         <div class="stat-card dark">
             <div class="stat-icon dark"><i data-lucide="users"></i></div>
             <div>
@@ -548,7 +566,6 @@
                 <div class="stat-trend neutral">👤 Pengguna sistem</div>
             </div>
         </div>
-
         <div class="stat-card pink">
             <div class="stat-icon pink"><i data-lucide="utensils"></i></div>
             <div>
@@ -557,20 +574,13 @@
                 <div class="stat-trend up">🍔 Menu tersedia</div>
             </div>
         </div>
-
     </div>
 
-    {{-- ══════════════════
-         CONTENT GRID
-    ══════════════════ --}}
+    {{-- Content Grid --}}
     <div class="content-grid">
-
-        {{-- Grafik Penjualan --}}
         <div class="box">
             <div class="box-header">
-                <div>
-                    <h3>Grafik Penjualan 7 Hari Terakhir</h3>
-                </div>
+                <div><h3>Grafik Penjualan 7 Hari Terakhir</h3></div>
                 <div style="font-size:12px;color:#94a3b8;font-weight:600;">
                     Hari ini: Rp {{ number_format($totalPenjualan,0,',','.') }}
                 </div>
@@ -582,28 +592,19 @@
             </div>
         </div>
 
-        {{-- Menu Terlaris --}}
         <div class="box">
             <div class="box-header">
                 <h3>🏆 Menu Terlaris</h3>
             </div>
             <div class="box-body">
                 @if($menuTerlaris->isEmpty())
-                    <p style="color:#94a3b8;font-size:13px;text-align:center;padding:20px 0;">
-                        Belum ada data hari ini
-                    </p>
+                    <p style="color:#94a3b8;font-size:13px;text-align:center;padding:20px 0;">Belum ada data hari ini</p>
                 @else
                     <div class="menu-rank">
                         @foreach($menuTerlaris as $i => $item)
                         <div class="menu-rank-item">
-                            <div class="rank-num {{ $i===0?'r1':($i===1?'r2':($i===2?'r3':'rn')) }}">
-                                {{ $i+1 }}
-                            </div>
-                            <img
-                                src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}"
-                                alt="{{ $item->menu->name ?? 'Menu' }}"
-                                class="rank-img"
-                            >
+                            <div class="rank-num {{ $i===0?'r1':($i===1?'r2':($i===2?'r3':'rn')) }}">{{ $i+1 }}</div>
+                            <img src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}" alt="{{ $item->menu->name ?? 'Menu' }}" class="rank-img">
                             <div class="rank-info">
                                 <div class="rank-name">{{ $item->menu->name ?? 'Menu Tidak Ditemukan' }}</div>
                                 <div class="rank-sub">Menu paling sering dipesan</div>
@@ -615,158 +616,105 @@
                 @endif
             </div>
         </div>
-
     </div>
 
     {{-- ════════════════════════════════════════
-         PESANAN TERBARU — DataTables
+         PESANAN TERBARU — SINKRON DENGAN INDEX
     ════════════════════════════════════════ --}}
     <div class="box" style="margin-top:20px;">
         <div class="box-header">
             <h3>Pesanan Terbaru</h3>
-            <a href="/admin/order"
-               style="font-size:12px;color:#7c3aed;font-weight:700;text-decoration:none;">
+            <a href="/admin/order" style="font-size:12px;color:#7c3aed;font-weight:700;text-decoration:none;">
                 Lihat semua →
             </a>
         </div>
 
-        {{-- Tabel pakai overflow-x:auto agar scroll horizontal berfungsi --}}
-        <div style="overflow-x:auto;">
-            <table class="rtable" id="recentOrdersTable" style="min-width:700px;">
+        <div class="table-responsive">
+            <table class="rtable" id="recentOrdersTable">
                 <thead>
                     <tr>
                         <th style="padding-left:22px;">ID Order</th>
                         <th>Meja</th>
                         <th>Item</th>
+                        <th>Total</th>
                         <th>Metode Bayar</th>
                         <th>Status</th>
                         <th>Waktu</th>
                     </tr>
                 </thead>
                 <tbody>
-
-@foreach($pesananTerbaru as $order)
-
-<tr>
-
-    <td style="padding-left:22px;">
-        <span style="
-            font-weight:800;
-            color:#7c3aed;
-            font-size:13px;
-        ">
-            #{{ str_pad($order->id,3,'0',STR_PAD_LEFT) }}
-        </span>
-    </td>
-
-    <td>
-        <span style="
-            background:#f1f5f9;
-            padding:4px 10px;
-            border-radius:8px;
-            font-size:12px;
-            font-weight:700;
-            color:#475569;
-        ">
-            {{ $order->table_number
-                ? 'Meja '.$order->table_number
-                : 'Take Away'
-            }}
-        </span>
-    </td>
-
-    <td>
-
-        @foreach($order->items->take(2) as $item)
-
-            <span style="font-size:13px;">
-
-                {{ $item->qty }}x
-                {{ $item->menu->name ?? '-' }}
-
-                @if(!$loop->last)
-                    ,
-                @endif
-
-            </span>
-
-        @endforeach
-
-        @if($order->items->count() > 2)
-
-            <span style="
-                color:#94a3b8;
-                font-size:12px;
-            ">
-                +{{ $order->items->count()-2 }} lagi
-            </span>
-
-        @endif
-
-    </td>
-
-    <td style="
-        font-size:12px;
-        color:#64748b;
-        text-transform:capitalize;
-    ">
-        {{ $order->payment_method ?? 'Tunai' }}
-    </td>
-
-    <td>
-
-        @php
-
-            $sm = [
-
-                'pending'   => ['Pending',  'pending'],
-
-                'process'   => ['Diproses', 'proses'],
-
-                'done'      => ['Selesai',  'selesai'],
-
-                'delivered' => ['Diantar',  'diantar'],
-
-            ];
-
-            $s = $sm[$order->status]
-                ?? [$order->status, 'pending'];
-
-        @endphp
-
-        <span class="badge {{ $s[1] }}">
-            <span class="badge-dot"></span>
-            {{ $s[0] }}
-        </span>
-
-    </td>
-
-    <td style="
-        font-size:12px;
-        color:#94a3b8;
-        white-space:nowrap;
-    ">
-        {{ $order->created_at->format('H:i') }}
-    </td>
-
-</tr>
-
-@endforeach
-
-</tbody>      
-
+                @foreach($pesananTerbaru as $order)
+                <tr>
+                    <td style="padding-left:22px;">
+                        <span style="font-weight:800; color:#7c3aed; font-size:13px;">
+                            {{ $order->queue_number ?: 'A-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background:#f1f5f9; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:#475569;">
+                            {{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($order->items && $order->items->count() > 0)
+                            @foreach($order->items->take(2) as $item)
+                                <span style="font-size:13px;">
+                                    {{ $item->qty ?? $item->quantity ?? 1 }}x
+                                    {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
+                                    @if(!$loop->last), @endif
+                                </span>
+                            @endforeach
+                            @if($order->items->count() > 2)
+                                <span style="color:#94a3b8; font-size:12px;">+{{ $order->items->count()-2 }} lagi</span>
+                            @endif
+                        @else
+                            <span style="font-size:13px; color:#94a3b8;">-</span>
+                        @endif
+                    </td>
+                    <td style="font-weight:600; font-size:13px; color:#0f172a;">
+                        Rp {{ number_format($order->total ?? 0, 0, ',', '.') }}
+                    </td>
+                    <td>
+                        @if($order->payment_method === 'cash')
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">💵 Cash</span>
+                        @elseif($order->payment_method === 'qris')
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;">📱 QRIS</span>
+                        @else
+                            <span style="font-size:12px; color:#64748b; text-transform:capitalize;">{{ $order->payment_method ?? 'Tunai' }}</span>
+                        @endif
+                    </td>
+                    <td>
+                        @php
+                            if ($order->status === 'pending') {
+                                $bg = 'pending'; $text = 'Menunggu Bayar';
+                            } elseif ($order->status === 'paid') {
+                                $bg = 'selesai'; $text = 'Lunas, Belum Diproses';
+                            } elseif ($order->status === 'process') {
+                                $bg = 'proses'; $text = 'Sedang Dimasak';
+                            } elseif (in_array($order->status, ['done', 'delivered'])) {
+                                $bg = 'diantar'; $text = 'Selesai Diantar';
+                            } else {
+                                $bg = 'pending'; $text = ucfirst($order->status);
+                            }
+                        @endphp
+                        <span class="badge {{ $bg }}">
+                            <span class="badge-dot"></span>
+                            {{ $text }}
+                        </span>
+                    </td>
+                    <td style="font-size:12px; color:#94a3b8; white-space:nowrap;">
+                        {{ $order->created_at->format('H:i') }}
+                    </td>
+                </tr>
+                @endforeach
+                </tbody>
             </table>
         </div>
     </div>
 
-</div>{{-- end .main --}}
+</div>
 
-
-{{-- ══════════════════════════════════════════
-     SCRIPTS
-══════════════════════════════════════════ --}}
 <script>
-// ── Clock ──
 function updateClock() {
     const now = new Date();
     const h = String(now.getHours()).padStart(2,'0');
@@ -777,13 +725,10 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// ── Sidebar Toggle ──
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('show');
     document.getElementById('overlay').classList.toggle('show');
 }
-
-// ── Profile Dropdown ──
 function toggleDropdown() {
     const btn  = document.getElementById('profileBtn');
     const menu = document.getElementById('dropdownMenu');
@@ -797,12 +742,9 @@ document.addEventListener('click', function(e) {
         document.getElementById('dropdownMenu').classList.remove('show');
     }
 });
-
-// ── Lucide Icons ──
 lucide.createIcons();
 </script>
 
-{{-- ── Chart Penjualan ── --}}
 <script>
 const ctx = document.getElementById('chartPenjualan').getContext('2d');
 new Chart(ctx, {
@@ -844,23 +786,16 @@ new Chart(ctx, {
 });
 </script>
 
-{{-- ════════════════════════════════════════════
-     DataTables INIT — Pesanan Terbaru
-════════════════════════════════════════════ --}}
 <script>
 $(document).ready(function () {
     $('#recentOrdersTable').DataTable({
-        scrollX: true,          // scroll horizontal aktif
-        pageLength: 10,         // 10 baris per halaman
-        lengthChange: false,    // sembunyikan dropdown "show N entries"
-        searching: false,       // sembunyikan kotak search (sudah ada di laporan)
-        ordering: false,        // urutan sudah dari server (latest)
+        pageLength: 10,
+        lengthChange: false,
+        searching: false,
+        ordering: false,
         language: {
             info:     "Showing _START_ to _END_ of _TOTAL_ entries",
-            paginate: {
-                previous: "Previous",
-                next:     "Next"
-            },
+            paginate: { previous: "Previous", next: "Next" },
             emptyTable: "Belum ada pesanan hari ini"
         }
     });

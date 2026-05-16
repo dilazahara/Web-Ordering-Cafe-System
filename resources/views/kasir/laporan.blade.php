@@ -6,6 +6,12 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Kasir — Laporan</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+{{-- DataTables CSS & Scripts --}}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -27,6 +33,7 @@
 html { scroll-behavior: smooth; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
+/* ══ HEADER & NAVIGASI KASIR (TIDAK DIUBAH) ══ */
 .header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 100; box-shadow: var(--shadow-header); }
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-mark { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgb(37 99 235/.35); }
@@ -34,39 +41,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .logo-text { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
 .logo-text span { color: var(--accent); }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.header-clock{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 14px;
-  border-radius:12px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  font-family:'Inter',sans-serif;
-  box-shadow:var(--shadow-sm);
-}
+.header-clock{ display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:12px; background:var(--surface); border:1px solid var(--border); font-family:'Inter',sans-serif; box-shadow:var(--shadow-sm); }
+.header-clock svg{ width:16px; height:16px; stroke:var(--accent); stroke-width:2.3; fill:none; }
+#liveClock{ font-size:13px; font-weight:700; color:var(--text-primary); letter-spacing:.5px; }
 
-.header-clock svg{
-  width:16px;
-  height:16px;
-  stroke:var(--blue);
-  stroke-width:2.3;
-  fill:none;
-}
-
-#liveClock{
-  font-size:13px;
-  font-weight:700;
-  color:var(--text-primary);
-  letter-spacing:.5px;
-}
-.hdr-btn { position: relative; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all .18s; }
-.hdr-btn:hover { background: var(--accent-bg); border-color: #bfcfff; color: var(--accent); }
-.hdr-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.notif-badge { position: absolute; top: -4px; right: -4px; min-width: 17px; height: 17px; background: var(--red); color: white; font-size: 10px; font-weight: 700; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid white; font-family: 'Inter', sans-serif; }
-.divider-v { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
-
-/* ── PROFILE DROPDOWN ── */
+/* Profile Dropdown */
 .profile-wrap { position: relative; }
 .user-btn { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: all 0.18s; user-select: none; }
 .user-btn:hover { background: var(--surface-2); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
@@ -93,7 +72,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown-item.danger { color: var(--red-text); }
 .dropdown-item.danger:hover { background: var(--red-bg); color: var(--red); }
 .dropdown-item.danger .item-icon { background: var(--red-bg); }
-.dropdown-item.danger:hover .item-icon { background: #fecaca; }
 
 .topnav { position: fixed; top: var(--header-h); left: 0; right: 0; height: var(--nav-h); background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); display: flex; justify-content: center; z-index: 99; }
 .nav-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: stretch; padding: 0 8px; }
@@ -102,276 +80,124 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .nav-link:hover { color: var(--text-primary); }
 .nav-link.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+/* ══ BAGIAN KONTEN (DIUPGRADE SINKRON ADMIN) ══ */
 .main { margin-top: var(--total-top); padding: 36px 24px 72px; width: 100%; }
 .container { max-width: 1280px; margin: 0 auto; padding: 0 8px; }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; gap: 16px; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; }
 .page-title { font-size: 23px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
 .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-family: 'Inter', sans-serif; }
-.filter-bar { background: var(--surface); padding: 16px 20px; border-radius: var(--radius-lg); border: 1px solid var(--border); margin-bottom: 20px; display: flex; gap: 10px; align-items: center; justify-content: space-between; box-shadow: var(--shadow); }
-.filter-bar input[type="date"] { padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; color: var(--text-primary); transition: border-color 0.18s; }
+
+/* Filter Bar Updated */
+.filter-bar { background: var(--surface); padding: 20px 24px; border-radius: var(--radius-lg); border: 1px solid var(--border); margin-bottom: 24px; display: flex; gap: 15px; align-items: center; justify-content: space-between; box-shadow: var(--shadow); flex-wrap: wrap; }
+.filter-bar input[type="date"] { padding: 10px 16px; border: 1px solid var(--border); border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 13.5px; color: var(--text-primary); transition: border-color 0.18s; min-width: 160px; }
 .filter-bar input[type="date"]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgb(37 99 235/.12); }
-.filter-btn { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; transition: all 0.18s; font-family: 'Plus Jakarta Sans', sans-serif; }
-.filter-btn:hover { border-color: #bfcfff; color: var(--accent); background: var(--accent-bg); }
-.download-btn { display: flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px; background: linear-gradient(135deg, #10b981, #059669); color: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.18s; font-family: 'Plus Jakarta Sans', sans-serif; text-decoration: none; border: none; box-shadow: 0 3px 10px rgb(5 150 105/.25); }
-.download-btn:hover { box-shadow: 0 6px 16px rgb(5 150 105/.35); filter: brightness(1.07); transform: translateY(-1px); }
-.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead { background: var(--surface-2); }
-th { padding: 14px 16px; text-align: left; font-size: 11.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-family: 'Inter', sans-serif; }
-td { padding: 14px 16px; border-top: 1px solid var(--border); color: var(--text-secondary); font-family: 'Inter', sans-serif; }
-td.strong { font-weight: 600; color: var(--text-primary); }
-tr:hover td { background: var(--surface-2); }
-.total-footer td { background: var(--surface-2); font-weight: 800; color: var(--text-primary); border-top: 2px solid var(--border-strong); }
-.total-footer .grand-total { color: var(--green); font-size: 15px; }
+.filter-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 12px; background: var(--accent); font-size: 13.5px; font-weight: 600; color: white; cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif; box-shadow: 0 3px 10px rgba(37,99,235,0.25); }
+.filter-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(37,99,235,0.3); }
+.download-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background: var(--red); color: white; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif; text-decoration: none; border: none; box-shadow: 0 3px 10px rgba(220,38,38,0.25); }
+.download-btn:hover { background: #b91c1c; box-shadow: 0 5px 15px rgba(220,38,38,0.3); transform: translateY(-1px); }
+
+/* Table & Datatable Styles */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); padding: 20px; }
+.rtable { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; }
+.rtable thead th { background: var(--surface-2); padding: 14px 16px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+.rtable tbody tr { border-bottom: 1px solid var(--surface-2); transition: background .15s; background: var(--surface); }
+.rtable tbody tr:hover { background: #fafbff; }
+.rtable td { padding: 15px 16px; font-size: 13.5px; color: var(--text-secondary); vertical-align: middle; }
+.rtable tfoot th { padding: 18px 16px; border-top: 2px solid var(--border); background: var(--surface-2); }
+
+/* Badges Status & Datatables Setup */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+.badge.pending  { background: #fef3c7; color: #92400e; }
+.badge.pending .badge-dot  { background: #f59e0b; }
+.badge.proses   { background: #dbeafe; color: #1e40af; }
+.badge.proses .badge-dot   { background: #3b82f6; }
+.badge.selesai  { background: #dcfce7; color: #15803d; }
+.badge.selesai .badge-dot  { background: #22c55e; }
+.badge.diantar  { background: #f0fdf4; color: #15803d; }
+.badge.diantar .badge-dot  { background: #22c55e; }
+
+.dataTables_wrapper { padding: 0 0 18px; }
+.dataTables_filter { padding: 0 0 18px; float: right; }
+.dataTables_length { padding: 0 0 18px; float: left; }
+.dataTables_filter input, .dataTables_length select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
+.dataTables_filter input:focus, .dataTables_length select:focus { border-color: var(--accent); }
+.dataTables_info { font-size: 13px !important; color: var(--text-muted) !important; padding: 14px 0 0 !important; font-weight: 500; font-family: 'Inter', sans-serif; }
+.dataTables_paginate { padding: 12px 0 0 !important; display: flex !important; align-items: center; gap: 4px; font-family: 'Inter', sans-serif; }
+.paginate_button { border-radius: 10px !important; border: 1px solid var(--border) !important; padding: 6px 13px !important; margin: 0 2px !important; background: var(--surface) !important; color: var(--text-secondary) !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; transition: all .15s !important; }
+.paginate_button:hover:not(.current):not(.disabled) { background: var(--accent-bg) !important; color: var(--accent) !important; border-color: #bfdbfe !important; }
+.paginate_button.current, .paginate_button.current:hover { background: linear-gradient(135deg, var(--accent), #1d4ed8) !important; color: white !important; border-color: var(--accent) !important; box-shadow: 0 2px 8px rgba(37,99,235,0.3) !important; }
+.paginate_button.disabled, .paginate_button.disabled:hover { color: var(--border-strong) !important; cursor: default !important; }
+.dataTables_scrollBody::-webkit-scrollbar { height: 5px; }
+.dataTables_scrollBody::-webkit-scrollbar-track { background: transparent; border-radius: 99px; }
+.dataTables_scrollBody::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+
 @media (max-width: 640px) {
   .main { padding: 24px 16px 48px; }
   .nav-link span { display: none; }
   .user-role, .user-info { display: none; }
   .filter-bar { flex-direction: column; align-items: stretch; }
   .page-header { flex-direction: column; }
+  .table-wrap { padding: 15px; }
 }
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 </style>
 </head>
 <body>
 
 <header class="header">
-
   <div class="logo">
-
     <div class="logo-mark">
-
-      <svg viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     </div>
-
-    <div class="logo-text">
-
-      Kasir<span></span>
-
-    </div>
-
+    <div class="logo-text">Kasir<span></span></div>
   </div>
 
   <div class="header-right">
     <div class="header-clock">
-  <svg viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12 6 12 12 16 14"/>
-  </svg>
-
-  <span id="liveClock">00:00:00</span>
-</div>
-
-    <!-- PROFILE DROPDOWN -->
-
-    <div class="profile-wrap">
-
-      <!-- BUTTON -->
-
-      <div
-        class="user-btn"
-        id="profileBtn"
-        onclick="toggleDropdown()"
-      >
-
-        <!-- AVATAR -->
-
-        <div class="avatar">
-
-          {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-
-        </div>
-
-        <!-- USER INFO -->
-
-        <div class="user-info">
-
-          <div class="user-name">
-
-            {{ Auth::user()->name }}
-
-          </div>
-
-          <div class="user-role">
-
-            {{ ucfirst(Auth::user()->role) }}
-
-          </div>
-
-        </div>
-
-        <!-- CHEVRON -->
-
-        <svg class="chevron" viewBox="0 0 24 24">
-
-          <polyline points="6 9 12 15 18 9"/>
-
-        </svg>
-
-      </div>
-
-
-      <!-- DROPDOWN -->
-
-      <div
-        class="dropdown"
-        id="profileDropdown"
-      >
-
-        <!-- HEADER -->
-
-        <div class="dropdown-header">
-
-          <div class="dropdown-avatar">
-
-            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-
-          </div>
-
-          <div>
-
-            <div class="dropdown-name">
-
-              {{ Auth::user()->name }}
-
-            </div>
-
-            <div class="dropdown-role">
-
-              {{ ucfirst(Auth::user()->role) }} · Online
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <!-- BODY -->
-
-        <div class="dropdown-body">
-
-          <!-- PROFIL -->
-
-          <a
-            href="/kasir/account/profil"
-            class="dropdown-item"
-          >
-
-            <div class="item-icon">
-
-              <svg viewBox="0 0 24 24">
-
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-
-                <circle cx="12" cy="7" r="4"/>
-
-              </svg>
-
-            </div>
-
-            Profil Saya
-
-          </a>
-
-
-          <!-- PASSWORD -->
-
-          <a
-            href="/kasir/account/ganti-sandi"
-            class="dropdown-item"
-          >
-
-            <div class="item-icon">
-
-              <svg viewBox="0 0 24 24">
-
-                <rect
-                  x="3"
-                  y="11"
-                  width="18"
-                  height="11"
-                  rx="2"
-                  ry="2"
-                />
-
-                <path
-                  d="M7 11V7a5 5 0 0 1 10 0v4"
-                />
-
-              </svg>
-
-            </div>
-
-            Ganti Password
-
-          </a>
-
-
-          <!-- DIVIDER -->
-
-          <div class="dropdown-divider"></div>
-
-
-          <!-- LOGOUT -->
-
-          <form
-            method="POST"
-            action="{{ route('logout') }}"
-          >
-
-            @csrf
-
-            <button
-              type="submit"
-              class="dropdown-item danger"
-            >
-
-              <div class="item-icon">
-
-                <svg viewBox="0 0 24 24">
-
-                  <path
-                    d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-                  />
-
-                  <polyline
-                    points="16 17 21 12 16 7"
-                  />
-
-                  <line
-                    x1="21"
-                    y1="12"
-                    x2="9"
-                    y2="12"
-                  />
-
-                </svg>
-
-              </div>
-
-              Logout
-
-            </button>
-
-          </form>
-
-        </div>
-
-      </div>
-
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="liveClock">00:00:00</span>
     </div>
 
-    <!-- END PROFILE DROPDOWN -->
+    <div class="profile-wrap">
+      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
+        <div class="avatar">{{ strtoupper(substr(Auth::user()->name,0,1)) }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ Auth::user()->name }}</div>
+          <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
 
+      <div class="dropdown" id="profileDropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-avatar">{{ strtoupper(substr(Auth::user()->name,0,1)) }}</div>
+          <div>
+            <div class="dropdown-name">{{ Auth::user()->name }}</div>
+            <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
+          </div>
+        </div>
+
+        <div class="dropdown-body">
+          <a href="/kasir/account/profil" class="dropdown-item">
+            <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            Profil Saya
+          </a>
+          <a href="/kasir/account/ganti-sandi" class="dropdown-item">
+            <div class="item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            Ganti Password
+          </a>
+          <div class="dropdown-divider"></div>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="dropdown-item danger">
+              <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-
 </header>
 
 <nav class="topnav">
@@ -399,83 +225,145 @@ tr:hover td { background: var(--surface-2); }
   <div class="container">
     <div class="page-header">
       <div>
-        <div class="page-title">Laporan Harian</div>
-        <div class="page-sub">Data penjualan kasir per hari</div>
+        <div class="page-title">Laporan Penjualan Harian</div>
+        <div class="page-sub">Pantau rekap transaksi kasir hari ini atau berdasarkan filter tanggal.</div>
       </div>
     </div>
 
     <div class="filter-bar">
-      <form method="GET" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; flex:1;">
-        <input type="date" name="tanggal" value="{{ request('tanggal') ?? date('Y-m-d') }}">
-        <button type="submit" class="filter-btn">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-          Filter
+      <form method="GET" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; flex:1;">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:12px; font-weight:600; color:var(--text-secondary);">Pilih Tanggal</label>
+            <input type="date" name="tanggal" value="{{ request('tanggal') ?? date('Y-m-d') }}">
+        </div>
+        <button type="submit" class="filter-btn" style="margin-top:19px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Filter Data
         </button>
       </form>
-      <a href="/kasir/laporan/pdf?tanggal={{ request('tanggal') }}" class="download-btn">
-        ⬇ Download PDF
+      <a href="/kasir/laporan/pdf?tanggal={{ request('tanggal') }}" class="download-btn" style="margin-top:19px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download PDF
       </a>
     </div>
 
     <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Waktu</th>
-            <th>Order</th>
-            <th>Meja</th>
-            <th>Metode</th>
-            <th style="text-align:right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          @php $grandTotal = 0; @endphp
-          @forelse($orders as $i => $order)
-          @php $grandTotal += $order->total; @endphp
-          <tr>
-            <td>{{ $i + 1 }}</td>
-            <td>{{ $order->created_at->format('H:i') }}</td>
-            <td class="strong">{{ $order->queue_number }}</td>
-            <td class="strong">{{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}</td>
-            <td>{{ $order->payment_method ?? '-' }}</td>
-            <td class="strong" style="text-align:right;">Rp {{ number_format($order->total) }}</td>
-          </tr>
-          @empty
-          <tr>
-            <td colspan="6" style="text-align:center; padding:40px; color:var(--text-muted);">Tidak ada data untuk tanggal ini</td>
-          </tr>
-          @endforelse
-        </tbody>
-        @if($orders->count() > 0)
-        <tfoot>
-          <tr class="total-footer">
-            <td colspan="5" style="text-align:right; padding:14px 16px;">TOTAL PENDAPATAN</td>
-            <td class="grand-total" style="text-align:right; padding:14px 16px;">Rp {{ number_format($grandTotal) }}</td>
-          </tr>
-        </tfoot>
-        @endif
-      </table>
+        <div style="overflow-x:auto;">
+            <table class="rtable" id="laporanTable" style="min-width:900px;">
+                <thead>
+                    <tr>
+                        <th style="padding-left:22px;">No</th>
+                        <th>Waktu Transaksi</th>
+                        <th>ID Order</th>
+                        <th>Meja </th>
+                        <th>Detail Pesanan</th>
+                        <th>Metode Bayar</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Total Harga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @php $grandTotal = 0; @endphp
+                @forelse($orders as $i => $order)
+                @php $grandTotal += $order->total; @endphp
+                <tr>
+                    <td style="padding-left:22px;">{{ $i + 1 }}</td>
+                    <td>
+                        <span style="font-weight: 600; color: var(--text-primary); display: block;">{{ $order->created_at->format('d M Y') }}</span>
+                        <span style="font-size: 12px; color: var(--text-muted);">{{ $order->created_at->format('H:i') }} WIB</span>
+                    </td>
+                    <td>
+                        <span style="font-weight:800; color:var(--accent); font-size:13px;">
+                            {{ $order->queue_number ?: 'A-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background:var(--surface-2); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:var(--text-secondary); white-space:nowrap;">
+                            {{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
+                        </span>
+                    </td>
+                    <td>
+                        @if($order->items && $order->items->count() > 0)
+                            @foreach($order->items->take(2) as $item)
+                                <span style="font-size:13px;">
+                                    {{ $item->qty ?? $item->quantity ?? 1 }}x
+                                    {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
+                                    @if(!$loop->last)<br>@endif
+                                </span>
+                            @endforeach
+                            @if($order->items->count() > 2)
+                                <br><span style="color:var(--text-muted); font-size:12px;">+{{ $order->items->count()-2 }} lagi</span>
+                            @endif
+                        @else
+                            <span style="font-size:13px; color:var(--text-muted);">-</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($order->payment_method === 'cash')
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">💵 Cash</span>
+                        @elseif($order->payment_method === 'qris')
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;">📱 QRIS</span>
+                        @else
+                            <span style="font-size:12px; color:var(--text-secondary); text-transform:capitalize;">{{ $order->payment_method ?? 'Tunai' }}</span>
+                        @endif
+                    </td>
+                    <td>
+                        @php
+                            if ($order->status === 'pending') {
+                                $bg = 'pending'; $text = 'Menunggu Bayar';
+                            } elseif ($order->status === 'paid') {
+                                $bg = 'selesai'; $text = 'Lunas, Belum Diproses';
+                            } elseif ($order->status === 'process') {
+                                $bg = 'proses'; $text = 'Sedang Dimasak';
+                            } elseif (in_array($order->status, ['done', 'delivered'])) {
+                                $bg = 'diantar'; $text = 'Selesai Diantar';
+                            } else {
+                                $bg = 'pending'; $text = ucfirst($order->status);
+                            }
+                        @endphp
+                        <span class="badge {{ $bg }}">
+                            <span class="badge-dot"></span>
+                            {{ $text }}
+                        </span>
+                    </td>
+                    <td style="font-weight:700; color:var(--text-primary); text-align:right; white-space:nowrap;">
+                        Rp {{ number_format($order->total, 0, ',', '.') }}
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">
+                        <span style="font-weight:600; font-size:14px; color:var(--text-muted);">Tidak ada data penjualan untuk filter saat ini</span>
+                    </td>
+                </tr>
+                @endforelse
+                </tbody>
+                
+                @if($orders->count() > 0)
+                <tfoot>
+                    <tr>
+                        <th colspan="7" style="text-align:right; font-size:14px; color:var(--text-secondary); padding-right:20px;">TOTAL PENDAPATAN :</th>
+                        <th style="color:var(--green); font-size:16px; text-align:right; white-space:nowrap; font-weight:800;">
+                            Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                        </th>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+        </div>
     </div>
   </div>
 </main>
 
 <script>
-  function updateClock(){
-
+function updateClock(){
     const now = new Date();
-
     const h = String(now.getHours()).padStart(2,'0');
     const m = String(now.getMinutes()).padStart(2,'0');
     const s = String(now.getSeconds()).padStart(2,'0');
-
-    document.getElementById('liveClock')
-        .textContent = `${h}:${m}:${s}`;
-
+    document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
 }
-
 setInterval(updateClock,1000);
-
 updateClock();
 
 function toggleDropdown() {
@@ -497,6 +385,22 @@ document.addEventListener('keydown', function(e) {
     document.getElementById('profileDropdown').classList.remove('show');
     document.getElementById('profileBtn').classList.remove('open');
   }
+});
+
+// Setup DataTables
+$(document).ready(function () {
+    $('#laporanTable').DataTable({
+        scrollX: true,
+        pageLength: 15,
+        ordering: false, // Diset false agar row TOTAL di footer tidak teracak posisinya
+        language: {
+            search: "Cari Laporan:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ laporan",
+            paginate: { previous: "Sebelumnya", next: "Selanjutnya" },
+            emptyTable: "Belum ada laporan aktif pada periode ini"
+        }
+    });
 });
 </script>
 </body>

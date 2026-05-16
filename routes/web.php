@@ -268,7 +268,7 @@ Route::middleware(['auth', 'role:admin'])
         [KategoriController::class, 'update']
     )->name('kategori.update');
 
-    Route::post(
+    Route::delete(
         '/kategori/delete/{id}',
         [KategoriController::class, 'destroy']
     )->name('kategori.delete');
@@ -290,6 +290,12 @@ Route::middleware(['auth', 'role:admin'])
         '/addons/store',
         [AddOnsController::class, 'store']
     )->name('addons.store');
+
+    Route::post(
+        '/addon-groups/store',
+        [AddonGroupController::class, 'store']
+        )->name('addon-groups.store');
+
 
     Route::get(
         '/addons/edit/{id}',
@@ -447,6 +453,7 @@ Route::middleware(['auth', 'role:admin'])
 
 });
 
+
 // ══════════════════════════════════════════════════════
 // KASIR
 // ══════════════════════════════════════════════════════
@@ -471,15 +478,33 @@ Route::middleware(['auth', 'role:kasir'])
         [KasirController::class, 'transaksi']
     )->name('transaksi');
 
+    // =====================================
+    // LAPORAN
+    // =====================================
+
     Route::get(
         '/laporan',
         [KasirController::class, 'laporan']
     )->name('laporan');
 
+    // DOWNLOAD PDF
+    Route::get(
+        '/laporan/pdf',
+        [LaporanController::class, 'exportPdf']
+    )->name('laporan.pdf');
+
+    // =====================================
+    // DETAIL PESANAN
+    // =====================================
+
     Route::get(
         '/detail/{id}',
         [KasirController::class, 'detail']
     )->name('detail');
+
+    // =====================================
+    // KONFIRMASI PESANAN
+    // =====================================
 
     Route::patch(
         '/pesanan/{id}/konfirmasi',
@@ -491,7 +516,10 @@ Route::middleware(['auth', 'role:kasir'])
         [KasirController::class, 'selesai']
     )->name('selesai');
 
+    // =====================================
     // ACCOUNT
+    // =====================================
+
     Route::get(
         '/account/profil',
         [AccountKasirController::class, 'profil']

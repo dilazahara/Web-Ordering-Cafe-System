@@ -1,83 +1,30 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
-use App\Models\Addon;
 use App\Models\AddonGroup;
-class AddOnsController extends Controller
+
+class AddonGroupController extends Controller
 {
-    // ======================
-    // INDEX
-    // ======================
-    public function index()
-    {
-        $addons = Addon::with('group')->latest()->paginate(15);
-        return view('admin.addons.index', compact('addons'));
-    }
-    // ======================
-    // CREATE
-    // ======================
-    public function create()
-    {
-        $groups = AddonGroup::all();
-        return view('admin.addons.create', compact('groups'));
-    }
-    // ======================
-    // STORE
-    // ======================
+    // =========================
+    // STORE GROUP
+    // =========================
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'addon_group_id' => 'required'
+            'name' => 'required|string|max:255',
         ]);
-        Addon::create([
+
+        $group = AddonGroup::create([
             'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'addon_group_id' => $request->addon_group_id,
-            'status' => $request->status ?? 1
+            'required' => $request->required ?? 0,
+            'max' => $request->max ?? null,
         ]);
-        return redirect('/admin/addons')
-            ->with('success', 'Add-on berhasil ditambahkan');
-    }
-    // ======================
-    // EDIT
-    // ======================
-    public function edit($id)
-    {
-        $addon = Addon::findOrFail($id);
-        $groups = AddonGroup::all();
-        return view('admin.addons.edit', compact('addon', 'groups'));
-    }
-    // ======================
-    // UPDATE
-    // ======================
-    public function update(Request $request, $id)
-    {
-        $addon = Addon::findOrFail($id);
-        $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'addon_group_id' => 'required'
+
+        return response()->json([
+            'success' => true,
+            'group' => $group
         ]);
-        $addon->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'addon_group_id' => $request->addon_group_id,
-            'status' => $request->status ?? 1
-        ]);
-        return redirect('/admin/addons')
-            ->with('success', 'Add-on berhasil diupdate');
-    }
-    // ======================
-    // DELETE
-    // ======================
-    public function destroy($id)
-    {
-        Addon::findOrFail($id)->delete();
-        return redirect('/admin/addons')
-            ->with('success', 'Add-on berhasil dihapus');
     }
 }

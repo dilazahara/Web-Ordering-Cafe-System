@@ -305,9 +305,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
         <div class="avatar">
 
-            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+    @if(Auth::user()->avatar)
+        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
+    @else
+        {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+    @endif
 
-        </div>
+</div>
 
         <!-- USER INFO -->
 
@@ -352,11 +356,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
         <div class="dropdown-header">
 
-            <div class="dropdown-avatar">
+          <div class="dropdown-avatar">
 
-                {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+    @if(Auth::user()->avatar)
+        <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
+    @else
+        {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+    @endif
 
-            </div>
+</div>
 
             <div>
 

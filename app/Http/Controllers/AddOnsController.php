@@ -54,7 +54,7 @@ class AddOnsController extends Controller
     // ======================
     // EDIT
     // ======================
-    public function edit($id)
+    public function edit(int $id)
     {
         $addon = Addon::findOrFail($id);
         $groups = AddonGroup::all();
@@ -65,7 +65,7 @@ class AddOnsController extends Controller
     // ======================
     // UPDATE
     // ======================
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $addon = Addon::findOrFail($id);
 
@@ -90,7 +90,7 @@ class AddOnsController extends Controller
     // ======================
     // DELETE
     // ======================
-    public function destroy($id)
+    public function destroy(int $id)
     {
         Addon::findOrFail($id)->delete();
 

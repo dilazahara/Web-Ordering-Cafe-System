@@ -12,7 +12,8 @@ class UserController extends Controller
     // ===============================
     public function index()
     {
-        $users = User::all(); // 🔥 ambil dari database
+        $users = User::all();
+
         return view('admin.user.index', compact('users'));
     }
 
@@ -32,7 +33,7 @@ class UserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => bcrypt($request->password), // 🔥 penting
+            'password' => bcrypt($request->password),
             'role' => $request->role
         ]);
 
@@ -46,6 +47,7 @@ class UserController extends Controller
     public function edit(int $id)
     {
         $item = User::findOrFail($id);
+
         return view('admin.user.edit', compact('item'));
     }
 
@@ -53,24 +55,28 @@ class UserController extends Controller
     // UPDATE
     // ===============================
     public function update(Request $request, int $id)
-{
-    $user = User::findOrFail($id);
+    {
+        $request->validate([
+            'role' => 'required'
+        ]);
 
-    $data = [
-        'name' => $request->name,
-        'email' => $request->email,
-        'role' => $request->role
-    ];
+        $user = User::findOrFail($id);
 
-    // kalau isi password baru
-    if ($request->password) {
-        $data['password'] = bcrypt($request->password);
+        // proteksi admin utama
+        if ($user->email == 'admin@gmail.com') {
+            return back()->withErrors(
+                'Role admin utama tidak boleh diubah'
+            );
+        }
+
+        // update role saja
+        $user->role = $request->role;
+
+        $user->save();
+
+        return redirect('/admin/user')
+            ->with('success', 'Role berhasil diupdate!');
     }
-
-    $user->update($data);
-
-    return redirect('/admin/user')->with('success','User berhasil diupdate!');
-}
 
     // ===============================
     // DELETE

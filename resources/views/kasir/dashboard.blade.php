@@ -77,7 +77,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 }
 .user-btn:hover { background: var(--surface-2); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
 .user-btn.open { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; overflow:hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .user-info { display: flex; flex-direction: column; }
 .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .user-role { font-size: 11px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
@@ -113,7 +114,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   color: white; font-size: 14px; font-weight: 800;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgb(79 70 229/.3);
+  overflow: hidden;
 }
+.dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .dropdown-name { font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
 .dropdown-role { font-size: 11.5px; color: var(--text-secondary); font-family: 'Inter', sans-serif; margin-top: 2px; }
 
@@ -220,14 +223,11 @@ tr:hover td { background: var(--surface-2); }
 
     {{-- CLOCK --}}
     <div class="header-clock">
-
         <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/>
             <polyline points="12 6 12 12 16 14"/>
         </svg>
-
         <span id="liveClock">00:00:00</span>
-
     </div>
 
     <div class="divider-v"></div>
@@ -240,35 +240,26 @@ tr:hover td { background: var(--surface-2); }
             id="profileBtn"
             onclick="toggleDropdown()"
         >
-
             <div class="avatar">
-
-                {{ strtoupper(substr(auth()->user()->name,0,1)) }}
-
+                @if(auth()->user()->avatar)
+                    <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar">
+                @else
+                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                @endif
             </div>
 
             <div class="user-info">
-
                 <div class="user-name">
-
                     {{ auth()->user()->name }}
-
                 </div>
-
                 <div class="user-role">
-
                     {{ ucfirst(auth()->user()->role) }}
-
                 </div>
-
             </div>
 
             <svg class="chevron" viewBox="0 0 24 24">
-
                 <polyline points="6 9 12 15 18 9"/>
-
             </svg>
-
         </div>
 
         <div
@@ -278,29 +269,22 @@ tr:hover td { background: var(--surface-2); }
 
             {{-- DROPDOWN HEADER --}}
             <div class="dropdown-header">
-
                 <div class="dropdown-avatar">
-
-                    {{ strtoupper(substr(auth()->user()->name,0,1)) }}
-
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Avatar">
+                    @else
+                        {{ strtoupper(substr(auth()->user()->name,0,1)) }}
+                    @endif
                 </div>
 
                 <div>
-
                     <div class="dropdown-name">
-
                         {{ auth()->user()->name }}
-
                     </div>
-
                     <div class="dropdown-role">
-
                         {{ ucfirst(auth()->user()->role) }} · Online
-
                     </div>
-
                 </div>
-
             </div>
 
             {{-- DROPDOWN BODY --}}
@@ -311,21 +295,13 @@ tr:hover td { background: var(--surface-2); }
                     href="/kasir/account/profil"
                     class="dropdown-item"
                 >
-
                     <div class="item-icon">
-
                         <svg viewBox="0 0 24 24">
-
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-
                             <circle cx="12" cy="7" r="4"/>
-
                         </svg>
-
                     </div>
-
                     Profil Saya
-
                 </a>
 
                 {{-- PASSWORD --}}
@@ -333,11 +309,8 @@ tr:hover td { background: var(--surface-2); }
                     href="/kasir/account/ganti-sandi"
                     class="dropdown-item"
                 >
-
                     <div class="item-icon">
-
                         <svg viewBox="0 0 24 24">
-
                             <rect
                                 x="3"
                                 y="11"
@@ -346,15 +319,10 @@ tr:hover td { background: var(--surface-2); }
                                 rx="2"
                                 ry="2"
                             />
-
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-
                         </svg>
-
                     </div>
-
                     Ganti Password
-
                 </a>
 
                 <div class="dropdown-divider"></div>
@@ -364,32 +332,20 @@ tr:hover td { background: var(--surface-2); }
                     method="POST"
                     action="{{ route('logout') }}"
                 >
-
                     @csrf
-
                     <button
                         type="submit"
                         class="dropdown-item danger"
                     >
-
                         <div class="item-icon">
-
                             <svg viewBox="0 0 24 24">
-
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-
                                 <polyline points="16 17 21 12 16 7"/>
-
                                 <line x1="21" y1="12" x2="9" y2="12"/>
-
                             </svg>
-
                         </div>
-
                         Logout
-
                     </button>
-
                 </form>
 
             </div>
@@ -573,6 +529,7 @@ function updateStats(orders) {
 
 function renderTable(orders) {
   const tbody = document.getElementById('orderTableBody');
+  if (!tbody) return; // Proteksi jika elemen tidak ada
   if (orders.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);">Belum ada pesanan hari ini</td></tr>`;
     return;

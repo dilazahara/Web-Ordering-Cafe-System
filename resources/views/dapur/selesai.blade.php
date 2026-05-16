@@ -418,7 +418,7 @@ tr:hover td { background: var(--surface-2); }
             <td>
               <div class="item-list">
                 @foreach($order->items as $item)
-                  <span class="item-chip">{{ $item->qty }}× {{ $item->menu->nama ?? 'Menu #'.$item->menu_id }}</span>
+                  <span class="item-chip">{{ $item->qty }}× {{ $item->menu->name ?? 'Menu #'.$item->menu_id }}</span>
                 @endforeach
               </div>
             </td>
