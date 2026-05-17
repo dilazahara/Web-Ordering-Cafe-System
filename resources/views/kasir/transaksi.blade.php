@@ -72,7 +72,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .user-btn { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: all 0.18s; user-select: none; }
 .user-btn:hover { background: var(--surface-2); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
 .user-btn.open { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 .user-info { display: flex; flex-direction: column; }
 .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .user-role { font-size: 11px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
@@ -81,7 +82,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 16px 48px rgb(0 0 0/.14), 0 0 0 1px rgb(0 0 0/.04); overflow: hidden; opacity: 0; transform: translateY(-8px) scale(.97); pointer-events: none; transition: opacity .18s, transform .18s; z-index: 200; }
 .dropdown.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 .dropdown-header { padding: 16px; background: linear-gradient(135deg, var(--indigo-bg), var(--accent-bg)); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(79 70 229/.3); }
+.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(79 70 229/.3); overflow: hidden; }
+.dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .dropdown-name { font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
 .dropdown-role { font-size: 11.5px; color: var(--text-secondary); font-family: 'Inter', sans-serif; margin-top: 2px; }
 .dropdown-body { padding: 8px; }
@@ -116,9 +118,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 /* ══ BOX & TABLE STYLE (Sinkron Admin Index) ══ */
 .table-wrap {
     background: white; border-radius: var(--radius-lg); border: 1px solid var(--border);
-    box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; padding-bottom: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow-x: auto; padding-bottom: 5px;
 }
-.rtable { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; }
+.rtable { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; min-width: 700px; }
 .rtable thead th {
     background: #f8fafc; padding: 14px 16px; font-size: 11.5px;
     font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
@@ -194,7 +196,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
     <div class="profile-wrap">
       <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">{{ strtoupper(substr(Auth::user()->name,0,1)) }}</div>
+        <div class="avatar">
+            @if(Auth::user()->avatar)
+                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
+            @else
+                {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+            @endif
+        </div>
         <div class="user-info">
           <div class="user-name">{{ Auth::user()->name }}</div>
           <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
@@ -204,7 +212,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
       <div class="dropdown" id="profileDropdown">
         <div class="dropdown-header">
-          <div class="dropdown-avatar">{{ strtoupper(substr(Auth::user()->name,0,1)) }}</div>
+          <div class="dropdown-avatar">
+              @if(Auth::user()->avatar)
+                  <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
+              @else
+                  {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+              @endif
+          </div>
           <div>
             <div class="dropdown-name">{{ Auth::user()->name }}</div>
             <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
@@ -276,8 +290,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     </div>
 
     <div class="table-wrap">
-        <div style="overflow-x:auto;">
-            <table class="rtable" id="transaksiTable" style="min-width:800px;">
+        @if($orders->isEmpty())
+            <div style="text-align:center; padding:56px 20px;">
+                <svg viewBox="0 0 24 24" style="width:40px;height:40px;stroke:#cbd5e1;stroke-width:1.5;fill:none;margin:0 auto 12px;display:block;"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <span style="font-weight:600; font-size:14px; color:#64748b; display:block;">Belum ada transaksi hari ini</span>
+            </div>
+        @else
+            <table class="rtable" id="transaksiTable" style="width:100%;">
                 <thead>
                     <tr>
                         <th style="padding-left:22px;">ID Order</th>
@@ -290,7 +309,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                     </tr>
                 </thead>
                 <tbody>
-                @forelse($orders as $order)
+                @foreach($orders as $order)
                 <tr>
                     <td style="padding-left:22px;">
                         <span style="font-weight:800; color:#2563eb; font-size:13px;">
@@ -353,62 +372,106 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         {{ $order->created_at->format('H:i') }}
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="7" style="text-align:center; padding:40px; color:#94a3b8;">
-                        <span style="font-weight:600; font-size:14px; color:#64748b;">Belum ada transaksi hari ini</span>
-                    </td>
-                </tr>
-                @endforelse
+                @endforeach
                 </tbody>
             </table>
-        </div>
-    </div>
-  </div>
+        @endif
+    </div>{{-- end table-wrap --}}
+  </div>{{-- end container --}}
 </main>
 
 <script>
-function updateClock(){
+function updateClock() {
     const now = new Date();
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-    document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
+
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+
+    const clock = document.getElementById('liveClock');
+
+    if (clock) {
+        clock.textContent = `${h}:${m}:${s}`;
+    }
 }
-setInterval(updateClock,1000);
+
+setInterval(updateClock, 1000);
 updateClock();
 
+
+
+/* =========================
+   DROPDOWN PROFILE
+========================= */
+
 function toggleDropdown() {
-  const btn      = document.getElementById('profileBtn');
-  const dropdown = document.getElementById('profileDropdown');
-  const isOpen   = dropdown.classList.contains('show');
-  dropdown.classList.toggle('show', !isOpen);
-  btn.classList.toggle('open', !isOpen);
+
+    const btn = document.getElementById('profileBtn');
+    const dropdown = document.getElementById('profileDropdown');
+
+    if (!btn || !dropdown) return;
+
+    const isOpen = dropdown.classList.contains('show');
+
+    dropdown.classList.toggle('show', !isOpen);
+    btn.classList.toggle('open', !isOpen);
 }
-document.addEventListener('click', function(e) {
-  const wrap = document.querySelector('.profile-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-  }
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-  }
+
+document.addEventListener('click', function (e) {
+
+    const wrap = document.querySelector('.profile-wrap');
+
+    if (wrap && !wrap.contains(e.target)) {
+
+        const dropdown = document.getElementById('profileDropdown');
+        const btn = document.getElementById('profileBtn');
+
+        if (dropdown) dropdown.classList.remove('show');
+        if (btn) btn.classList.remove('open');
+    }
 });
 
+document.addEventListener('keydown', function (e) {
+
+    if (e.key === 'Escape') {
+
+        const dropdown = document.getElementById('profileDropdown');
+        const btn = document.getElementById('profileBtn');
+
+        if (dropdown) dropdown.classList.remove('show');
+        if (btn) btn.classList.remove('open');
+    }
+});
+
+
+
+/* =========================
+   DATATABLE
+========================= */
 $(document).ready(function () {
+    // Hanya init jika tabel ada (ada data)
+    if (!$('#transaksiTable').length) return;
+
+    if ($.fn.DataTable.isDataTable('#transaksiTable')) {
+        $('#transaksiTable').DataTable().destroy();
+    }
+
     $('#transaksiTable').DataTable({
-        scrollX: true,
-        pageLength: 15,
+        destroy      : true,
+        responsive   : false,
+        autoWidth    : false,
+        pageLength   : 15,
+        ordering     : true,
+        searching    : true,
+        paging       : true,
+        info         : true,
         language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ transaksi",
-            paginate: { previous: "Sebelumnya", next: "Selanjutnya" },
-            emptyTable: "Belum ada transaksi hari ini"
+            search      : "Cari:",
+            lengthMenu  : "Tampilkan _MENU_ data",
+            info        : "Menampilkan _START_ sampai _END_ dari _TOTAL_ transaksi",
+            emptyTable  : "Belum ada transaksi hari ini",
+            zeroRecords : "Data tidak ditemukan",
+            paginate    : { previous: "Sebelumnya", next: "Selanjutnya" }
         }
     });
 });

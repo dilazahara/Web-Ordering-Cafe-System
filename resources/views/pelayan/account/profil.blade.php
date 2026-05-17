@@ -58,6 +58,14 @@ body{
     margin-bottom:30px;
 }
 
+/* AVATAR — support foto & inisial */
+.avatar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
 .avatar{
     width:80px;
     height:80px;
@@ -69,6 +77,43 @@ body{
     color:white;
     font-size:28px;
     font-weight:800;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 20px;
+}
+
+.avatar:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    text-align: center;
 }
 
 .profile-info h2{
@@ -181,7 +226,7 @@ input:focus{
 
     @if(session('success'))
         <div class="alert alert-success">
-            {{ session('success') }}
+            ✅ {{ session('success') }}
         </div>
     @endif
 
@@ -192,37 +237,62 @@ input:focus{
             <p>Kelola informasi akun pelayan Anda</p>
         </div>
 
-        <div class="profile-top">
-
-            <div class="avatar">
-                {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-            </div>
-
-            <div class="profile-info">
-
-                <h2>
-                    {{ Auth::user()->name }}
-                </h2>
-
-                <p>
-                    {{ Auth::user()->email }}
-                </p>
-
-                <div class="badge">
-                    {{ ucfirst(Auth::user()->role) }}
-                </div>
-
-            </div>
-
-        </div>
-
+        {{-- Form pakai enctype multipart agar bisa upload file --}}
         <form
             action="{{ route('pelayan.account.update') }}"
             method="POST"
+            enctype="multipart/form-data"
         >
 
             @csrf
             @method('PUT')
+
+            <div class="profile-top">
+
+                {{-- AVATAR: klik untuk ganti foto --}}
+                <div class="avatar-wrap">
+                    <div class="avatar" onclick="document.getElementById('avatarInput').click()">
+                        @if(Auth::user()->avatar)
+                            <img
+                                id="avatarPreview"
+                                src="{{ asset('storage/' . Auth::user()->avatar) }}"
+                                alt="Foto Profil"
+                            >
+                        @else
+                            <span id="avatarInitials">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
+                            <img id="avatarPreview" src="" alt="" style="display:none;">
+                        @endif
+                        <div class="avatar-overlay">Ubah Foto</div>
+                    </div>
+                    <span class="avatar-hint">Klik untuk ubah</span>
+                </div>
+
+                {{-- Input file tersembunyi --}}
+                <input
+                    type="file"
+                    id="avatarInput"
+                    name="avatar"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    style="display:none;"
+                >
+
+                <div class="profile-info">
+
+                    <h2>
+                        {{ Auth::user()->name }}
+                    </h2>
+
+                    <p>
+                        {{ Auth::user()->email }}
+                    </p>
+
+                    <div class="badge">
+                        {{ ucfirst(Auth::user()->role) }}
+                    </div>
+
+                </div>
+
+            </div>
 
             <div class="form-group">
 
@@ -301,6 +371,26 @@ input:focus{
     </div>
 
 </div>
+
+<script>
+    // Preview foto sebelum di-upload
+    const avatarInput    = document.getElementById('avatarInput');
+    const avatarPreview  = document.getElementById('avatarPreview');
+    const avatarInitials = document.getElementById('avatarInitials');
+
+    avatarInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            avatarPreview.src          = event.target.result;
+            avatarPreview.style.display = 'block';
+            if (avatarInitials) avatarInitials.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
 
 </body>
 </html>

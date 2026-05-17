@@ -90,14 +90,13 @@
             position: relative; z-index: 1;
         }
         
-        /* Mengatur logo agar berada di tengah tanpa border/background */
         .logo-wrapper {
             display: flex;
             justify-content: center;
             margin-bottom: 16px;
         }
         .logo-wrapper img {
-            width: 65px; /* Anda bisa menyesuaikan ukurannya di sini */
+            width: 65px;
             height: auto;
             object-fit: contain;
         }
@@ -185,6 +184,33 @@
             color: var(--text-muted);
         }
 
+        /* ── LANJUTKAN BUTTON ───────────────────── */
+        .btn-lanjutkan {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px;
+            background: var(--primary);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px rgba(212,160,23,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-lanjutkan:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(212,160,23,0.35);
+        }
+        .btn-lanjutkan i { font-size: 18px; }
+
         /* ── LOGIN FORM ──────────────────────────── */
         .section-title {
             font-size: 12px;
@@ -239,8 +265,8 @@
             cursor: pointer; color: var(--text-muted);
         }
 
-        .flex-between {
-            display: flex; justify-content: space-between; align-items: center;
+        /* Remember me */
+        .remember-wrap {
             margin-bottom: 28px;
         }
         .remember {
@@ -248,10 +274,6 @@
             font-size: 14px; color: var(--text-mid); cursor: pointer;
         }
         .remember input { accent-color: var(--primary); width: 16px; height: 16px; }
-        .forgot {
-            font-size: 14px; font-weight: 600;
-            color: var(--primary-dark); text-decoration: none;
-        }
 
         .role-tag {
             display: inline-flex;
@@ -267,6 +289,24 @@
             margin-bottom: 24px;
         }
         .role-tag i { color: var(--primary-dark); }
+
+        /* Tombol ganti role */
+        .btn-ganti-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 8px;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
 
         .btn-login {
             width: 100%;
@@ -295,12 +335,32 @@
         }
         .register a { color: var(--primary-dark); font-weight: 700; text-decoration: none; }
 
+        /* ── ANIMASI ─────────────────────────────── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(20px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         .role-card-wrap { animation: fadeUp 0.5s ease-out both; }
-        .login-wrap { animation: fadeUp 0.5s 0.15s ease-out both; }
+        .login-wrap { animation: fadeUp 0.5s ease-out both; }
+
+        /* ── SHOW/HIDE CREDENTIAL SECTION ───────── */
+        .step-connector,
+        .login-wrap {
+            /* Tersembunyi di awal */
+            display: none;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .step-connector.visible,
+        .login-wrap.visible {
+            display: flex;       /* connector pakai flex */
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .login-wrap.visible {
+            display: block;      /* login card pakai block */
+        }
 
         @media (max-width: 480px) {
             .card { padding: 30px 20px; }
@@ -312,20 +372,17 @@
 
 <div class="wrapper">
 
-    <!-- STEP 1: Pilih Role -->
     <div class="card role-card-wrap">
         <div class="header">
-            <!-- Menampilkan logonya saja tanpa bungkus garis/tulisan -->
             <div class="logo-wrapper">
                 <img src="{{ asset('logo.png') }}" alt="Logo Momoo Order">
             </div>
-            
             <h1>Selamat Datang</h1>
             <p class="subtitle">Pilih akses masuk sesuai posisi Anda</p>
         </div>
 
         <div class="role-grid">
-            <div class="role-item selected" onclick="selectRole(this, 'Admin', 'ti-shield-check')">
+            <div class="role-item" onclick="selectRole(this, 'Admin', 'ti-shield-check')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
                 <div class="ri-icon icon-admin"><i class="ti ti-shield-check"></i></div>
                 <div class="ri-text">
@@ -343,9 +400,9 @@
                 </div>
             </div>
 
-            <div class="role-item" onclick="selectRole(this, 'Dapur', 'ti-tool-kitchen-2')">
+            <div class="role-item" onclick="selectRole(this, 'Dapur', 'ti-flame')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
-                <div class="ri-icon icon-dapur"><i class="ti ti-tool-kitchen-2"></i></div>
+                <div class="ri-icon icon-dapur"><i class="ti ti-flame"></i></div>
                 <div class="ri-text">
                     <p class="ri-name">Dapur</p>
                     <p class="ri-sub">Masak pesanan</p>
@@ -361,29 +418,36 @@
                 </div>
             </div>
         </div>
+
+        <button class="btn-lanjutkan" id="btn-lanjutkan" style="display:none;" onclick="showCredential()">
+            Lanjutkan <i class="ti ti-arrow-right"></i>
+        </button>
     </div>
 
-    <!-- Connector -->
-    <div class="step-connector">
+    <div class="step-connector" id="step-connector">
         <div class="step-connector-line"></div>
         <div class="step-connector-dot"><i class="ti ti-lock"></i></div>
         <div class="step-connector-line"></div>
     </div>
 
-    <!-- STEP 2: Login Form -->
-    <div class="card login-wrap">
+    <div class="card login-wrap" id="login-wrap">
         <p class="section-title">Kredensial Login</p>
 
-        <div style="text-align: center;">
-            <div class="role-tag" id="role-tag">
+        <div style="text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; margin-bottom: 0;">
+            <div class="role-tag" id="role-tag" style="margin-bottom: 0;">
                 <i class="ti ti-shield-check" id="tag-icon"></i>
                 <span id="tag-label">Admin</span>
             </div>
+            <button type="button" class="btn-ganti-role" onclick="gantiRole()" title="Ganti role">
+                <i class="ti ti-refresh"></i> Ganti
+            </button>
         </div>
+
+        <br>
 
         <form method="POST" action="{{ route('login') }}" id="login-form">
             @csrf
-            <input type="hidden" name="role" id="role-input" value="Admin">
+            <input type="hidden" name="role" id="role-input" value="">
 
             <div class="form-group">
                 <label>Alamat Email</label>
@@ -406,13 +470,10 @@
                 </div>
             </div>
 
-            <div class="flex-between">
+            <div class="remember-wrap">
                 <label class="remember">
                     <input type="checkbox" name="remember"> Ingat Sesi
                 </label>
-                <a href="{{ url('admin/account/ganti-sandi') }}" class="forgot">
-                    Lupa Password?
-                </a>
             </div>
 
             <button type="submit" class="btn-login">
@@ -430,21 +491,77 @@
     const roleIconMap = {
         'Admin':   'ti-shield-check',
         'Kasir':   'ti-receipt',
-        'Dapur':   'ti-tool-kitchen-2',
+        'Dapur':   'ti-flame',
         'Pelayan': 'ti-user-star',
     };
 
+    let selectedRoleName = null;
+    let selectedRoleIcon = null;
+
+    /* ── Pilih role ─────────────────────────── */
     function selectRole(el, name, icon) {
+        // Hapus selected dari semua item
         document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
         el.classList.add('selected');
 
-        document.getElementById('role-input').value = name;
-        document.getElementById('tag-label').textContent = name;
+        selectedRoleName = name;
+        selectedRoleIcon = icon;
 
-        const tagIcon = document.getElementById('tag-icon');
-        tagIcon.className = 'ti ' + (roleIconMap[name] || icon);
+        // Tampilkan kembali tombol Lanjutkan jika sebelumnya sempat disembunyikan
+        const btnLanjutkan = document.getElementById('btn-lanjutkan');
+        btnLanjutkan.style.display = 'flex';
+
+        // Animasi bounce kecil pada tombol
+        btnLanjutkan.style.animation = 'none';
+        void btnLanjutkan.offsetWidth; // reflow
+        btnLanjutkan.style.animation = 'fadeUp 0.3s ease-out both';
     }
 
+    /* ── Tampilkan form kredensial ──────────── */
+    function showCredential() {
+        if (!selectedRoleName) return;
+
+        // SEGERA SEMBUNYIKAN TOMBOL LANJUTKAN AGAR OTOMATIS HILANG
+        document.getElementById('btn-lanjutkan').style.display = 'none';
+
+        // Isi hidden input dan tag role
+        document.getElementById('role-input').value = selectedRoleName;
+        document.getElementById('tag-label').textContent = selectedRoleName;
+
+        const tagIcon = document.getElementById('tag-icon');
+        tagIcon.className = 'ti ' + (roleIconMap[selectedRoleName] || selectedRoleIcon);
+
+        // Tampilkan connector
+        const connector = document.getElementById('step-connector');
+        connector.classList.add('visible');
+
+        // Tampilkan login card dengan sedikit delay agar animasi berurutan
+        setTimeout(() => {
+            const loginWrap = document.getElementById('login-wrap');
+            loginWrap.classList.add('visible');
+
+            // Scroll ke credential card
+            loginWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+
+    /* ── Ganti role (balik ke step 1) ──────── */
+    function gantiRole() {
+        // Sembunyikan kembali credential section
+        document.getElementById('step-connector').classList.remove('visible');
+        document.getElementById('login-wrap').classList.remove('visible');
+
+        // Bersihkan data pilihan lama & reset tombol agar bersih kembali
+        document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
+        document.getElementById('btn-lanjutkan').style.display = 'none';
+        selectedRoleName = null;
+        selectedRoleIcon = null;
+
+        // Scroll ke atas dengan mulus
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── Toggle password visibility ─────────── */
     function togglePw() {
         const pw = document.getElementById('pw-input');
         const icon = document.getElementById('pw-icon');

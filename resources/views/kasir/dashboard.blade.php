@@ -49,7 +49,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .header-clock svg{
   width:16px;
   height:16px;
-  stroke:var(--blue);
+  stroke:var(--accent);
   stroke-width:2.3;
   fill:none;
 }

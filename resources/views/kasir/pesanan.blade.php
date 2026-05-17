@@ -50,7 +50,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .header-clock svg{
   width:16px;
   height:16px;
-  stroke:var(--blue);
+  stroke:var(--accent);
   stroke-width:2.3;
   fill:none;
 }
@@ -71,7 +71,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .user-btn { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: all 0.18s; user-select: none; }
 .user-btn:hover { background: var(--surface-2); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
 .user-btn.open { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+/* PERBAIKAN: Penambahan overflow: hidden dan styling img pada .avatar */
+.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
 .user-info { display: flex; flex-direction: column; }
 .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .user-role { font-size: 11px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
@@ -80,7 +84,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 16px 48px rgb(0 0 0/.14), 0 0 0 1px rgb(0 0 0/.04); overflow: hidden; opacity: 0; transform: translateY(-8px) scale(.97); pointer-events: none; transition: opacity .18s, transform .18s; z-index: 200; }
 .dropdown.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 .dropdown-header { padding: 16px; background: linear-gradient(135deg, var(--indigo-bg), var(--accent-bg)); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(79 70 229/.3); }
+
+/* PERBAIKAN: Penambahan overflow: hidden dan styling img pada .dropdown-avatar */
+.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #818cf8, #4f46e5); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(79 70 229/.3); overflow: hidden; }
+.dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
 .dropdown-name { font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
 .dropdown-role { font-size: 11.5px; color: var(--text-secondary); font-family: 'Inter', sans-serif; margin-top: 2px; }
 .dropdown-body { padding: 8px; }
@@ -293,15 +301,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 <div class="profile-wrap">
 
-    <!-- PROFILE BUTTON -->
-
     <div
         class="user-btn"
         id="profileBtn"
         onclick="toggleDropdown()"
     >
-
-        <!-- AVATAR -->
 
         <div class="avatar">
 
@@ -312,8 +316,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     @endif
 
 </div>
-
-        <!-- USER INFO -->
 
         <div class="user-info">
 
@@ -331,8 +333,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
         </div>
 
-        <!-- CHEVRON -->
-
         <svg
             class="chevron"
             viewBox="0 0 24 24"
@@ -345,14 +345,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     </div>
 
 
-    <!-- DROPDOWN -->
-
     <div
         class="dropdown"
         id="profileDropdown"
     >
-
-        <!-- DROPDOWN HEADER -->
 
         <div class="dropdown-header">
 
@@ -385,11 +381,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         </div>
 
 
-        <!-- DROPDOWN BODY -->
-
         <div class="dropdown-body">
-
-            <!-- PROFIL -->
 
             <a
                 href="/kasir/account/profil"
@@ -418,8 +410,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
             </a>
 
-
-            <!-- GANTI PASSWORD -->
 
             <a
                 href="/kasir/account/ganti-sandi"
@@ -452,12 +442,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
             </a>
 
 
-            <!-- DIVIDER -->
-
             <div class="dropdown-divider"></div>
 
-
-            <!-- LOGOUT -->
 
             <form
                 method="POST"
@@ -599,15 +585,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
     <div class="oc-right">
 
-        <!-- JAM -->
-
         <div class="oc-time">
 
             {{ $order->created_at->translatedFormat('H:i') }}
 
         </div>
-
-        <!-- PAYMENT -->
 
         @if($order->payment_method === 'cash')
 

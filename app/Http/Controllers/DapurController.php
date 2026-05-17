@@ -9,6 +9,7 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class DapurController extends Controller
 {
@@ -140,42 +141,42 @@ class DapurController extends Controller
     public function updateProfil(Request $request)
     {
         $request->validate([
-
-            'name' => 'required|string|max:100',
-
-            'email' =>
-                'required|email|unique:users,email,' . Auth::id(),
-
+            'name'   => 'required|string|max:100',
+            'email'  => 'required|email|unique:users,email,' . Auth::id(),
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         /** @var User $user */
         $user = Auth::user();
 
-        $user->name = $request->name;
-
+        $user->name  = $request->name;
         $user->email = $request->email;
 
-
         // USERNAME
-
         if ($request->filled('username')) {
-
             $user->username = $request->username;
-
         }
 
-
         // PHONE
-
         if ($request->filled('phone')) {
-
             $user->phone = $request->phone;
+        }
 
+        // UPLOAD AVATAR
+        if ($request->hasFile('avatar')) {
+            // Hapus foto lama jika ada
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            // Simpan foto baru
+            $path = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $path;
         }
 
         $user->save();
 
-        return redirect('/dapur/account/profil')
+        // ✅ Redirect ke /dapur/proses agar flash success muncul di proses.blade.php
+        return redirect('/dapur/proses')
             ->with(
                 'success',
                 'Profil berhasil diperbarui!'

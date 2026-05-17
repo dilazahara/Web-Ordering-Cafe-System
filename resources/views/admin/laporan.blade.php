@@ -308,11 +308,91 @@ body{
     box-shadow:0 4px 10px rgba(0,0,0,.04);
 }
 
-.table-title{
-    font-size:22px;
-    font-weight:700;
+/* ── TABLE TITLE (DIUPGRADE) ── */
+
+.table-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:14px;
     margin-bottom:24px;
+    padding-bottom:20px;
+    border-bottom:1px solid #f1f5f9;
 }
+
+.table-title-icon{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    background:#eff6ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.table-title-icon i{
+    width:22px;
+    height:22px;
+    color:#3b82f6;
+}
+
+.table-title-text h2{
+    font-size:20px;
+    font-weight:700;
+    color:#0f172a;
+    line-height:1.2;
+}
+
+.table-title-text p{
+    font-size:13px;
+    color:#64748b;
+    margin-top:3px;
+}
+
+/* ── EMPTY STATE (DIUPGRADE) ── */
+
+.empty-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:70px 20px;
+    text-align:center;
+}
+
+.empty-icon-wrap{
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    background:#f8fafc;
+    border:2px dashed #cbd5e1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:20px;
+}
+
+.empty-icon-wrap i{
+    width:36px;
+    height:36px;
+    color:#94a3b8;
+}
+
+.empty-state h3{
+    font-size:17px;
+    font-weight:700;
+    color:#334155;
+    margin-bottom:8px;
+}
+
+.empty-state p{
+    font-size:14px;
+    color:#94a3b8;
+    max-width:320px;
+    line-height:1.6;
+}
+
+/* TABLE WRAPPER */
 
 .table-wrapper{
     overflow-x:auto;
@@ -660,9 +740,19 @@ Export PDF
 
 <div class="table-box">
 
-<div class="table-title">
-Data Transaksi
-</div>
+    {{-- ── JUDUL TABEL (DIUPGRADE) ── --}}
+    <div class="table-title-wrap">
+
+        <div class="table-title-icon">
+            <i data-lucide="file-bar-chart-2"></i>
+        </div>
+
+        <div class="table-title-text">
+            <h2>Data Laporan</h2>
+            <p>Rincian seluruh transaksi penjualan</p>
+        </div>
+
+    </div>
 
 <div class="table-wrapper">
 
@@ -782,15 +872,26 @@ Rp {{ number_format($order->total,0,',','.') }}
 
 @empty
 
+{{-- ── EMPTY STATE (DIUPGRADE) ── --}}
 <tr>
+<td colspan="8" style="padding:0;border:none;">
 
-<td colspan="8"
-style="text-align:center;padding:50px;color:#94a3b8;">
+    <div class="empty-state">
 
-Tidak ada data transaksi
+        <div class="empty-icon-wrap">
+            <i data-lucide="inbox"></i>
+        </div>
+
+        <h3>Tidak ada data laporan saat ini</h3>
+
+        <p>
+            Belum ada transaksi yang tercatat.<br>
+            Coba ubah filter periode atau pilih tanggal yang berbeda.
+        </p>
+
+    </div>
 
 </td>
-
 </tr>
 
 @endforelse
@@ -843,4 +944,3 @@ document
 
 </body>
 </html>
-

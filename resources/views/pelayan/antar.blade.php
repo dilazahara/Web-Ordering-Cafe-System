@@ -71,7 +71,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .user-pill { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 10px; background: var(--surface-2); border: 0.5px solid var(--border-md); cursor: pointer; user-select: none; transition: all .15s; }
 .user-pill:hover { background: #f0f1f5; border-color: rgba(0,0,0,.18); }
 .user-pill.open { border-color: var(--teal); background: var(--teal-bg); }
-.avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--teal); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--teal); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 .u-name { font-size: 13px; font-weight: 700; color: #0f1623; }
 .chevron { font-size: 14px; color: #5a6279; transition: transform .2s; }
 .user-pill.open .chevron { transform: rotate(180deg); }
@@ -79,7 +80,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 0.5px solid var(--border-md); border-radius: 16px; box-shadow: 0 16px 40px rgba(0,0,0,.12); overflow: hidden; opacity: 0; transform: translateY(-8px) scale(.97); pointer-events: none; transition: opacity .18s, transform .18s; z-index: 200; }
 .dropdown.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 .dd-header { padding: 16px; background: linear-gradient(135deg, var(--teal-bg), #d1fae5); border-bottom: 0.5px solid var(--border-md); display: flex; align-items: center; gap: 12px; }
-.dd-avatar { width: 40px; height: 40px; background: var(--teal); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; }
+.dd-avatar { width: 40px; height: 40px; background: var(--teal); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; overflow: hidden; }
+.dd-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 .dd-name { font-size: 13.5px; font-weight: 800; color: #0f1623; }
 .dd-role { font-size: 11.5px; color: #5a6279; margin-top: 2px; }
 .dd-body { padding: 8px; }
@@ -218,6 +220,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 /* ── TOAST ── */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #0f1623; color: #fff; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; transition: transform .3s; z-index: 999; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.15); display: flex; align-items: center; gap: 8px; }
 .toast.show { transform: translateX(-50%) translateY(0); }
+/* ── ALERT FLASH ── */
+.alert-flash { padding: 12px 18px; border-radius: 12px; margin-bottom: 18px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.alert-flash.success { background: #dcfce7; color: #166534; border: 1px solid #a7f3d0; }
 .toast i { font-size: 16px; }
 
 /* ── RESPONSIVE ── */
@@ -263,14 +268,26 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
     <div class="profile-wrap">
       <div class="user-pill" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">{{ $initial }}</div>
+        <div class="avatar">
+          @if($user->avatar)
+            <img src="{{ asset('storage/' . $user->avatar) }}" alt="Foto Profil">
+          @else
+            {{ $initial }}
+          @endif
+        </div>
         <span class="u-name">{{ $user->name }}</span>
         <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
       </div>
 
       <div class="dropdown" id="profileDropdown">
         <div class="dd-header">
-          <div class="dd-avatar">{{ $initial }}</div>
+          <div class="dd-avatar">
+            @if($user->avatar)
+              <img src="{{ asset('storage/' . $user->avatar) }}" alt="Foto Profil">
+            @else
+              {{ $initial }}
+            @endif
+          </div>
           <div>
             <div class="dd-name">{{ $user->name }}</div>
             <div class="dd-role">{{ ucfirst($user->role ?? 'Pelayan') }} · Online</div>
@@ -298,6 +315,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 <!-- ══ MAIN ══ -->
 <main class="main">
+
+  @if(session('success'))
+  <div class="alert-flash success">
+    ✅ {{ session('success') }}
+  </div>
+  @endif
 
   <div class="page-head">
     <div>

@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Profil Saya</title>
+<title>Profil Dapur</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -18,152 +17,163 @@
 }
 
 body{
-    background:#f3f4f6;
     min-height:100vh;
-    padding:40px 20px;
+    background:
+        radial-gradient(circle at top left,#dbeafe,transparent 30%),
+        radial-gradient(circle at bottom right,#e0e7ff,transparent 35%),
+        #f5f7fb;
+    padding:50px 20px;
 }
 
 .container{
-    max-width:700px;
+    width:100%;
+    max-width:920px;
     margin:auto;
 }
 
-.card{
-    background:white;
-    border-radius:24px;
-    padding:35px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.05);
+.page-header{
+    margin-bottom:25px;
 }
 
-.header{
-    margin-bottom:30px;
-}
-
-.header h1{
-    font-size:30px;
+.page-header h1{
+    font-size:38px;
     font-weight:800;
     color:#111827;
+    letter-spacing:-1px;
 }
 
-.header p{
-    margin-top:6px;
+.page-header p{
+    margin-top:8px;
     color:#6b7280;
-    font-size:14px;
+    font-size:15px;
+}
+
+.card{
+    position:relative;
+    overflow:hidden;
+    background:rgba(255,255,255,0.78);
+    backdrop-filter:blur(16px);
+    border:1px solid rgba(255,255,255,0.5);
+    border-radius:32px;
+    padding:42px;
+    box-shadow:
+        0 20px 50px rgba(15,23,42,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+.card::before{
+    content:'';
+    position:absolute;
+    top:-120px;
+    right:-120px;
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    opacity:.08;
 }
 
 .profile-top{
+    position:relative;
+    z-index:2;
     display:flex;
     align-items:center;
-    gap:18px;
-    margin-bottom:30px;
+    gap:26px;
+    margin-bottom:38px;
+    padding-bottom:30px;
+    border-bottom:1px solid rgba(226,232,240,0.7);
 }
 
-.avatar{
-    width:80px;
-    height:80px;
-    border-radius:20px;
-    background:linear-gradient(135deg,#f97316,#ea580c);
+/* AVATAR STYLE */
+.avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.big-avatar{
+    width:110px;
+    height:110px;
+    border-radius:30px;
+    background: linear-gradient(135deg,#2563eb,#4f46e5);
+    color:white;
     display:flex;
     align-items:center;
     justify-content:center;
-    color:white;
-    font-size:28px;
+    font-size:44px;
     font-weight:800;
+    box-shadow: 0 15px 35px rgba(37,99,235,0.35);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.big-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: 0.2s;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.big-avatar:hover .avatar-overlay {
+    opacity: 1;
 }
 
 .profile-info h2{
-    font-size:22px;
+    font-size:32px;
     font-weight:800;
     color:#111827;
+    letter-spacing:-1px;
 }
 
 .profile-info p{
+    margin-top:6px;
     color:#6b7280;
-    margin-top:4px;
+    font-size:15px;
 }
 
-.badge{
-    display:inline-block;
-    margin-top:8px;
+.online{
+    margin-top:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
     background:#dcfce7;
     color:#166534;
-    padding:6px 12px;
+    padding:9px 15px;
     border-radius:999px;
-    font-size:12px;
+    font-size:13px;
     font-weight:700;
+    box-shadow:0 4px 10px rgba(22,101,52,0.08);
 }
 
-.form-group{
+.online::before{
+    content:'';
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#22c55e;
+}
+
+.alert-success,
+.alert-error{
     margin-bottom:20px;
-}
-
-.form-group label{
-    display:block;
-    margin-bottom:8px;
-    font-size:14px;
-    font-weight:700;
-    color:#111827;
-}
-
-input{
-    width:100%;
-    padding:14px 16px;
-    border-radius:14px;
-    border:1px solid #d1d5db;
-    background:#f9fafb;
-    font-size:14px;
-}
-
-input:focus{
-    outline:none;
-    border-color:#f97316;
-    background:white;
-    box-shadow:0 0 0 4px rgba(249,115,22,0.1);
-}
-
-.button-group{
-    display:flex;
-    gap:14px;
-    margin-top:25px;
-}
-
-.btn{
-    flex:1;
-    padding:14px;
-    border-radius:14px;
-    text-align:center;
-    text-decoration:none;
-    font-size:14px;
-    font-weight:700;
-    transition:.2s;
-    cursor:pointer;
-    border:none;
-}
-
-.btn-save{
-    background:linear-gradient(135deg,#f97316,#ea580c);
-    color:white;
-}
-
-.btn-save:hover{
-    transform:translateY(-2px);
-}
-
-.btn-back{
-    background:white;
-    border:1px solid #d1d5db;
-    color:#111827;
-}
-
-.btn-back:hover{
-    background:#111827;
-    color:white;
-}
-
-.alert{
-    padding:14px 18px;
-    border-radius:14px;
-    margin-bottom:20px;
+    padding:16px 18px;
+    border-radius:16px;
     font-size:14px;
     font-weight:600;
 }
@@ -171,129 +181,201 @@ input:focus{
 .alert-success{
     background:#dcfce7;
     color:#166534;
+    border:1px solid #bbf7d0;
 }
 
+.alert-error{
+    background:#fee2e2;
+    color:#991b1b;
+    border:1px solid #fecaca;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+}
+
+.form-group{
+    margin-bottom:22px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:10px;
+    font-size:14px;
+    font-weight:700;
+    color:#111827;
+}
+
+.form-group input{
+    width:100%;
+    padding:16px 18px;
+    border-radius:18px;
+    border:1px solid #dbe1ea;
+    background:rgba(255,255,255,0.8);
+    font-size:14px;
+    color:#111827;
+    transition:.25s;
+}
+
+.form-group input:focus{
+    outline:none;
+    border-color:#2563eb;
+    background:white;
+    box-shadow:
+        0 0 0 5px rgba(37,99,235,0.10),
+        0 10px 20px rgba(37,99,235,0.08);
+}
+
+.form-group input[readonly]{
+    background:#f3f4f6;
+    color:#6b7280;
+}
+
+.button-group{
+    display:flex;
+    gap:16px;
+    margin-top:14px;
+}
+
+.btn-save{
+    flex:1;
+    border:none;
+    border-radius:18px;
+    padding:16px 26px;
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    color:white;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    transition:.25s;
+    box-shadow: 0 14px 30px rgba(37,99,235,0.25);
+}
+
+.btn-save:hover{
+    transform:translateY(-2px);
+    box-shadow: 0 18px 38px rgba(37,99,235,0.35);
+}
+
+.btn-back{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    border-radius:18px;
+    padding:16px 26px;
+    background:white;
+    border:1px solid #dbe1ea;
+    color:#111827;
+    font-size:14px;
+    font-weight:700;
+    transition:.25s;
+}
+
+.btn-back:hover{
+    background:#111827;
+    color:white;
+    transform:translateY(-2px);
+}
+
+@media(max-width:768px){
+    .grid{ grid-template-columns:1fr; }
+    .profile-top{ flex-direction:column; text-align:center; }
+    .button-group{ flex-direction:column; }
+    .card{ padding:28px; }
+    .page-header h1{ font-size:30px; }
+}
 </style>
 </head>
+
 <body>
 
 <div class="container">
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
+    <div class="page-header">
+        <h1>Profil Dapur</h1>
+        <p>Kelola informasi akun dan data pribadi Anda</p>
+    </div>
 
     <div class="card">
 
-        <div class="header">
-            <h1>Profil Saya</h1>
-            <p>Kelola informasi akun dapur Anda</p>
+        @if(session('success'))
+        <div class="alert-success">
+            {{ session('success') }}
         </div>
+        @endif
 
-        <div class="profile-top">
-
-            <div class="avatar">
-                {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-            </div>
-
-            <div class="profile-info">
-
-                <h2>
-                    {{ Auth::user()->name }}
-                </h2>
-
-                <p>
-                    {{ Auth::user()->email }}
-                </p>
-
-                <div class="badge">
-                    {{ ucfirst(Auth::user()->role) }}
-                </div>
-
-            </div>
-
+        @if($errors->any())
+        <div class="alert-error">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
         </div>
+        @endif
 
         <form
             action="{{ route('dapur.account.update') }}"
             method="POST"
+            enctype="multipart/form-data"
         >
-
             @csrf
             @method('PUT')
 
-            <div class="form-group">
+            <div class="profile-top">
 
-                <label>Nama Lengkap</label>
+                <div class="avatar-container">
+                    <div class="big-avatar" onclick="document.getElementById('profileInput').click()">
+                        @if(auth()->user()->avatar)
+                            <img id="avatarPreview" src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Foto Profil">
+                        @else
+                            <div id="avatarInitials">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+                            <img id="avatarPreview" src="" alt="Foto Profil" style="display:none;">
+                        @endif
+                        <div class="avatar-overlay">Ubah Foto</div>
+                    </div>
+                    <input type="file"  id="profileInput" name="avatar" accept="image/jpeg,image/png,image/jpg,image/webp" style="display:none;">
+                </div>
 
-                <input
-                    type="text"
-                    name="name"
-                    value="{{ Auth::user()->name }}"
-                    required
-                >
+                <div class="profile-info">
+                    <h2>{{ auth()->user()->name }}</h2>
+                    <p>{{ auth()->user()->email }}</p>
+                    <div class="online">Online Sekarang</div>
+                </div>
 
             </div>
 
-            <div class="form-group">
+            <div class="grid">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" name="name" value="{{ auth()->user()->name }}">
+                </div>
 
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" name="username" value="{{ auth()->user()->username }}">
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label>Email</label>
-
-                <input
-                    type="email"
-                    name="email"
-                    value="{{ Auth::user()->email }}"
-                    required
-                >
-
+                <input type="email" name="email" value="{{ auth()->user()->email }}">
             </div>
 
             <div class="form-group">
-
-                <label>Username</label>
-
-                <input
-                    type="text"
-                    name="username"
-                    value="{{ Auth::user()->username }}"
-                >
-
-            </div>
-
-            <div class="form-group">
-
                 <label>No Telepon</label>
+                <input type="text" name="phone" value="{{ auth()->user()->phone }}">
+            </div>
 
-                <input
-                    type="text"
-                    name="phone"
-                    value="{{ Auth::user()->phone }}"
-                >
-
+            <div class="form-group">
+                <label>Role</label>
+                <input type="text" value="{{ ucfirst(auth()->user()->role) }}" readonly>
             </div>
 
             <div class="button-group">
-
-                <button
-                    type="submit"
-                    class="btn btn-save"
-                >
-
-                    Simpan Perubahan
-
-                </button>
-
-                <a
-                    href="/dapur/proses"
-                    class="btn btn-back"
-                >
-
-                    Kembali
-
-                </a>
-
+                <button type="submit" class="btn-save">Simpan Perubahan</button>
+                <a href="/dapur/proses" class="btn-back">Kembali</a>
             </div>
 
         </form>
@@ -301,6 +383,26 @@ input:focus{
     </div>
 
 </div>
+
+<script>
+    // Preview Gambar sebelum di-upload
+    const profileInput = document.getElementById('profileInput');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarInitials = document.getElementById('avatarInitials');
+
+    profileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                avatarPreview.src = event.target.result;
+                avatarPreview.style.display = 'block';
+                if(avatarInitials) avatarInitials.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
 
 </body>
 </html>

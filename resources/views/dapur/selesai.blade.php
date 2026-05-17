@@ -16,6 +16,7 @@
   --amber: #d97706; --amber-bg: #fffbeb; --amber-text: #92400e;
   --red: #dc2626; --red-bg: #fef2f2; --red-text: #991b1b;
   --orange: #ea580c; --orange-bg: #fff7ed; --orange-text: #9a3412;
+  --blue: #2563eb; --blue-bg: #eff4ff; --blue-text: #1e40af;
   --header-h: 64px; --nav-h: 48px; --total-top: 112px;
   --radius: 14px; --radius-lg: 18px;
   --shadow-sm: 0 1px 4px rgb(0 0 0/.05), 0 0 0 1px rgb(0 0 0/.04);
@@ -25,6 +26,7 @@
 }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
+/* ── HEADER ── */
 .header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 100; box-shadow: var(--shadow-header); }
 .logo { display: flex; align-items: center; gap: 10px; }
 .logo-mark { width: 36px; height: 36px; background: linear-gradient(135deg, #f97316, #ea580c); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgb(234 88 12/.35); }
@@ -32,38 +34,19 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .logo-text { font-size: 16px; font-weight: 800; letter-spacing: -0.5px; }
 .logo-text span { color: var(--orange); }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.header-clock{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 14px;
-  border-radius:12px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  font-family:'Inter',sans-serif;
-  box-shadow:var(--shadow-sm);
-}
+.header-clock { display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:12px; background:var(--surface); border:1px solid var(--border); font-family:'Inter',sans-serif; box-shadow:var(--shadow-sm); }
+.header-clock svg { width:16px; height:16px; stroke:var(--blue); stroke-width:2.3; fill:none; }
+#liveClock { font-size:13px; font-weight:700; color:var(--text-primary); letter-spacing:.5px; }
 
-.header-clock svg{
-  width:16px;
-  height:16px;
-  stroke:var(--blue);
-  stroke-width:2.3;
-  fill:none;
-}
-
-#liveClock{
-  font-size:13px;
-  font-weight:700;
-  color:var(--text-primary);
-  letter-spacing:.5px;
-}
 /* ── PROFILE DROPDOWN ── */
 .profile-wrap { position: relative; }
 .user-btn { display: flex; align-items: center; gap: 10px; padding: 5px 12px 5px 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); cursor: pointer; transition: all 0.18s; user-select: none; }
 .user-btn:hover { background: var(--surface-2); border-color: var(--border-strong); box-shadow: var(--shadow-sm); }
 .user-btn.open { border-color: var(--orange); background: var(--orange-bg); box-shadow: 0 0 0 3px rgba(234,88,12,.1); }
-.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #fb923c, #ea580c); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.avatar { width: 28px; height: 28px; background: linear-gradient(135deg, #fb923c, #ea580c); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #fb923c, #ea580c); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(234 88 12/.3); overflow: hidden; }
+.dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
 .user-info { display: flex; flex-direction: column; }
 .user-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
 .user-role { font-size: 11px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
@@ -72,7 +55,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 16px 48px rgb(0 0 0/.14), 0 0 0 1px rgb(0 0 0/.04); overflow: hidden; opacity: 0; transform: translateY(-8px) scale(.97); pointer-events: none; transition: opacity .18s, transform .18s; z-index: 200; }
 .dropdown.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 .dropdown-header { padding: 16px; background: linear-gradient(135deg, var(--orange-bg), #fef3c7); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
-.dropdown-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #fb923c, #ea580c); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 800; flex-shrink: 0; box-shadow: 0 2px 8px rgb(234 88 12/.3); }
 .dropdown-name { font-size: 13.5px; font-weight: 800; color: var(--text-primary); }
 .dropdown-role { font-size: 11.5px; color: var(--text-secondary); font-family: 'Inter', sans-serif; margin-top: 2px; }
 .dropdown-body { padding: 8px; }
@@ -87,6 +69,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown-item.danger .item-icon { background: var(--red-bg); }
 .dropdown-item.danger:hover .item-icon { background: #fecaca; }
 
+/* ── TOPNAV ── */
 .topnav { position: fixed; top: var(--header-h); left: 0; right: 0; height: var(--nav-h); background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); display: flex; justify-content: center; z-index: 99; }
 .nav-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: stretch; padding: 0 8px; }
 .nav-link { display: flex; align-items: center; gap: 7px; padding: 0 18px; text-decoration: none; font-size: 13px; font-weight: 600; color: var(--text-secondary); transition: all 0.18s; white-space: nowrap; border-bottom: 2px solid transparent; margin-bottom: -1px; }
@@ -95,18 +78,42 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .nav-link.active { color: var(--orange); border-bottom-color: var(--orange); }
 .nav-badge { background: var(--red); color: white; font-size: 10px; font-weight: 700; border-radius: 8px; padding: 1px 6px; font-family: 'Inter', sans-serif; }
 
+/* ── MAIN ── */
 .main { margin-top: var(--total-top); padding: 36px 24px 72px; }
 .container { max-width: 1280px; margin: 0 auto; padding: 0 8px; }
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; gap: 16px; }
 .page-title { font-size: 23px; font-weight: 800; letter-spacing: -0.5px; }
 .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-family: 'Inter', sans-serif; }
 
+/* ── STATS ROW ── */
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
-.stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+.stat-mini { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; transition: box-shadow .2s; }
+.stat-mini:hover { box-shadow: var(--shadow-md); }
 .stat-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; background: var(--green-bg); border: 1px solid #a7f3d0; }
 .stat-val { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
 .stat-lbl { font-size: 11.5px; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
+/* ── INFO BANNER (hanya saat ada data) ── */
+.info-banner { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.info-card { flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 12px; transition: box-shadow .2s, transform .2s; }
+.info-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.info-card-icon { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.info-card-icon.green { background: var(--green-bg); }
+.info-card-icon.blue { background: var(--blue-bg); }
+.info-card-icon.amber { background: var(--amber-bg); }
+.info-card-icon.purple { background: #f5f3ff; }
+.info-card-val { font-size: 20px; font-weight: 800; color: var(--text-primary); line-height: 1.1; font-variant-numeric: tabular-nums; font-family: 'Inter', sans-serif; }
+.info-card-lbl { font-size: 11.5px; color: var(--text-muted); font-family: 'Inter', sans-serif; margin-top: 2px; }
+
+/* Badge performa hari ini */
+.perf-banner { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 12px; margin-bottom: 20px; font-size: 13px; font-weight: 700; }
+.perf-banner.excellent { background: var(--green-bg); border: 1px solid #a7f3d0; color: var(--green-text); }
+.perf-banner.good { background: var(--blue-bg); border: 1px solid #bfdbfe; color: var(--blue-text); }
+.perf-banner.slow { background: var(--amber-bg); border: 1px solid #fde68a; color: var(--amber-text); }
+.perf-banner-icon { font-size: 20px; flex-shrink: 0; }
+.perf-banner-sub { font-size: 12px; font-weight: 500; opacity: .8; margin-top: 1px; font-family: 'Inter', sans-serif; }
+
+/* ── TABLE ── */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 thead { background: var(--surface-2); }
@@ -116,14 +123,40 @@ td.strong { font-weight: 600; color: var(--text-primary); }
 tr:hover td { background: var(--surface-2); }
 .pill { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Inter', sans-serif; }
 .pill-green { background: var(--green-bg); color: var(--green-text); border: 1px solid #a7f3d0; }
+.pill-amber { background: var(--amber-bg); color: var(--amber-text); border: 1px solid #fde68a; }
 .item-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .item-chip { padding: 3px 9px; border-radius: 6px; font-size: 11.5px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary); font-family: 'Inter', sans-serif; }
-.empty-state { text-align: center; padding: 80px 20px; }
-.empty-icon { font-size: 56px; margin-bottom: 16px; }
-.empty-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
-.empty-sub { font-size: 13px; color: var(--text-muted); font-family: 'Inter', sans-serif; }
 
-@media (max-width: 768px) { .stats-row { grid-template-columns: 1fr; } }
+/* Durasi cepat/lambat */
+.dur-fast { color: var(--green); font-weight: 700; }
+.dur-slow { color: var(--amber); font-weight: 700; }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 60px 20px 80px; }
+.empty-icon-wrap { position: relative; display: inline-block; margin-bottom: 24px; }
+.empty-icon { font-size: 80px; display: block; animation: float 3.5s ease-in-out infinite; line-height: 1; }
+.empty-glow { width: 140px; height: 140px; background: radial-gradient(circle, rgba(5,150,105,.12) 0%, transparent 70%); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: pulse-glow 3.5s ease-in-out infinite; pointer-events: none; }
+@keyframes float { 0%,100%{ transform:translateY(0) rotate(-2deg); } 50%{ transform:translateY(-14px) rotate(2deg); } }
+@keyframes pulse-glow { 0%,100%{ opacity:.4; transform:translate(-50%,-50%) scale(1); } 50%{ opacity:1; transform:translate(-50%,-50%) scale(1.2); } }
+.empty-title { font-size: 22px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; margin-bottom: 8px; }
+.empty-sub { font-size: 14px; color: var(--text-muted); font-family: 'Inter', sans-serif; margin-bottom: 36px; }
+.empty-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; max-width: 680px; margin: 0 auto 32px; text-align: left; }
+.empty-tip { display: flex; align-items: flex-start; gap: 14px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s; }
+.empty-tip:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+.tip-icon { font-size: 24px; flex-shrink: 0; margin-top: 1px; }
+.tip-body { flex: 1; }
+.tip-title { font-size: 13px; font-weight: 800; color: var(--text-primary); margin-bottom: 3px; }
+.tip-desc { font-size: 12px; color: var(--text-secondary); font-family: 'Inter', sans-serif; line-height: 1.5; }
+.empty-status { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--amber-bg); border: 1px solid #fde68a; border-radius: 50px; font-size: 13px; font-weight: 700; color: var(--amber-text); }
+.empty-status-dot { width: 8px; height: 8px; background: var(--amber); border-radius: 50%; animation: blink 1.5s ease-in-out infinite; }
+@keyframes blink { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:.4; transform:scale(.75); } }
+
+/* ── ALERT ── */
+.alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+.alert-success { background: var(--green-bg); color: var(--green-text); border: 1px solid #a7f3d0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) { .stats-row { grid-template-columns: 1fr; } .info-banner { gap: 8px; } }
 @media (max-width: 640px) { .main { padding: 24px 16px 48px; } .nav-link span { display: none; } .user-role, .user-info { display: none; } }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
@@ -131,6 +164,7 @@ tr:hover td { background: var(--surface-2); }
 </head>
 <body>
 
+<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header class="header">
   <div class="logo">
     <div class="logo-mark">
@@ -140,207 +174,72 @@ tr:hover td { background: var(--surface-2); }
   </div>
 
   <div class="header-right">
-<div class="header-clock">
-  <svg viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="10"/>
-    <polyline points="12 6 12 12 16 14"/>
-  </svg>
-
-  <span id="liveClock">00:00:00</span>
-</div>
+    <div class="header-clock">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span id="liveClock">00:00:00</span>
+    </div>
 
     <!-- PROFILE DROPDOWN -->
-<div class="profile-wrap">
-
-  <div
-    class="user-btn"
-    id="profileBtn"
-    onclick="toggleDropdown()"
-  >
-
-    <!-- AVATAR -->
-
-    <div class="avatar">
-
-      {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-
-    </div>
-
-    <!-- USER INFO -->
-
-    <div class="user-info">
-
-      <div class="user-name">
-
-        {{ Auth::user()->name }}
-
+    <div class="profile-wrap">
+      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
+        <div class="avatar">
+          @if(Auth::user()->avatar)
+            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+          @else
+            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+          @endif
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ Auth::user()->name }}</div>
+          <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
 
-      <div class="user-role">
-
-        {{ ucfirst(Auth::user()->role) }}
-
-      </div>
-
-    </div>
-
-    <!-- CHEVRON -->
-
-    <svg class="chevron" viewBox="0 0 24 24">
-
-      <polyline points="6 9 12 15 18 9"/>
-
-    </svg>
-
-  </div>
-
-  <!-- DROPDOWN -->
-
-  <div
-    class="dropdown"
-    id="profileDropdown"
-  >
-
-    <div class="dropdown-header">
-
-      <div class="dropdown-avatar">
-
-        {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-
-      </div>
-
-      <div>
-
-        <div class="dropdown-name">
-
-          {{ Auth::user()->name }}
-
-        </div>
-
-        <div class="dropdown-role">
-
-          {{ ucfirst(Auth::user()->role) }} · Online
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div class="dropdown-body">
-
-      <!-- PROFIL -->
-
-      <a
-        href="/dapur/account/profil"
-        class="dropdown-item"
-      >
-
-        <div class="item-icon">
-
-          <svg viewBox="0 0 24 24">
-
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-
-            <circle cx="12" cy="7" r="4"/>
-
-          </svg>
-
-        </div>
-
-        Profil Saya
-
-      </a>
-
-      <!-- GANTI PASSWORD -->
-
-      <a
-        href="/dapur/account/ganti-sandi"
-        class="dropdown-item"
-      >
-
-        <div class="item-icon">
-
-          <svg viewBox="0 0 24 24">
-
-            <rect
-              x="3"
-              y="11"
-              width="18"
-              height="11"
-              rx="2"
-              ry="2"
-            />
-
-            <path
-              d="M7 11V7a5 5 0 0 1 10 0v4"
-            />
-
-          </svg>
-
-        </div>
-
-        Ganti Password
-
-      </a>
-
-      <div class="dropdown-divider"></div>
-
-      <!-- LOGOUT -->
-
-      <form
-        method="POST"
-        action="{{ route('logout') }}"
-      >
-
-        @csrf
-
-        <button
-          type="submit"
-          class="dropdown-item danger"
-        >
-
-          <div class="item-icon">
-
-            <svg viewBox="0 0 24 24">
-
-              <path
-                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-              />
-
-              <polyline
-                points="16 17 21 12 16 7"
-              />
-
-              <line
-                x1="21"
-                y1="12"
-                x2="9"
-                y2="12"
-              />
-
-            </svg>
-
+      <div class="dropdown" id="profileDropdown">
+        <div class="dropdown-header">
+          <div class="dropdown-avatar">
+            @if(Auth::user()->avatar)
+              <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
+            @else
+              {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+            @endif
           </div>
-
-          Logout
-
-        </button>
-
-      </form>
-
+          <div>
+            <div class="dropdown-name">{{ Auth::user()->name }}</div>
+            <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
+          </div>
+        </div>
+        <div class="dropdown-body">
+          <a href="/dapur/account/profil" class="dropdown-item">
+            <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            Profil Saya
+          </a>
+          <a href="/dapur/account/ganti-sandi" class="dropdown-item">
+            <div class="item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            Ganti Password
+          </a>
+          <div class="dropdown-divider"></div>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="dropdown-item danger">
+              <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+              Logout
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
-
-  </div>
-
-</div>
-<!-- END PROFILE DROPDOWN -->
+    <!-- END PROFILE DROPDOWN -->
   </div>
 </header>
 
+<!-- ═══════════════════════════════ TOPNAV ═══════════════════════════════ -->
 <nav class="topnav">
   <div class="nav-container">
-
     <a href="/dapur/proses" class="nav-link {{ request()->is('dapur/proses') ? 'active' : '' }}">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Sedang Diproses</span>
@@ -355,8 +254,10 @@ tr:hover td { background: var(--surface-2); }
   </div>
 </nav>
 
+<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
 <main class="main">
   <div class="container">
+
     <div class="page-header">
       <div>
         <div class="page-title">Pesanan Selesai</div>
@@ -364,13 +265,26 @@ tr:hover td { background: var(--surface-2); }
       </div>
     </div>
 
+    @if(session('success'))
+      <div class="alert alert-success">✅ {{ session('success') }}</div>
+    @endif
+
     @php
       $totalItem = $orders->sum(fn($o) => $o->items->sum('qty'));
       $avgMenit  = $orders->count() > 0
         ? round($orders->avg(fn($o) => $o->updated_at->diffInMinutes($o->created_at)))
         : 0;
+
+      // Pesanan tercepat & terlambat
+      $minMenit = $orders->count() > 0
+        ? $orders->min(fn($o) => $o->updated_at->diffInMinutes($o->created_at))
+        : 0;
+      $maxMenit = $orders->count() > 0
+        ? $orders->max(fn($o) => $o->updated_at->diffInMinutes($o->created_at))
+        : 0;
     @endphp
 
+    {{-- ── STATS ROW (selalu tampil) ── --}}
     <div class="stats-row">
       <div class="stat-mini">
         <div class="stat-icon">✅</div>
@@ -396,69 +310,195 @@ tr:hover td { background: var(--surface-2); }
     </div>
 
     @if($orders->count() > 0)
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#Order</th>
-            <th>Selesai</th>
-            <th>Meja</th>
-            <th>Item Dipesan</th>
-            <th>Durasi</th>
-            <th>Catatan</th>
-            <th style="text-align:center;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach($orders as $order)
-          <tr>
-            <td class="strong">{{ $order->queue_number }}</td>
-            <td>{{ $order->updated_at->format('H:i') }}</td>
-            <td class="strong">Meja {{ $order->table_number ?? '-' }}</td>
-            <td>
-              <div class="item-list">
-                @foreach($order->items as $item)
-                  <span class="item-chip">{{ $item->qty }}× {{ $item->menu->name ?? 'Menu #'.$item->menu_id }}</span>
-                @endforeach
-              </div>
-            </td>
-            <td>{{ $order->updated_at->diffInMinutes($order->created_at) }} mnt</td>
-            <td>{{ $order->note ?? '-' }}</td>
-            <td style="text-align:center;"><span class="pill pill-green">Selesai</span></td>
-          </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
+
+      {{-- ── INFO BANNER EXTRA ── --}}
+      <div class="info-banner">
+
+        <div class="info-card">
+          <div class="info-card-icon green">🏆</div>
+          <div>
+            <div class="info-card-val">{{ $minMenit }} mnt</div>
+            <div class="info-card-lbl">Pengerjaan tercepat</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon amber">🐢</div>
+          <div>
+            <div class="info-card-val">{{ $maxMenit }} mnt</div>
+            <div class="info-card-lbl">Pengerjaan terlama</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon blue">📦</div>
+          <div>
+            @php $rataItem = $orders->count() > 0 ? round($totalItem / $orders->count(), 1) : 0; @endphp
+            <div class="info-card-val">{{ $rataItem }}</div>
+            <div class="info-card-lbl">Rata-rata item/order</div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-icon purple">⏰</div>
+          <div>
+            @php
+              $tepatWaktu = $orders->filter(fn($o) => $o->updated_at->diffInMinutes($o->created_at) <= 10)->count();
+              $pctTepat   = $orders->count() > 0 ? round($tepatWaktu / $orders->count() * 100) : 0;
+            @endphp
+            <div class="info-card-val">{{ $pctTepat }}%</div>
+            <div class="info-card-lbl">Tepat waktu (≤10 mnt)</div>
+          </div>
+        </div>
+
+      </div>
+
+      {{-- ── BADGE PERFORMA ── --}}
+      @php
+        $totalOrder = $orders->count();
+        if ($pctTepat >= 90) {
+          $perfClass = 'excellent';
+          $perfIcon  = '🔥';
+          $perfMsg   = 'Performa Luar Biasa! Hampir semua pesanan selesai tepat waktu.';
+          $perfSub   = $tepatWaktu . ' dari ' . $totalOrder . ' pesanan diselesaikan dalam 10 menit';
+        } elseif ($pctTepat >= 70) {
+          $perfClass = 'good';
+          $perfIcon  = '👍';
+          $perfMsg   = 'Performa Baik! Terus pertahankan kecepatan ini.';
+          $perfSub   = $tepatWaktu . ' dari ' . $totalOrder . ' pesanan diselesaikan tepat waktu';
+        } else {
+          $perfClass = 'slow';
+          $perfIcon  = '⚠️';
+          $perfMsg   = 'Perlu ditingkatkan. Banyak pesanan melebihi target 10 menit.';
+          $perfSub   = 'Hanya ' . $tepatWaktu . ' dari ' . $totalOrder . ' pesanan yang tepat waktu';
+        }
+      @endphp
+      <div class="perf-banner {{ $perfClass }}">
+        <span class="perf-banner-icon">{{ $perfIcon }}</span>
+        <div>
+          <div>{{ $perfMsg }}</div>
+          <div class="perf-banner-sub">{{ $perfSub }}</div>
+        </div>
+      </div>
+
+      {{-- ── TABLE ── --}}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#Order</th>
+              <th>Selesai</th>
+              <th>Meja</th>
+              <th>Item Dipesan</th>
+              <th>Durasi</th>
+              <th>Catatan</th>
+              <th style="text-align:center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach($orders as $order)
+            @php $dur = $order->updated_at->diffInMinutes($order->created_at); @endphp
+            <tr>
+              <td class="strong">{{ $order->queue_number }}</td>
+              <td>{{ $order->updated_at->format('H:i') }}</td>
+              <td class="strong">Meja {{ $order->table_number ?? '-' }}</td>
+              <td>
+                <div class="item-list">
+                  @foreach($order->items as $item)
+                    <span class="item-chip">{{ $item->qty }}× {{ $item->menu->name ?? 'Menu #'.$item->menu_id }}</span>
+                  @endforeach
+                </div>
+              </td>
+              <td>
+                @if($dur <= 10)
+                  <span class="dur-fast">{{ $dur }} mnt ⚡</span>
+                @elseif($dur <= 15)
+                  <span>{{ $dur }} mnt</span>
+                @else
+                  <span class="dur-slow">{{ $dur }} mnt 🐢</span>
+                @endif
+              </td>
+              <td>{{ $order->note ?? '-' }}</td>
+              <td style="text-align:center;"><span class="pill pill-green">Selesai</span></td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+      </div>
 
     @else
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">Belum ada pesanan selesai</div>
-      <div class="empty-sub">Pesanan yang sudah ditandai selesai akan muncul di sini.</div>
-    </div>
+
+      {{-- ════════════════════════════════════
+           EMPTY STATE — BELUM ADA SELESAI
+      ════════════════════════════════════ --}}
+      <div class="empty-state">
+
+        <div class="empty-icon-wrap">
+          <div class="empty-glow"></div>
+          <span class="empty-icon">📋</span>
+        </div>
+
+        <div class="empty-title">Belum Ada Pesanan Selesai</div>
+        <div class="empty-sub">Pesanan yang sudah ditandai selesai oleh dapur akan muncul di sini 👨‍🍳</div>
+
+        <div class="empty-tips">
+
+          <div class="empty-tip">
+            <span class="tip-icon">👨‍🍳</span>
+            <div class="tip-body">
+              <div class="tip-title">Tandai selesai di tab Diproses</div>
+              <div class="tip-desc">Klik tombol "Tandai Selesai" pada pesanan yang sudah siap dihidangkan</div>
+            </div>
+          </div>
+
+          <div class="empty-tip">
+            <span class="tip-icon">📊</span>
+            <div class="tip-body">
+              <div class="tip-title">Rekap performa harian</div>
+              <div class="tip-desc">Halaman ini menampilkan statistik kecepatan dan akurasi pengerjaan hari ini</div>
+            </div>
+          </div>
+
+          <div class="empty-tip">
+            <span class="tip-icon">🏆</span>
+            <div class="tip-body">
+              <div class="tip-title">Target: selesai dalam 10 menit</div>
+              <div class="tip-desc">Pesanan ≤10 menit ditandai ⚡, lebih dari 15 menit ditandai 🐢 di tabel</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="empty-status">
+          <span class="empty-status-dot"></span>
+          Menunggu pesanan pertama hari ini
+        </div>
+
+      </div>
+
     @endif
+
   </div>
 </main>
 
 <script>
-function updateClock(){
 
-    const now = new Date();
-
-    const h = String(now.getHours()).padStart(2,'0');
-    const m = String(now.getMinutes()).padStart(2,'0');
-    const s = String(now.getSeconds()).padStart(2,'0');
-
-    document.getElementById('liveClock')
-        .textContent = `${h}:${m}:${s}`;
-
+// ═══════════════════════════════
+// LIVE CLOCK
+// ═══════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
 }
-
-setInterval(updateClock,1000);
-
+setInterval(updateClock, 1000);
 updateClock();
 
+// ═══════════════════════════════
+// DROPDOWN PROFILE
+// ═══════════════════════════════
 function toggleDropdown() {
   const btn      = document.getElementById('profileBtn');
   const dropdown = document.getElementById('profileDropdown');
@@ -466,6 +506,7 @@ function toggleDropdown() {
   dropdown.classList.toggle('show', !isOpen);
   btn.classList.toggle('open', !isOpen);
 }
+
 document.addEventListener('click', function(e) {
   const wrap = document.querySelector('.profile-wrap');
   if (wrap && !wrap.contains(e.target)) {
@@ -473,12 +514,14 @@ document.addEventListener('click', function(e) {
     document.getElementById('profileBtn').classList.remove('open');
   }
 });
+
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
     document.getElementById('profileDropdown').classList.remove('show');
     document.getElementById('profileBtn').classList.remove('open');
   }
 });
+
 </script>
 </body>
 </html>

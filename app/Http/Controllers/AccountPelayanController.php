@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AccountPelayanController extends Controller
 {
@@ -20,45 +21,51 @@ class AccountPelayanController extends Controller
     public function updateProfil(Request $request)
     {
         $request->validate([
-
-            'name' => 'required|string|max:100',
-
-            'email' =>
-                'required|email|unique:users,email,' .
-                Auth::id(),
-
+            'name'   => 'required|string|max:100',
+            'email'  => 'required|email|unique:users,email,' . Auth::id(),
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // UPDATE DATA
-
-        $user->name = $request->name;
-
+        // ── UPDATE DATA ───────────────────────────
+        $user->name  = $request->name;
         $user->email = $request->email;
 
         // USERNAME
-
         if ($request->filled('username')) {
-
             $user->username = $request->username;
-
         }
 
         // PHONE
-
         if ($request->filled('phone')) {
-
             $user->phone = $request->phone;
-
         }
 
-        // SAVE
+        // ── UPLOAD AVATAR ─────────────────────────
+        if ($request->hasFile('avatar')) {
 
+            // Hapus avatar lama jika ada
+            if (
+                $user->avatar &&
+                Storage::disk('public')->exists($user->avatar)
+            ) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+
+            // Simpan avatar baru
+            $path = $request
+                ->file('avatar')
+                ->store('avatars', 'public');
+
+            $user->avatar = $path;
+        }
+
+        // ── SAVE ──────────────────────────────────
         $user->save();
 
         return redirect('/pelayan/antar')
-
             ->with(
                 'success',
                 'Profil berhasil diperbarui!'
@@ -88,12 +95,14 @@ class AccountPelayanController extends Controller
 
         ]);
 
-        // CEK PASSWORD LAMA
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
+        // ── CEK PASSWORD LAMA ─────────────────────
         if (
             !Hash::check(
                 $request->current_password,
-                Auth::user()->password
+                $user->password
             )
         ) {
 
@@ -103,21 +112,16 @@ class AccountPelayanController extends Controller
                     'Password lama yang kamu masukkan salah!'
 
             ]);
-
         }
 
-        // UPDATE PASSWORD
+        // ── UPDATE PASSWORD ───────────────────────
+        $user->password = Hash::make(
+            $request->new_password
+        );
 
-        Auth::user()->update([
-
-            'password' => Hash::make(
-                $request->new_password
-            )
-
-        ]);
+        $user->save();
 
         return redirect('/pelayan/antar')
-
             ->with(
                 'success',
                 'Password berhasil diubah!'
