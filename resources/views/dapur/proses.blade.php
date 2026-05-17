@@ -389,8 +389,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="order-items">
             @foreach($order->items as $item)
             <div class="item-row">
-              <div class="item-name">{{ $item->menu->nama ?? 'Menu' }}</div>
-              <div class="item-qty">{{ $item->qty }}x</div>
+              <div class="item-left">
+                <div class="item-qty">{{ $item->qty }}x</div>
+                <div>
+                  <div class="item-name">{{ $item->menu->name ?? ($item->menu->nama ?? 'Menu #'.$item->menu_id) }}</div>
+                </div>
+              </div>
             </div>
             @endforeach
           </div>
