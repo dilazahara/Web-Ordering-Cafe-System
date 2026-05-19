@@ -81,11 +81,43 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 /* ── MAIN ── */
 .main { margin-top: var(--total-top); padding: 36px 24px 72px; }
 .container { max-width: 1280px; margin: 0 auto; padding: 0 8px; }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; gap: 16px; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; }
 .page-title { font-size: 23px; font-weight: 800; letter-spacing: -0.5px; }
 .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-family: 'Inter', sans-serif; }
 .alert { padding: 14px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
 .alert-success { background: var(--green-bg); color: var(--green-text); border: 1px solid #a7f3d0; }
+
+/* ── LIVE UPDATE BADGE ── */
+.live-update-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--green);
+}
+.live-dot {
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+/* ── SWIPE HINT BANNER ── */
+.swipe-hint {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--green-bg);
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--green-text);
+  font-weight: 600;
+}
+.swipe-hint-icon { font-size: 22px; flex-shrink: 0; }
 
 /* ── STATS BANNER ── */
 .stats-banner { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
@@ -112,9 +144,63 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 /* ── ORDER GRID ── */
 .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
-.order-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); transition: box-shadow 0.22s, transform 0.22s; position: relative; }
-.order-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3b82f6, #6366f1); }
-.order-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+/* ── SWIPE WRAPPER ── */
+.swipe-outer {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: max-height .4s ease, opacity .3s ease, margin .4s ease;
+}
+
+/* Green confirmation layer */
+.swipe-confirm {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 32px;
+  gap: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.swipe-confirm-icon { font-size: 32px; }
+
+/* Progress bar at bottom */
+.swipe-bar {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 4px;
+  width: 0%;
+  background: #94a3b8;
+  z-index: 10;
+  border-radius: 0;
+  pointer-events: none;
+  transition: background .2s;
+}
+
+.order-card { 
+  position: relative;
+  z-index: 1;
+  background: var(--surface); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius-lg); 
+  overflow: hidden; 
+  box-shadow: var(--shadow); 
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y;
+  will-change: transform;
+}
+.order-card:active { cursor: grabbing; }
+.order-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #3b82f6, #6366f1); z-index: 5; }
 .order-card-top { padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .oc-left { display: flex; align-items: center; gap: 14px; }
 .table-badge { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; background: var(--blue-bg); border: 1px solid #bfdbfe; }
@@ -135,16 +221,33 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .item-qty { min-width:40px; height:40px; border-radius:12px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-weight:700; }
 .item-name { font-size:16px; font-weight:700; color:#111827; }
 .item-price { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
-.item-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #bfdbfe; background: white; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.18s; margin-top: 2px; }
-.item-check.checked { background: var(--green); border-color: var(--green); }
-.item-check.checked::after { content: '✓'; color: white; font-size: 12px; font-weight: 800; }
-.order-footer { padding: 14px 20px; border-top: 1px solid var(--border); }
-.act-btn { width: 100%; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: 'Plus Jakarta Sans', sans-serif; display: flex; align-items: center; justify-content: center; gap: 7px; transition: all 0.18s; }
-.act-btn svg { width: 15px; height: 15px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.ab-success { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 3px 10px rgb(5 150 105/.25); }
-.ab-success:hover { box-shadow: 0 6px 16px rgb(5 150 105/.35); filter: brightness(1.07); transform: translateY(-1px); }
 .pill { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; font-family: 'Inter', sans-serif; }
 .pill-blue { background: var(--blue-bg); color: var(--blue-text); border: 1px solid #bfdbfe; }
+.pill-green { background: var(--green-bg); color: var(--green-text); border: 1px solid #a7f3d0; }
+.pill-amber { background: var(--amber-bg); color: var(--amber-text); border: 1px solid #fde68a; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #0f1623;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform .3s;
+  z-index: 999;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast-icon { font-size: 20px; }
 
 /* ── EMPTY STATE ── */
 .empty-state { text-align: center; padding: 60px 20px 80px; }
@@ -178,6 +281,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   .stats-banner { gap: 8px; }
   .stat-card { min-width: 140px; }
   .empty-tips { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; align-items: flex-start; }
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -186,7 +290,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 </head>
 <body>
 
-<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
 <header class="header">
   <div class="logo">
     <div class="logo-mark">
@@ -196,8 +299,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 
   <div class="header-right">
-    <x-notification-bell />
-
     <div class="header-clock">
       <svg viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="10"/>
@@ -206,7 +307,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       <span id="liveClock">00:00:00</span>
     </div>
 
-    <!-- PROFILE DROPDOWN -->
     <div class="profile-wrap">
       <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
         <div class="avatar">
@@ -257,11 +357,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         </div>
       </div>
     </div>
-    <!-- END PROFILE DROPDOWN -->
-  </div>
+    </div>
 </header>
 
-<!-- ═══════════════════════════════ TOPNAV ═══════════════════════════════ -->
 <nav class="topnav">
   <div class="nav-container">
     <a href="/dapur/proses" class="nav-link {{ request()->is('dapur/proses') ? 'active' : '' }}">
@@ -278,7 +376,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 </nav>
 
-<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
 <main class="main">
   <div class="container">
 
@@ -293,6 +390,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           @endif
         </div>
       </div>
+      <div class="live-update-badge">
+        <span class="live-dot"></span> Live update tiap 5 detik
+      </div>
     </div>
 
     @if(session('success'))
@@ -300,6 +400,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     @endif
 
     @if($orders->count() > 0)
+
+      {{-- ── SWIPE HINT ── --}}
+      <div class="swipe-hint">
+        <span class="swipe-hint-icon">👉</span>
+        <span>Geser kartu ke kanan untuk tandai pesanan sudah selesai</span>
+      </div>
 
       {{-- ── STATS BANNER ── --}}
       <div class="stats-banner">
@@ -350,72 +456,73 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       <div class="order-grid">
 
         @foreach($orders as $order)
-        <div class="order-card">
-
-          {{-- HEADER CARD --}}
-          <div class="order-card-top">
-            <div class="oc-left">
-              <div class="table-badge">👨‍🍳</div>
-              <div class="oc-info">
-                <h3>🍽️ Meja {{ $order->table_number ?? '-' }}</h3>
-                <p>
-                  {{ $order->queue_number }}
-                  &nbsp;·&nbsp;
-                  @if($order->payment_method === 'qris')
-                    <span class="pill pill-green">📱 QRIS (Auto)</span>
-                  @else
-                    <span class="pill pill-amber">💵 Cash</span>
-                  @endif
-                  &nbsp;·&nbsp;
-                  <span class="pill pill-blue">Diproses</span>
-                </p>
-              </div>
-            </div>
-            <div class="oc-time time" data-time="{{ $order->process_at ?? $order->created_at }}">00:00</div>
+        <div class="swipe-outer" data-order-id="{{ $order->id }}">
+          
+          {{-- GREEN CONFIRMATION LAYER --}}
+          <div class="swipe-confirm">
+            <span>Tada! Sudah Selesai!</span>
+            <span class="swipe-confirm-icon">✅</span>
           </div>
 
-          {{-- PROGRESS --}}
-          <div class="progress-wrap">
-            <div class="progress-top">
-              <span class="progress-label">⏱ Waktu proses</span>
-              <span class="progress-time time" data-time="{{ $order->process_at ?? $order->created_at }}">00:00</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" data-time="{{ $order->process_at ?? $order->created_at }}" style="width:0%"></div>
-            </div>
-          </div>
+          {{-- THE CARD --}}
+          <div class="order-card">
+            <div class="swipe-bar"></div>
 
-          {{-- ITEMS --}}
-          <div class="order-items">
-            @foreach($order->items as $item)
-            <div class="item-row">
-              <div class="item-left">
-                <div class="item-qty">{{ $item->qty }}x</div>
-                <div>
-                  <div class="item-name">{{ $item->menu->name ?? ($item->menu->nama ?? 'Menu #'.$item->menu_id) }}</div>
+            {{-- HEADER CARD --}}
+            <div class="order-card-top">
+              <div class="oc-left">
+                <div class="table-badge">👨‍🍳</div>
+                <div class="oc-info">
+                  <h3>🍽️ Meja {{ $order->table_number ?? '-' }}</h3>
+                  <p>
+                    {{ $order->queue_number }}
+                    &nbsp;·&nbsp;
+                    @if($order->payment_method === 'qris')
+                      <span class="pill pill-green">📱 QRIS (Auto)</span>
+                    @else
+                      <span class="pill pill-amber">💵 Cash</span>
+                    @endif
+                    &nbsp;·&nbsp;
+                    <span class="pill pill-blue">Diproses</span>
+                  </p>
                 </div>
               </div>
+              <div class="oc-time time" data-time="{{ $order->process_at ?? $order->created_at }}">00:00</div>
             </div>
-            @endforeach
-          </div>
 
-          {{-- NOTE --}}
-          @if($order->note)
-          <div style="margin: 0 20px 14px; padding: 10px 14px; background:var(--amber-bg); border:1px solid #fde68a; border-radius:10px; font-size:12.5px; color:var(--amber-text);">
-            📝 <strong>Catatan:</strong> {{ $order->note }}
-          </div>
-          @endif
+            {{-- PROGRESS --}}
+            <div class="progress-wrap">
+              <div class="progress-top">
+                <span class="progress-label">⏱ Waktu proses</span>
+                <span class="progress-time time" data-time="{{ $order->process_at ?? $order->created_at }}">00:00</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" data-time="{{ $order->process_at ?? $order->created_at }}" style="width:0%"></div>
+              </div>
+            </div>
 
-          {{-- ACTION --}}
-          <div class="order-footer">
-            <form action="{{ route('dapur.tandaiSelesai', $order->id) }}" method="POST">
-              @csrf
-              <button type="submit" class="act-btn ab-success">
-                ✅ Tandai Selesai
-              </button>
-            </form>
-          </div>
+            {{-- ITEMS --}}
+            <div class="order-items">
+              @foreach($order->items as $item)
+              <div class="item-row">
+                <div class="item-left">
+                  <div class="item-qty">{{ $item->qty }}x</div>
+                  <div>
+                    <div class="item-name">{{ $item->menu->name ?? ($item->menu->nama ?? 'Menu #'.$item->menu_id) }}</div>
+                  </div>
+                </div>
+              </div>
+              @endforeach
+            </div>
 
+            {{-- NOTE --}}
+            @if($order->note)
+            <div style="margin: 0 20px 14px; padding: 10px 14px; background:var(--amber-bg); border:1px solid #fde68a; border-radius:10px; font-size:12.5px; color:var(--amber-text);">
+              📝 <strong>Catatan:</strong> {{ $order->note }}
+            </div>
+            @endif
+
+          </div>
         </div>
         @endforeach
 
@@ -449,24 +556,16 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="empty-tip">
             <span class="tip-icon">⏱️</span>
             <div class="tip-body">
-              <div class="tip-title">Target waktu: 10 menit</div>
-              <div class="tip-desc">Timer berubah merah & alert muncul jika pesanan melewati batas waktu</div>
-            </div>
-          </div>
-
-          <div class="empty-tip">
-            <span class="tip-icon">🚨</span>
-            <div class="tip-body">
-              <div class="tip-title">Notifikasi pesanan menumpuk</div>
-              <div class="tip-desc">Banner merah muncul otomatis jika ada pesanan yang terlambat dikerjakan</div>
+              <div class="tip-title">Pantau waktu proses</div>
+              <div class="tip-desc">Timer otomatis mulai hitung mundur saat pesanan masuk ke dapur</div>
             </div>
           </div>
 
           <div class="empty-tip">
             <span class="tip-icon">✅</span>
             <div class="tip-body">
-              <div class="tip-title">Tandai selesai saat hidangan siap</div>
-              <div class="tip-desc">Pesanan akan pindah ke tab Selesai dan kasir mendapat notifikasi</div>
+              <div class="tip-title">Tandai selesai dengan mudah</div>
+              <div class="tip-desc">Geser kartu pesanan ke kanan untuk menandai sudah selesai dimasak</div>
             </div>
           </div>
 
@@ -474,7 +573,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
         <div class="empty-status">
           <span class="empty-status-dot"></span>
-          Dapur siap menerima pesanan
+          Siap menerima pesanan baru
         </div>
 
       </div>
@@ -484,17 +583,250 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 </main>
 
+{{-- TOAST NOTIFICATION --}}
+<div class="toast" id="toast">
+  <span class="toast-icon">🔔</span>
+  <span id="toastText"></span>
+</div>
+
 <script>
-
-// ═══════════════════════════════
-// TIMER ORDER
-// ═══════════════════════════════
-
+const CSRF = document.querySelector('meta[name="csrf-token"]').content;
 const TARGET = 600; // 10 menit dalam detik
+const SWIPE_THRESHOLD = 0.45; // 45% lebar card = confirm
+
+let notifCtx = null;
+let lastOrderIds = [];
+
+// ═══════════════════════════════
+// SOUND EFFECT
+// ═══════════════════════════════
+
+function playBeep(freq = 520) {
+  try {
+    if (!notifCtx) notifCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = notifCtx.createOscillator();
+    const g = notifCtx.createGain();
+    o.connect(g);
+    g.connect(notifCtx.destination);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.3, notifCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, notifCtx.currentTime + 0.45);
+    o.start();
+    o.stop(notifCtx.currentTime + 0.45);
+  } catch(e) {
+    console.log('Audio not supported:', e);
+  }
+}
+
+// ═══════════════════════════════
+// TOAST NOTIFICATION
+// ═══════════════════════════════
+
+function showToast(msg, icon = '🔔') {
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  const toastIcon = toast.querySelector('.toast-icon');
+  
+  toastIcon.textContent = icon;
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// ═══════════════════════════════
+// SWIPE LOGIC
+// ═══════════════════════════════
+
+function attachSwipe(outer) {
+  const card = outer.querySelector('.order-card');
+  const bar = outer.querySelector('.swipe-bar');
+  const confirm = outer.querySelector('.swipe-confirm');
+  const orderId = outer.dataset.orderId;
+
+  let startX = 0, curX = 0, dragging = false, cardW = 0;
+
+  const setTransform = pct => {
+    card.style.transform = `translateX(${pct * 100}%)`;
+  };
+
+  function onStart(x) {
+    if (outer.dataset.done) return;
+    startX = x;
+    curX = 0;
+    dragging = true;
+    cardW = card.offsetWidth;
+    card.style.transition = 'none';
+  }
+
+  function onMove(x) {
+    if (!dragging) return;
+    curX = Math.max(0, x - startX);
+    const pct = Math.min(curX / cardW, 1.0);
+    const filled = Math.min(pct / SWIPE_THRESHOLD, 1);
+
+    setTransform(pct);
+    bar.style.width = (filled * 100) + '%';
+    bar.style.background = filled >= 1 ? '#10b981' : '#94a3b8';
+    confirm.style.opacity = filled;
+  }
+
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    const pct = Math.min(curX / cardW, 1.0);
+
+    if (pct >= SWIPE_THRESHOLD) {
+      // ── CONFIRMED ──
+      outer.dataset.done = '1';
+      card.style.transition = 'transform .28s ease-in, opacity .28s';
+      card.style.opacity = '0';
+      setTransform(1.1);
+      
+      // Play success sound
+      playBeep(600);
+      showToast('Pesanan sudah selesai! ✓', '✅');
+
+      // Submit to server
+      submitSelesai(orderId)
+        .then(r => { 
+          if (!r.ok) throw new Error(); 
+        })
+        .catch(() => {
+          // Rollback on error
+          delete outer.dataset.done;
+          card.style.transition = 'transform .35s cubic-bezier(.25,.46,.45,.94), opacity .2s';
+          card.style.transform = '';
+          card.style.opacity = '1';
+          bar.style.width = '0%';
+          confirm.style.opacity = '0';
+          showToast('Gagal, coba lagi', '⚠️');
+        });
+
+      setTimeout(() => collapseCard(outer), 260);
+
+    } else {
+      // ── SNAP BACK ──
+      card.style.transition = 'transform .35s cubic-bezier(.25,.46,.45,.94)';
+      card.style.transform = '';
+      bar.style.width = '0%';
+      confirm.style.opacity = '0';
+    }
+  }
+
+  // Touch events
+  card.addEventListener('touchstart', e => onStart(e.touches[0].clientX), { passive: true });
+  card.addEventListener('touchmove', e => { e.preventDefault(); onMove(e.touches[0].clientX); }, { passive: false });
+  card.addEventListener('touchend', () => onEnd());
+  card.addEventListener('touchcancel', () => onEnd());
+
+  // Mouse events (desktop)
+  card.addEventListener('mousedown', e => { e.preventDefault(); onStart(e.clientX); });
+  window.addEventListener('mousemove', e => { if (dragging) onMove(e.clientX); });
+  window.addEventListener('mouseup', () => { if (dragging) onEnd(); });
+}
+
+// ═══════════════════════════════
+// SUBMIT TO SERVER
+// ═══════════════════════════════
+
+function submitSelesai(orderId) {
+  return fetch(`/dapur/selesai/${orderId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-CSRF-TOKEN': CSRF
+    },
+    body: `_token=${encodeURIComponent(CSRF)}`
+  });
+}
+
+// ═══════════════════════════════
+// COLLAPSE & REMOVE CARD
+// ═══════════════════════════════
+
+function collapseCard(outer) {
+  const h = outer.offsetHeight;
+  outer.style.overflow = 'hidden';
+  outer.style.maxHeight = h + 'px';
+  
+  requestAnimationFrame(() => {
+    outer.style.transition = 'max-height .38s ease, opacity .28s ease, margin .38s ease';
+    outer.style.maxHeight = '0';
+    outer.style.opacity = '0';
+    outer.style.margin = '0';
+  });
+  
+  setTimeout(() => {
+    outer.remove();
+    checkIfEmpty();
+  }, 420);
+}
+
+function checkIfEmpty() {
+  const grid = document.querySelector('.order-grid');
+  if (!grid.querySelector('.swipe-outer')) {
+    // Reload halaman jika semua card sudah hilang
+    setTimeout(() => window.location.reload(), 500);
+  }
+}
+
+// ═══════════════════════════════
+// POLLING - DETECT NEW ORDERS (MODIFIED FOR AUTO-UPDATE UI)
+// ═══════════════════════════════
+
+function pollNewOrders() {
+  fetch('/dapur/poll-orders')
+    .then(r => r.json())
+    .then(data => {
+      const currentIds = data.orders.map(o => o.id);
+      
+      // Check for new orders
+      const newOrders = currentIds.filter(id => !lastOrderIds.includes(id));
+      
+      if (newOrders.length > 0 && lastOrderIds.length > 0) {
+        // Ada orderan baru!
+        playBeep(700); // Higher pitch for new order
+        showToast(`${newOrders.length} pesanan baru masuk! 🔥`, '🍳');
+
+        // Update DOM tanpa full refresh menggunakan Fetch API secara background
+        fetch(window.location.href)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newContainer = doc.querySelector('.container');
+            const currentContainer = document.querySelector('.container');
+
+            if (newContainer && currentContainer) {
+              currentContainer.innerHTML = newContainer.innerHTML;
+              // Re-attach fungsi geser (swipe) pada semua card yang baru di-render
+              document.querySelectorAll('.swipe-outer').forEach(outer => {
+                attachSwipe(outer);
+              });
+            }
+          });
+      }
+      
+      lastOrderIds = currentIds;
+    })
+    .catch(err => console.log('Poll error:', err));
+}
+
+// Initial poll to set baseline
+pollNewOrders();
+
+// Poll setiap 5 detik untuk orderan baru
+setInterval(pollNewOrders, 5000);
+
+// ═══════════════════════════════
+// TIMERS UPDATE
+// ═══════════════════════════════
 
 function updateTimers() {
   document.querySelectorAll('[data-time]').forEach(el => {
-    const diff = Math.floor((Date.now() - new Date(el.dataset.time)) / 1000);
+    const created = new Date(el.dataset.time);
+    const diff = Math.floor((Date.now() - created) / 1000);
     const m = String(Math.floor(diff / 60)).padStart(2, '0');
     const s = String(diff % 60).padStart(2, '0');
 
@@ -545,7 +877,7 @@ function updateStats() {
 
   // Stat card: lewat 10 menit
   const statLateCard = document.getElementById('statLateCard');
-  const statLateNum  = document.getElementById('statLateNum');
+  const statLateNum = document.getElementById('statLateNum');
   if (statLateCard && statLateNum) {
     statLateNum.textContent = lateCount;
     if (lateCount > 0) {
@@ -558,9 +890,9 @@ function updateStats() {
   }
 
   // Urgent alert banner
-  const urgentAlert     = document.getElementById('urgentAlert');
+  const urgentAlert = document.getElementById('urgentAlert');
   const urgentAlertText = document.getElementById('urgentAlertText');
-  const urgentAlertCount= document.getElementById('urgentAlertCount');
+  const urgentAlertCount = document.getElementById('urgentAlertCount');
   if (urgentAlert) {
     if (lateCount > 0) {
       urgentAlert.classList.add('visible');
@@ -596,7 +928,7 @@ updateClock();
 // DROPDOWN PROFILE
 // ═══════════════════════════════
 
-const profileBtn      = document.getElementById('profileBtn');
+const profileBtn = document.getElementById('profileBtn');
 const profileDropdown = document.getElementById('profileDropdown');
 
 function toggleDropdown() {

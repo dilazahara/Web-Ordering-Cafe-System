@@ -185,7 +185,6 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
         <button class="menu-icon-btn" onclick="toggleSidebar()">
             <i data-lucide="menu" style="width:20px;height:20px;"></i>
         </button>
-        <span>Admin Panel</span>
     </div>
     <div class="topbar-avatar">A</div>
 </div>
@@ -247,9 +246,6 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             <h1>Edit Add-on</h1>
             <p>Perbarui data add-on yang sudah ada</p>
         </div>
-        <a href="/admin/addons" class="btn-back">
-            <i data-lucide="arrow-left" style="width:15px;height:15px;"></i> Kembali
-        </a>
     </div>
 
     @if($errors->any())
@@ -322,9 +318,6 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 
         <!-- ── FOOTER ── -->
         <div class="card-footer">
-            <button type="button" class="btn-delete" onclick="confirmDelete()">
-                <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Hapus Add-on
-            </button>
             <div class="footer-right">
                 <a href="/admin/addons" class="btn-cancel">Batal</a>
                 <button type="submit" class="btn-save">

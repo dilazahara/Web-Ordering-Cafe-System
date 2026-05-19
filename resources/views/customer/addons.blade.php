@@ -371,7 +371,26 @@
     <img src="/storage/{{ $menu->image }}" alt="Preview" onclick="event.stopPropagation()">
 </div>
 
+<!-- ══ TOAST FEEDBACK ══ -->
+<div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-2 items-center pointer-events-none" style="min-width:0;width:max-content;max-width:calc(100vw - 32px);"></div>
+
 <script>
+// ═══════════════════════════════
+//  TOAST SYSTEM
+// ═══════════════════════════════
+function showToast(msg, type = 'success', duration = 2000) {
+    const container = document.getElementById('toastContainer');
+    const colors = { success:'bg-green-500 text-white', info:'bg-gray-800 text-white', warning:'bg-amber-500 text-white', error:'bg-red-500 text-white' };
+    const icons  = { success:'✅', info:'ℹ️', warning:'⚠️', error:'❌' };
+    const toast = document.createElement('div');
+    toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold ${colors[type]||colors.info}`;
+    toast.style.cssText = 'opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;white-space:nowrap;';
+    toast.innerHTML = `<span>${icons[type]||'📢'}</span><span>${msg}</span>`;
+    container.appendChild(toast);
+    requestAnimationFrame(()=>{ toast.style.opacity='1'; toast.style.transform='translateY(0) scale(1)'; });
+    setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateY(-10px) scale(0.95)'; setTimeout(()=>toast.remove(),260); }, duration);
+}
+
 const menu = @json($menu);
 let qty = 1;
 
@@ -402,23 +421,25 @@ function handleCheckbox(el, max, groupId){
         const checked = document.querySelectorAll(`input[data-group="${groupId}"]:checked`);
         if(checked.length > max){
             el.checked = false;
-            alert(`Maksimal pilih ${max} pilihan.`);
+            showToast(`Maksimal pilih ${max} pilihan`, 'warning', 2000);
             return;
         }
     }
+    if(el.checked) showToast(`${el.dataset.name} dipilih ✓`, 'success', 1500);
     updateTotal();
 }
 
 function changeQty(val){
     qty = Math.min(20, Math.max(1, qty + val));
     document.getElementById('qty').textContent = qty;
+    showToast(val > 0 ? `Jumlah: ${qty} 🔢` : `Jumlah: ${qty} 🔢`, 'info', 1200);
     updateTotal();
 }
 
 function addToCart(){
     @foreach($menu->addonGroups->where('required', true) as $group)
     if(!document.querySelector('input[name="group_{{ $group->id }}"]:checked')){
-        alert('Mohon pilih "{{ $group->name }}".'); return;
+        showToast('Mohon pilih "{{ $group->name }}"', 'error', 2500); return;
     }
     @endforeach
 
@@ -435,9 +456,10 @@ function addToCart(){
 
     localStorage.setItem('cart', JSON.stringify(cart));
     const btn = document.querySelector('.cta-btn');
-    btn.innerHTML = "<span>Berhasil Ditambah!</span>";
+    btn.innerHTML = "<span>Berhasil Ditambah! 🎉</span>";
     btn.style.background = "#16a34a";
-    setTimeout(() => { window.location.href = '/customer/home'; }, 500);
+    showToast(`${menu.name} ditambahkan ke keranjang! 🛒`, 'success', 2000);
+    setTimeout(() => { window.location.href = '/customer/home'; }, 800);
 }
 
 function goBack(){ window.location.href = '/customer/home'; }

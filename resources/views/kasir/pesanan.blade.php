@@ -869,6 +869,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 </div>
 
+<!-- ── TOAST KASIR ── -->
+<div id="ksToastContainer" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;"></div>
+
 <div class="toast" id="toast"></div>
 
 @if(session('success'))
@@ -878,11 +881,33 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     t.innerHTML = '✅ ' + "{{ session('success') }}";
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3000);
+    ksToast('✅ ' + "{{ session('success') }}", 'success', 3500);
   });
 </script>
 @endif
 
 <script>
+/* ── Feedback submit form "Selesai" ── */
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.order-footer form').forEach(function(form) {
+    form.addEventListener('submit', function() {
+      ksToast('⏳ Memproses pesanan...', 'info', 2000);
+    });
+  });
+  /* ── Feedback submit form Cash Konfirmasi ── */
+  var cashForm = document.getElementById('cashConfirmForm');
+  if (cashForm) {
+    cashForm.addEventListener('submit', function() {
+      ksToast('💵 Konfirmasi pembayaran cash diproses...', 'success', 3000);
+    });
+  }
+});
+</script>
+
+<script>
+/* ── TOAST ── */
+function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
+
 /* ══════════════════════════════════════
    CLOCK (tidak diubah)
 ══════════════════════════════════════ */
@@ -930,6 +955,8 @@ function filterByChip(el, state) {
   document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   activeFilter = state;
+  const labels = { all:'Semua pesanan', urgent:'Perlu konfirmasi', pending:'Menunggu', process:'Di dapur', done:'Lunas' };
+  ksToast('Filter: ' + (labels[state] || state), 'info', 1600);
   applyFilters();
 }
 
@@ -947,6 +974,7 @@ function clearSearch() {
   document.getElementById('searchInput').value = '';
   activeSearch = '';
   document.getElementById('searchClear').classList.remove('visible');
+  ksToast('Pencarian dihapus', 'info', 1400);
   applyFilters();
 }
 
@@ -968,6 +996,8 @@ function handleSort(val) {
     return 0;
   });
   cards.forEach(c => grid.appendChild(c));
+  const sortLabels = { newest:'Terbaru', oldest:'Terlama', highest:'Total Terbesar', lowest:'Total Terkecil', table:'Nomor Meja' };
+  ksToast('Urutan: ' + (sortLabels[val]||val), 'info', 1500);
 }
 
 /* ══════════════════════════════════════
@@ -1032,11 +1062,13 @@ function openCashModal(orderId, total, tableLabel) {
   buildQuickCash(total);
   calcChange();
   document.getElementById('cashModal').classList.add('show');
+  ksToast('💵 Modal pembayaran cash dibuka — Meja ' + tableLabel, 'info', 2000);
   setTimeout(() => input.focus(), 280);
 }
 
 function closeCashModal() {
   document.getElementById('cashModal').classList.remove('show');
+  ksToast('Modal ditutup', 'info', 1200);
 }
 
 function handleOverlayClick(e) {
@@ -1077,9 +1109,9 @@ function calcChange() {
   input.classList.remove('error');
   changeBlock.classList.remove('insuf', 'exact');
   if (received === 0) { changeLabel.textContent = 'Kembalian'; changeValue.textContent = 'Rp 0'; confirmBtn.disabled = true; return; }
-  if (change < 0)     { changeBlock.classList.add('insuf'); changeLabel.textContent = '⚠️ Kurang'; changeValue.textContent = '−' + formatRp(change); confirmBtn.disabled = true; input.classList.add('error'); }
-  else if (change === 0) { changeBlock.classList.add('exact'); changeLabel.textContent = '✨ Pas, tidak ada kembalian'; changeValue.textContent = ''; confirmBtn.disabled = false; }
-  else                { changeLabel.textContent = '💰 Kembalian'; changeValue.textContent = formatRp(change); confirmBtn.disabled = false; }
+  if (change < 0)     { changeBlock.classList.add('insuf'); changeLabel.textContent = '⚠️ Kurang'; changeValue.textContent = '−' + formatRp(change); confirmBtn.disabled = true; input.classList.add('error'); ksToast('Uang kurang ' + formatRp(Math.abs(change)), 'error', 1800); }
+  else if (change === 0) { changeBlock.classList.add('exact'); changeLabel.textContent = '✨ Pas, tidak ada kembalian'; changeValue.textContent = ''; confirmBtn.disabled = false; ksToast('✨ Uang pas! Bisa langsung konfirmasi', 'success', 1800); }
+  else                { changeLabel.textContent = '💰 Kembalian'; changeValue.textContent = formatRp(change); confirmBtn.disabled = false; ksToast('Kembalian: ' + formatRp(change), 'success', 1800); }
 }
 </script>
 </body>

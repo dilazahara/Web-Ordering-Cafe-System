@@ -71,7 +71,7 @@ class DapurController extends Controller
 
 
     // ═══════════════════════════════
-    // TANDAI SELESAI
+    // TANDAAI SELESAI
     // ═══════════════════════════════
 
     public function selesai(int $id)
@@ -79,7 +79,6 @@ class DapurController extends Controller
         $order = Order::findOrFail($id);
 
         // VALIDASI
-
         abort_if(
             $order->status !== 'process',
             422,
@@ -87,43 +86,27 @@ class DapurController extends Controller
         );
 
         // UPDATE STATUS
-
         $order->update([
-
             'status'  => 'done',
-
             'done_at' => now(),
-
         ]);
 
-
         // NOTIF KE PELAYAN
-
         Notification::kirim(
-
             'pelayan',
-
             'order_done',
-
             '🍽️ Makanan Siap Diantar',
-
             "Pesanan {$order->queue_number}" .
             ($order->table_number
                 ? " meja {$order->table_number}"
                 : '') .
             " sudah selesai dimasak.",
-
             $order
-
         );
 
-
         return back()->with(
-
             'success',
-
             "Pesanan {$order->queue_number} selesai dimasak!"
-
         );
     }
 
@@ -164,18 +147,20 @@ class DapurController extends Controller
 
         // UPLOAD AVATAR
         if ($request->hasFile('avatar')) {
+
             // Hapus foto lama jika ada
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
+
             // Simpan foto baru
             $path = $request->file('avatar')->store('avatars', 'public');
+
             $user->avatar = $path;
         }
 
         $user->save();
 
-        // ✅ Redirect ke /dapur/proses agar flash success muncul di proses.blade.php
         return redirect('/dapur/proses')
             ->with(
                 'success',
@@ -197,20 +182,14 @@ class DapurController extends Controller
     public function updatePassword(Request $request)
     {
         $request->validate([
-
             'current_password' => 'required',
-
-            'new_password' =>
-                'required|min:8|confirmed',
-
+            'new_password'     => 'required|min:8|confirmed',
         ]);
 
         /** @var User $user */
         $user = Auth::user();
 
-
         // CEK PASSWORD LAMA
-
         if (
             !Hash::check(
                 $request->current_password,
@@ -219,30 +198,38 @@ class DapurController extends Controller
         ) {
 
             return back()->withErrors([
-
                 'current_password' =>
                     'Password lama yang kamu masukkan salah!'
-
             ]);
-
         }
 
-
         // UPDATE PASSWORD BARU
-
         $user->update([
-
             'password' => Hash::make(
                 $request->new_password
             )
-
         ]);
-
 
         return redirect('/dapur/proses')
             ->with(
                 'success',
                 'Password berhasil diubah!'
             );
+    }
+
+
+    // ═══════════════════════════════
+    // POLLING ORDER REALTIME
+    // ═══════════════════════════════
+
+    public function pollOrders()
+    {
+        $orders = Order::where('status', 'process')
+            ->select('id')
+            ->get();
+
+        return response()->json([
+            'orders' => $orders
+        ]);
     }
 }

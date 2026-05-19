@@ -495,5 +495,46 @@ body{
 
 </div>
 
+<!-- ── TOAST KASIR ── -->
+<div id="ksToastContainer" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;"></div>
+
+<script>
+function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
+
+/* feedback submit */
+var pwForm = document.querySelector('form[action*="update-password"], form[method="POST"]');
+if (pwForm) {
+    pwForm.addEventListener('submit', function(e) {
+        var pw = document.querySelector('input[name="password"]');
+        var pc = document.querySelector('input[name="password_confirmation"]');
+        if (pw && pc && pw.value && pw.value !== pc.value) {
+            e.preventDefault();
+            ksToast('❌ Password baru tidak cocok!', 'error', 3000);
+            return;
+        }
+        ksToast('🔒 Memproses ganti password...', 'info', 2500);
+    });
+}
+
+/* feedback realtime cocok/tidak cocok */
+var pwConfirm = document.querySelector('input[name="password_confirmation"]');
+var pwNew = document.querySelector('input[name="password"]');
+if (pwConfirm && pwNew) {
+    pwConfirm.addEventListener('input', function() {
+        if (this.value && pwNew.value) {
+            if (this.value === pwNew.value) ksToast('✅ Password cocok', 'success', 1200);
+        }
+    });
+}
+
+/* toast session flash */
+@if(session('success'))
+ksToast('✅ {{ session("success") }}', 'success', 3500);
+@endif
+@if($errors->any())
+ksToast('❌ {{ $errors->first() }}', 'error', 4000);
+@endif
+</script>
+
 </body>
 </html>

@@ -196,9 +196,22 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 }
 .btn-save:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
 .btn-save:active { transform: scale(0.97); }
+
+/* ── TOAST NOTIFICATION ── */
+#t-wrap{position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
+.t-box{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;min-width:280px;max-width:390px;font-size:13.5px;font-weight:600;pointer-events:all;box-shadow:0 8px 30px rgba(0,0,0,.13);transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease;opacity:0;}
+.t-box.show{transform:translateX(0);opacity:1;}
+.t-ok{background:#f0fdf4;border:1.5px solid #86efac;color:#15803d;}
+.t-err{background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;}
+.t-warn{background:#fffbeb;border:1.5px solid #fcd34d;color:#92400e;}
+.t-box svg{flex-shrink:0;width:18px;height:18px;}
+.t-x{margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;opacity:.55;color:inherit;padding:0 0 0 6px;line-height:1;}
+.t-x:hover{opacity:1;}
 </style>
 </head>
 <body>
+<div id="t-wrap"></div>
+
 
 <!-- ══ TOPBAR ══ -->
 <div class="topbar">
@@ -369,7 +382,33 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 </div>
 
 <script>
+/* ── Toast function ── */
+function showToast(msg,type,dur){
+  dur=dur||4000;
+  var w=document.getElementById('t-wrap');
+  if(!w||!msg)return;
+  var icons={
+    ok:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    err:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+    warn:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>'
+  };
+  var cls='t-box '+(type==='err'?'t-err':type==='warn'?'t-warn':'t-ok');
+  var ico=icons[type]||icons.ok;
+  var el=document.createElement('div');
+  el.className=cls;
+  el.innerHTML=ico+'<span>'+msg+'</span><button class="t-x" onclick="this.closest(\'.t-box\').remove()">&#x2715;</button>';
+  w.appendChild(el);
+  requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('show');});});
+  setTimeout(function(){el.classList.remove('show');setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},350);},dur);
+}
+
 lucide.createIcons();
+
+@if(session('success'))showToast(@js(session('success')),'ok');@endif
+@if(session('error'))showToast(@js(session('error')),'err');@endif
+@if(session('warning'))showToast(@js(session('warning')),'warn');@endif
+@if($errors->any())showToast(@js($errors->first()),'err');@endif
+
 function toggleSidebar(){
     document.getElementById('sidebar').classList.toggle('show');
     document.getElementById('overlay').classList.toggle('show');
@@ -398,7 +437,7 @@ async function simpanGroup(){
     const nama     = document.getElementById('inputNamaGroup').value.trim();
     const max      = document.getElementById('inputMax').value;
     const required = document.getElementById('inputRequired').value;
-    if(!nama){ alert('Nama group tidak boleh kosong!'); return; }
+    if(!nama){ showToast('Nama group tidak boleh kosong!','err'); return; }
     const response = await fetch('/admin/addon-groups/store', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
@@ -410,8 +449,9 @@ async function simpanGroup(){
         const option = new Option(data.group.name, data.group.id, true, true);
         select.add(option);
         tutupModal();
+        showToast('Group add-on berhasil ditambahkan!','ok');
     } else {
-        alert('Gagal menyimpan group: ' + (data.message ?? 'Coba lagi'));
+        showToast('Gagal menyimpan group: ' + (data.message ?? 'Coba lagi'),'err');
     }
 }
 document.getElementById('modalGroup').addEventListener('click', function(e){

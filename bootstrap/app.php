@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
+        // Skip ngrok browser warning
+        $middleware->append(\App\Http\Middleware\NgrokSkipWarning::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

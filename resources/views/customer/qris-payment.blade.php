@@ -187,6 +187,25 @@
 </div>
 
 <script>
+// ═══ TOAST ═══
+(function(){
+    const el = document.createElement('div');
+    el.id = 'toastContainer';
+    el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:calc(100vw - 32px);';
+    document.body.appendChild(el);
+})();
+function showToast(msg, type='success', duration=2200){
+    const c=document.getElementById('toastContainer');
+    const colors={success:'background:#22c55e;color:white;',info:'background:#1e293b;color:white;',warning:'background:#f59e0b;color:white;',error:'background:#ef4444;color:white;'};
+    const icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};
+    const t=document.createElement('div');
+    t.style.cssText=`pointer-events:auto;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-size:13px;font-weight:600;white-space:nowrap;opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;${colors[type]||colors.info}`;
+    t.innerHTML=`<span>${icons[type]||'📢'}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateY(0) scale(1)';});
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-10px) scale(0.95)';setTimeout(()=>t.remove(),260);},duration);
+}
+
 // Klik konfirmasi → tampilkan loading state
 document.getElementById('confirmForm').addEventListener('submit', function() {
     const btn = document.getElementById('btnConfirm');
@@ -200,6 +219,7 @@ document.getElementById('confirmForm').addEventListener('submit', function() {
         'mt-4 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-50 border border-emerald-100';
     document.getElementById('statusText').className = 'text-xs font-bold text-emerald-700';
 
+    showToast('Pembayaran QRIS dikonfirmasi! 🎉', 'success', 3000);
     // Bersihkan cart
     localStorage.removeItem('cart');
     localStorage.removeItem('checkoutCart');

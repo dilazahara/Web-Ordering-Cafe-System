@@ -110,7 +110,7 @@
                     <img src="{{ asset('logo.png') }}" class="h-10 sm:h-12 w-10 sm:w-12 object-contain rounded-full shadow-sm">
                     <div class="leading-tight">
                         <h1 class="font-bold text-base sm:text-lg text-gray-800 tracking-tight">
-                            Momoo Juice Coffee
+                            Momoo Juice Bar Coffee Windsor
                         </h1>
                         <p id="greetingText" class="text-[11px] sm:text-xs text-gray-500 font-medium mt-0.5">
                             Order menu favoritmu ✨
@@ -290,7 +290,43 @@
         </button>
     </div>
 
+    <!-- 🔔 TOAST FEEDBACK CONTAINER -->
+    <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-2 items-center pointer-events-none" style="min-width:0;width:max-content;max-width:calc(100vw - 32px);"></div>
+
     <script>
+        // ══════════════════════════════════
+        //  TOAST NOTIFICATION SYSTEM
+        // ══════════════════════════════════
+        function showToast(msg, type = 'success', duration = 2200) {
+            const container = document.getElementById('toastContainer');
+            const colors = {
+                success: 'bg-green-500 text-white',
+                info:    'bg-gray-800 text-white',
+                warning: 'bg-amber-500 text-white',
+                error:   'bg-red-500 text-white',
+            };
+            const icons = {
+                success: '✅',
+                info:    'ℹ️',
+                warning: '⚠️',
+                error:   '❌',
+            };
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold ${colors[type] || colors.info}`;
+            toast.style.cssText = 'opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;white-space:nowrap;';
+            toast.innerHTML = `<span>${icons[type] || '📢'}</span><span>${msg}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0) scale(1)';
+            });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px) scale(0.95)';
+                setTimeout(() => toast.remove(), 260);
+            }, duration);
+        }
+
         const menuData = JSON.parse('@json($menus)');
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         let currentCategory = 'all';
@@ -387,6 +423,9 @@
             cart[index].quantity += val;
             if(cart[index].quantity <= 0){
                 cart.splice(index, 1);
+                showToast('Item dihapus dari keranjang', 'info', 1800);
+            } else {
+                showToast(val > 0 ? 'Jumlah ditambah' : 'Jumlah dikurangi', 'info', 1400);
             }
             localStorage.setItem('cart', JSON.stringify(cart));
             updateCartUI();
@@ -399,6 +438,7 @@
                 el.style.opacity = 0;
                 el.style.transform = 'translateX(-20px)';
             }
+            showToast('Item dihapus dari keranjang', 'warning', 1800);
             setTimeout(()=>{
                 cart.splice(index,1);
                 localStorage.setItem('cart', JSON.stringify(cart));
@@ -547,6 +587,7 @@
                 icon.classList.remove('fa-shopping-basket');
                 icon.classList.add('fa-times');
                 document.body.style.overflow = 'hidden'; // Prevent scrolling bg
+                showToast('Keranjang dibuka 🛒', 'info', 1400);
             } else {
                 popup.classList.remove('show');
                 setTimeout(()=>{
@@ -567,6 +608,7 @@
             cart[index].notes = value;
             cart[index].isEditing = false;
             localStorage.setItem('cart', JSON.stringify(cart));
+            showToast('Catatan disimpan 📝', 'success', 1600);
             updateCartUI();
         }
 
@@ -636,6 +678,8 @@
                 event.currentTarget.classList.add('active');
             }
 
+            const label = category === 'all' ? 'Semua Menu' : category;
+            showToast(`Kategori: ${label}`, 'info', 1500);
             filterMenu();
         }
     </script>

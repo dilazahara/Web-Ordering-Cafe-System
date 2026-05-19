@@ -81,13 +81,12 @@ Route::middleware('auth')->group(function () {
         [LoginController::class, 'logout']
     );
 
-    Route::post('/logout', function () {
+    Route::post('/logout', function (Illuminate\Http\Request $request) {
 
         Auth::logout();
 
-        request()->session()->invalidate();
-
-        request()->session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect('/login');
 
@@ -127,7 +126,7 @@ Route::middleware('auth')
 Route::prefix('customer')
     ->name('customer.')
     ->group(function () {
- 
+
     Route::get(
         '/home',
         [HomeController::class, 'index']
@@ -138,38 +137,38 @@ Route::prefix('customer')
         '/scan/{nomor_meja}',
         [HomeController::class, 'scanMeja']
     )->name('scan');
- 
+
     Route::get(
         '/addons',
         [AddonController::class, 'index']
     )->name('addons');
- 
+
     Route::get(
         '/cart',
         [CartController::class, 'index']
     )->name('cart');
- 
+
     Route::get(
         '/checkout',
         [CheckoutController::class, 'index']
     )->name('checkout');
- 
+
     Route::post(
         '/order',
         [CustomerOrderController::class, 'store']
     )->name('order.store');
- 
+
     // ← BARU: halaman barcode QRIS
     Route::get(
         '/order/qris/{id}',
         [CustomerOrderController::class, 'qrisPayment']
     )->name('order.qris');
- 
+
     Route::get(
         '/order/success/{id}',
         [CustomerOrderController::class, 'success']
     )->name('order.success');
- 
+
 });
 
 // ══════════════════════════════════════════════════════
@@ -294,8 +293,7 @@ Route::middleware(['auth', 'role:admin'])
     Route::post(
         '/addon-groups/store',
         [AddonGroupController::class, 'store']
-        )->name('addon-groups.store');
-
+    )->name('addon-groups.store');
 
     Route::get(
         '/addons/edit/{id}',
@@ -382,6 +380,7 @@ Route::middleware(['auth', 'role:admin'])
         '/pembayaran/{id}',
         [PaymentMethodController::class, 'destroy']
     )->name('pembayaran.destroy');
+
     // =====================================
     // USER
     // =====================================
@@ -463,16 +462,13 @@ Route::middleware(['auth', 'role:kasir'])
     ->name('kasir.')
     ->group(function () {
 
-    Route::get(
-        '/dashboard',
-        [KasirController::class, 'dashboard']
-    )->name('dashboard');
+    Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('dashboard');
 
-    Route::get(
-        '/pesanan',
-        [KasirController::class, 'pesanan']
-    )->name('pesanan');
+    // ← TAMBAHKAN INI
+    Route::get('/poll', [KasirController::class, 'poll'])->name('poll');
 
+    Route::get('/pesanan', [KasirController::class, 'pesanan'])->name('pesanan');
+    // ... sisa routes tetap sama
     Route::get(
         '/transaksi',
         [KasirController::class, 'transaksi']
@@ -557,6 +553,9 @@ Route::middleware(['auth', 'role:dapur'])
         [DapurController::class, 'proses']
     )->name('proses');
 
+
+    Route::get('/poll-orders', [DapurController::class, 'pollOrders'])->name('pollOrders');
+    
     // RIWAYAT SELESAI
     Route::get(
         '/selesai',

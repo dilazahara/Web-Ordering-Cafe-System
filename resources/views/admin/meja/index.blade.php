@@ -363,7 +363,7 @@ tbody tr:hover { background: #f8fafc; }
                             <button
                                 class="act-btn act-qr"
                                 title="Lihat QR Code"
-                                onclick="openQR('{{ $meja->nomor_meja }}', 'http://192.168.1.7:8000/customer/scan/{{ $meja->nomor_meja }}')"
+                                onclick="openQR('{{ $meja->nomor_meja }}', '{{ config('app.url') }}/customer/scan/{{ $meja->nomor_meja }}')"
                             >
                                 <i data-lucide="qr-code" style="width:15px;height:15px;"></i>
                             </button>

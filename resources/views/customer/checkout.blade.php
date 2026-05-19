@@ -229,6 +229,28 @@
 
 <script>
 // ══════════════════════════════════════════════════════
+//  TOAST NOTIFICATION SYSTEM
+// ══════════════════════════════════════════════════════
+(function initToast() {
+    const el = document.createElement('div');
+    el.id = 'toastContainer';
+    el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;min-width:0;width:max-content;max-width:calc(100vw - 32px);';
+    document.body.appendChild(el);
+})();
+
+function showToast(msg, type = 'success', duration = 2200) {
+    const container = document.getElementById('toastContainer');
+    const colors = { success:'background:#22c55e;color:white;', info:'background:#1e293b;color:white;', warning:'background:#f59e0b;color:white;', error:'background:#ef4444;color:white;' };
+    const icons  = { success:'✅', info:'ℹ️', warning:'⚠️', error:'❌' };
+    const t = document.createElement('div');
+    t.style.cssText = `pointer-events:auto;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-size:13px;font-weight:600;white-space:nowrap;opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;${colors[type]||colors.info}`;
+    t.innerHTML = `<span>${icons[type]||'📢'}</span><span>${msg}</span>`;
+    container.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity='1'; t.style.transform='translateY(0) scale(1)'; });
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-10px) scale(0.95)'; setTimeout(()=>t.remove(),260); }, duration);
+}
+
+// ══════════════════════════════════════════════════════
 //  DATA FROM BLADE
 // ══════════════════════════════════════════════════════
 const paymentMethods = @json($paymentMethods->values());
@@ -332,7 +354,12 @@ function changeQty(id, delta) {
     const item = cart.find(i => i.id === id);
     if (!item) return;
     item.quantity += delta;
-    if (item.quantity <= 0) cart = cart.filter(i => i.id !== id);
+    if (item.quantity <= 0) {
+        cart = cart.filter(i => i.id !== id);
+        showToast('Item dihapus dari pesanan', 'warning', 1800);
+    } else {
+        showToast(delta > 0 ? `Jumlah ${item.name}: ${item.quantity}` : `Jumlah ${item.name}: ${item.quantity}`, 'info', 1400);
+    }
     saveCart(); renderCart();
 }
 
@@ -354,6 +381,8 @@ function selectPayment(kode) {
     if (el) el.classList.add('selected');
     selectedKode = kode;
     document.getElementById('paymentMethodInput').value = kode;
+    const labels = { cash:'Tunai / Cash 💵', qris:'QRIS 📱', bank:'Transfer Bank 🏦' };
+    showToast(`Metode: ${labels[kode] || kode}`, 'info', 1600);
     renderInfoBox(kode);
 }
 
@@ -368,7 +397,7 @@ function renderInfoBox(kode) {
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     if (!cart || cart.length === 0) {
         e.preventDefault();
-        showToast('Keranjang masih kosong! Tambah menu dulu ya. 🛒');
+        showToast('Keranjang masih kosong! Tambah menu dulu ya. 🛒', 'error', 2800);
         return;
     }
 
@@ -377,13 +406,14 @@ const tn = document.getElementById('tableNumberInput').value;
 
 if (!tn) {
     e.preventDefault();
-    showToast('⚠️ Scan QR Code meja dulu!');
+    showToast('⚠️ Scan QR Code meja dulu!', 'warning', 2800);
     return;
 }
 
     document.getElementById('cartInput').value  = JSON.stringify(cart);
     document.getElementById('noteHidden').value = document.getElementById('noteInput').value;
 
+    showToast('Pesanan sedang diproses... 🍽️', 'success', 2500);
     const btn = document.getElementById('btnSubmitOrder');
     if (btn) {
         btn.disabled = true;
@@ -396,14 +426,6 @@ if (!tn) {
 // ══════════════════════════════════════════════════════
 function escHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function showToast(msg) {
-    const t = document.createElement('div');
-    t.textContent = msg;
-    t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:12px 20px;border-radius:14px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:fadeUp .3s ease;white-space:nowrap;`;
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2800);
 }
 </script>
 </body>
