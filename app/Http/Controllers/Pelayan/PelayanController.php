@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Pelayan;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Meja;
 use App\Models\Notification;

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Meja;
@@ -9,9 +10,6 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    // =====================================
-    // LIST ORDER ADMIN
-    // =====================================
     public function index()
     {
         $orders = Order::with('items.menu')
@@ -24,9 +22,6 @@ class OrderController extends Controller
         );
     }
 
-    // =====================================
-    // STORE ORDER CUSTOMER
-    // =====================================
     public function store(Request $request)
     {
         $request->validate([
@@ -54,10 +49,6 @@ class OrderController extends Controller
 
         $total = $subtotal + 2000;
 
-        // =====================================
-        // GENERATE QUEUE NUMBER
-        // =====================================
-
         $lastOrder = Order::latest()->first();
 
         $nextNumber = 1;
@@ -79,10 +70,6 @@ class OrderController extends Controller
             STR_PAD_LEFT
         );
 
-        // =====================================
-        // CREATE ORDER
-        // =====================================
-
         $order = Order::create([
 
             'queue_number' => $queueNumber,
@@ -99,10 +86,6 @@ class OrderController extends Controller
 
         ]);
 
-        // =====================================
-        // AUTO STATUS MEJA = TERISI
-        // =====================================
-
         if ($request->table_number) {
 
             Meja::where(
@@ -113,10 +96,6 @@ class OrderController extends Controller
             ]);
 
         }
-
-        // =====================================
-        // SAVE ORDER ITEMS
-        // =====================================
 
         foreach ($cart as $item) {
 
@@ -140,19 +119,11 @@ class OrderController extends Controller
             ]);
         }
 
-        // =====================================
-        // REDIRECT SUCCESS
-        // =====================================
-
         return redirect()->route(
             'customer.order.success',
             $order->id
         );
     }
-
-    // =====================================
-    // PROCESS ORDER
-    // =====================================
 
     public function process(int $id)
     {
@@ -168,10 +139,6 @@ class OrderController extends Controller
         );
     }
 
-    // =====================================
-    // DONE ORDER
-    // =====================================
-
     public function done(int $id)
     {
         $order = Order::findOrFail($id);
@@ -185,10 +152,6 @@ class OrderController extends Controller
             'Pesanan selesai'
         );
     }
-
-    // =====================================
-    // KONFIRMASI CASH
-    // =====================================
 
     public function konfirmasi(
         Request $request,
@@ -224,10 +187,6 @@ class OrderController extends Controller
         );
     }
 
-    // =====================================
-    // SELESAI FINAL
-    // =====================================
-
     public function selesai(Order $order)
     {
         abort_if(
@@ -239,17 +198,9 @@ class OrderController extends Controller
             'Status tidak valid.'
         );
 
-        // =====================================
-        // UPDATE STATUS ORDER
-        // =====================================
-
         $order->status = 'delivered';
 
         $order->save();
-
-        // =====================================
-        // AUTO STATUS MEJA = KOSONG
-        // =====================================
 
         if ($order->table_number) {
 
@@ -261,10 +212,6 @@ class OrderController extends Controller
             ]);
 
         }
-
-        // =====================================
-        // SUCCESS MESSAGE
-        // =====================================
 
         return back()->with(
             'success',

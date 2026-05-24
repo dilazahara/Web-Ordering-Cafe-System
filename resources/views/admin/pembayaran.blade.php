@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kelola Pembayaran</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
+
+@section('title', 'Kelola Pembayaran')
+
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; color: #1e293b; }
@@ -208,9 +205,10 @@ input:checked + .slider:before { transform: translateX(20px); }
 .btn-icon {
     width: 34px; height: 34px; border-radius: 9px;
     display: inline-flex; align-items: center; justify-content: center;
-    border: 1.5px solid; cursor: pointer; transition: all 0.2s; text-decoration: none;
+    border: 1.5px solid; cursor: pointer; transition: all 0.2s;
+    text-decoration: none; background: none;
 }
-.btn-icon i { width: 15px; height: 15px; }
+.btn-icon svg { width: 15px; height: 15px; }
 .btn-edit { border-color: #dbeafe; background: #eff6ff; color: #2563eb; }
 .btn-edit:hover { background: #dbeafe; border-color: #93c5fd; }
 .btn-config { border-color: #e0e7ff; background: #f5f3ff; color: #7c3aed; }
@@ -223,7 +221,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     text-align: center; padding: 64px 24px;
     color: #94a3b8;
 }
-.empty-state i { width: 48px; height: 48px; margin: 0 auto 16px; display: block; color: #cbd5e1; }
+.empty-state svg { width: 48px; height: 48px; margin: 0 auto 16px; display: block; color: #cbd5e1; }
 .empty-state h3 { font-size: 16px; font-weight: 600; color: #64748b; margin-bottom: 6px; }
 .empty-state p { font-size: 13px; }
 
@@ -260,7 +258,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: #64748b; transition: all 0.2s; flex-shrink: 0;
 }
 .modal-close:hover { background: #e2e8f0; color: #1e293b; }
-.modal-close i { width: 16px; height: 16px; }
+.modal-close svg { width: 16px; height: 16px; }
 .modal-body { padding: 24px 28px; }
 .modal-footer {
     padding: 16px 28px 24px;
@@ -299,17 +297,6 @@ select.form-control { cursor: pointer; }
 .type-name { font-size: 13px; font-weight: 600; color: #374151; }
 .type-sub  { font-size: 11px; color: #94a3b8; }
 
-/* ── QRIS CONFIG SECTION (in table row) ── */
-.qris-section {
-    background: #f8fafc; border-radius: 12px;
-    padding: 16px 20px; margin-top: 12px; border: 1px dashed #e2e8f0;
-}
-.qris-section-title {
-    font-size: 11px; font-weight: 700; color: #7c3aed;
-    text-transform: uppercase; letter-spacing: 0.8px;
-    display: flex; align-items: center; gap: 5px; margin-bottom: 14px;
-}
-
 /* ── QR PREVIEW ── */
 .qr-preview-area { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
 .qr-preview-box {
@@ -331,7 +318,7 @@ select.form-control { cursor: pointer; }
     font-size: 12px; font-weight: 500; color: #475569; cursor: pointer; transition: all 0.2s;
 }
 .file-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-.file-btn i { width: 13px; height: 13px; }
+.file-btn svg { width: 13px; height: 13px; }
 
 /* ── BUTTONS ── */
 .btn-primary {
@@ -342,7 +329,7 @@ select.form-control { cursor: pointer; }
     font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-.btn-primary i { width: 15px; height: 15px; }
+.btn-primary svg { width: 15px; height: 15px; }
 .btn-secondary {
     display: inline-flex; align-items: center; gap: 7px;
     padding: 10px 20px; border-radius: 11px;
@@ -359,6 +346,7 @@ select.form-control { cursor: pointer; }
     font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
 .btn-danger:hover { background: #b91c1c; }
+.btn-danger svg { width: 15px; height: 15px; }
 
 /* ── DELETE CONFIRM ── */
 .delete-icon-wrap {
@@ -366,7 +354,7 @@ select.form-control { cursor: pointer; }
     background: #fef2f2; display: flex; align-items: center;
     justify-content: center; margin: 0 auto 16px;
 }
-.delete-icon-wrap i { width: 28px; height: 28px; color: #dc2626; }
+.delete-icon-wrap svg { width: 28px; height: 28px; color: #dc2626; }
 
 /* ── QRIS CONFIG MODAL ── */
 .qris-modal-preview {
@@ -376,10 +364,7 @@ select.form-control { cursor: pointer; }
     background: #f8fafc; margin: 0 auto 16px;
 }
 .qris-modal-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-/* ── VALIDATION ── */
-.field-error { font-size: 11.5px; color: #dc2626; margin-top: 3px; }
-.form-control.invalid { border-color: #f87171; }
+.qris-modal-preview svg { width: 36px; height: 36px; color: #cbd5e1; }
 
 @media (max-width: 640px) {
     .form-row.cols-2 { grid-template-columns: 1fr; }
@@ -389,63 +374,9 @@ select.form-control { cursor: pointer; }
     .page-header { flex-direction: column; }
 }
 </style>
-</head>
-<body>
+@endpush
 
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <button onclick="toggleSidebar()" aria-label="Menu">
-            <i data-lucide="menu"></i>
-        </button>
-    </div>
-</div>
-
-<!-- Overlay -->
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="clipboard-list"></i> Order
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-</div>
-
-<!-- ══ MAIN ══ -->
+@section('content')
 <div class="main">
 
     <!-- Page Header -->
@@ -455,7 +386,10 @@ select.form-control { cursor: pointer; }
             <p>Tambah, ubah, hapus, dan aktifkan metode pembayaran.</p>
         </div>
         <button class="btn-add" onclick="openModal('modalTambah')">
-            <i data-lucide="plus" style="width:16px;height:16px;"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
             Tambah Metode
         </button>
     </div>
@@ -463,13 +397,19 @@ select.form-control { cursor: pointer; }
     {{-- ALERT --}}
     @if(session('success'))
     <div class="alert alert-success" id="alertMsg">
-        <i data-lucide="check-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
         {{ session('success') }}
     </div>
     @endif
     @if(session('error'))
     <div class="alert alert-error" id="alertMsg">
-        <i data-lucide="alert-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
         {{ session('error') }}
     </div>
     @endif
@@ -477,7 +417,10 @@ select.form-control { cursor: pointer; }
     {{-- VALIDATION ERRORS --}}
     @if($errors->any())
     <div class="alert alert-error">
-        <i data-lucide="alert-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
         <div>
             @foreach($errors->all() as $err)
                 <div>{{ $err }}</div>
@@ -523,7 +466,10 @@ select.form-control { cursor: pointer; }
         <div class="table-card-header">
             <h2>Daftar Metode Pembayaran</h2>
             <div class="search-wrap">
-                <i data-lucide="search"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:12px;width:15px;height:15px;color:#94a3b8;pointer-events:none;"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <input type="text" class="search-input" id="searchInput"
                     placeholder="Cari metode..." onkeyup="filterTable()">
             </div>
@@ -531,7 +477,11 @@ select.form-control { cursor: pointer; }
 
         @if($paymentMethods->isEmpty())
         <div class="empty-state">
-            <i data-lucide="credit-card"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
             <h3>Belum ada metode pembayaran</h3>
             <p>Klik "Tambah Metode" untuk menambahkan metode pembayaran pertama.</p>
         </div>
@@ -587,21 +537,35 @@ select.form-control { cursor: pointer; }
                             <!-- Edit -->
                             <button class="btn-icon btn-edit" title="Edit"
                                 onclick="openEdit({{ $pm->id }}, '{{ addslashes($pm->nama) }}', '{{ $pm->kode }}')">
-                                <i data-lucide="pencil"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
                             </button>
 
                             {{-- Config QRIS --}}
                             @if($pm->kode === 'qris')
                             <button class="btn-icon btn-config" title="Konfigurasi QRIS"
                                 onclick="openQrisConfig({{ $pm->id }}, '{{ addslashes($pm->nama_rekening ?? '') }}', '{{ addslashes($pm->no_rekening ?? '') }}', '{{ $pm->qris_image ? asset('storage/'.$pm->qris_image) : '' }}')">
-                                <i data-lucide="settings"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
                             </button>
                             @endif
 
                             <!-- Delete -->
                             <button class="btn-icon btn-delete" title="Hapus"
                                 onclick="openDelete({{ $pm->id }}, '{{ addslashes($pm->nama) }}')">
-                                <i data-lucide="trash-2"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                </svg>
                             </button>
                         </div>
                     </td>
@@ -623,7 +587,10 @@ select.form-control { cursor: pointer; }
         <div class="modal-header">
             <h3>Tambah Metode Pembayaran</h3>
             <button class="modal-close" onclick="closeModal('modalTambah')">
-                <i data-lucide="x"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
         <form action="{{ route('admin.pembayaran.store') }}" method="POST">
@@ -693,7 +660,10 @@ select.form-control { cursor: pointer; }
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="closeModal('modalTambah')">Batal</button>
                 <button type="submit" class="btn-primary">
-                    <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
                     Tambah
                 </button>
             </div>
@@ -710,7 +680,10 @@ select.form-control { cursor: pointer; }
         <div class="modal-header">
             <h3>Edit Metode Pembayaran</h3>
             <button class="modal-close" onclick="closeModal('modalEdit')">
-                <i data-lucide="x"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
         <form id="editForm" action="" method="POST">
@@ -732,7 +705,11 @@ select.form-control { cursor: pointer; }
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="closeModal('modalEdit')">Batal</button>
                 <button type="submit" class="btn-primary">
-                    <i data-lucide="save" style="width:15px;height:15px;"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                    </svg>
                     Simpan Perubahan
                 </button>
             </div>
@@ -749,7 +726,10 @@ select.form-control { cursor: pointer; }
         <div class="modal-header">
             <h3>⚙️ Konfigurasi QRIS</h3>
             <button class="modal-close" onclick="closeModal('modalQris')">
-                <i data-lucide="x"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
         <form id="qrisForm" action="" method="POST" enctype="multipart/form-data">
@@ -760,13 +740,22 @@ select.form-control { cursor: pointer; }
                 <div class="form-group" style="margin-bottom:20px;">
                     <label>Gambar QR Code</label>
                     <div class="qris-modal-preview" id="qrisPreviewBox">
-                        <i data-lucide="image" style="width:36px;height:36px;color:#cbd5e1;" id="qrisEmptyIcon"></i>
+                        <svg id="qrisEmptyIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                        </svg>
                         <img id="qrisPreviewImg" src="" alt="QR Preview" style="display:none;width:100%;height:100%;object-fit:cover;">
                     </div>
                     <div style="text-align:center;">
                         <div class="file-input-wrap">
                             <div class="file-btn">
-                                <i data-lucide="upload"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="16 16 12 12 8 16"/>
+                                    <line x1="12" y1="12" x2="12" y2="21"/>
+                                    <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                                </svg>
                                 Pilih Gambar
                             </div>
                             <input type="file" name="image" accept="image/*" onchange="previewQrisModal(this)">
@@ -792,7 +781,11 @@ select.form-control { cursor: pointer; }
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="closeModal('modalQris')">Batal</button>
                 <button type="submit" class="btn-primary">
-                    <i data-lucide="save" style="width:15px;height:15px;"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+                    </svg>
                     Simpan QRIS
                 </button>
             </div>
@@ -808,7 +801,13 @@ select.form-control { cursor: pointer; }
     <div class="modal" style="max-width:400px;">
         <div class="modal-body" style="padding-top:32px;text-align:center;">
             <div class="delete-icon-wrap">
-                <i data-lucide="trash-2"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
             </div>
             <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;color:#0f172a;">Hapus Metode?</h3>
             <p style="font-size:14px;color:#64748b;margin-bottom:4px;">
@@ -825,7 +824,13 @@ select.form-control { cursor: pointer; }
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn-danger">
-                    <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
                     Ya, Hapus
                 </button>
             </form>
@@ -833,71 +838,75 @@ select.form-control { cursor: pointer; }
     </div>
 </div>
 
+@endsection
 
+@push('scripts')
 <script>
-lucide.createIcons();
-
-// ── Sidebar ──
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
-    document.getElementById('overlay').classList.toggle('show');
-}
-
-// ── Modal Helpers ──
+/* ═══════════════════════════════════════
+   MODAL HELPERS
+═══════════════════════════════════════ */
 function openModal(id) {
     document.getElementById(id).classList.add('open');
     document.body.style.overflow = 'hidden';
 }
+
 function closeModal(id) {
     document.getElementById(id).classList.remove('open');
     document.body.style.overflow = '';
 }
-// Close on backdrop click
-document.querySelectorAll('.modal-overlay').forEach(el => {
-    el.addEventListener('click', function(e) {
-        if (e.target === this) closeModal(this.id);
-    });
-});
-// Close on ESC
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.open').forEach(m => closeModal(m.id));
-    }
-});
 
-// ── Tambah: type switcher ──
-const typeInputs = document.querySelectorAll('input[name="kode"]');
-const customKodeWrap = document.getElementById('customKodeWrap');
-typeInputs.forEach(inp => {
-    inp.addEventListener('change', () => {
-        customKodeWrap.style.display = inp.value === 'lain' ? 'flex' : 'none';
-        // Auto-fill nama
-        const namaMap = { cash:'Tunai (Cash)', qris:'QRIS', bank:'Transfer Bank', lain:'' };
-        const nameEl = document.getElementById('tambahNamaInput');
-        if (nameEl.value === '' || Object.values(namaMap).includes(nameEl.value)) {
-            nameEl.value = namaMap[inp.value] || '';
+// Tutup modal jika klik overlay (luar modal)
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
         }
     });
 });
 
-// ── Edit Modal ──
+// Tutup modal dengan tombol ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(function(m) {
+            m.classList.remove('open');
+        });
+        document.body.style.overflow = '';
+    }
+});
+
+/* ═══════════════════════════════════════
+   MODAL: EDIT
+═══════════════════════════════════════ */
 function openEdit(id, nama, kode) {
-    document.getElementById('editForm').action = `/admin/pembayaran/${id}`;
     document.getElementById('editNama').value = nama;
     document.getElementById('editKode').value = kode;
+    document.getElementById('editForm').action = '/admin/pembayaran/' + id;
     openModal('modalEdit');
 }
 
-// ── QRIS Config Modal ──
-function openQrisConfig(id, namaMerchant, nomorMerchant, imgUrl) {
-    document.getElementById('qrisForm').action = `/admin/pembayaran/qris/${id}`;
+/* ═══════════════════════════════════════
+   MODAL: HAPUS
+═══════════════════════════════════════ */
+function openDelete(id, nama) {
+    document.getElementById('deleteNamaText').textContent = nama;
+    document.getElementById('deleteForm').action = '/admin/pembayaran/' + id;
+    openModal('modalHapus');
+}
+
+/* ═══════════════════════════════════════
+   MODAL: QRIS CONFIG
+═══════════════════════════════════════ */
+function openQrisConfig(id, namaMerchant, nomorMerchant, imageUrl) {
     document.getElementById('qrisNamaMerchant').value = namaMerchant;
     document.getElementById('qrisNomorMerchant').value = nomorMerchant;
+    document.getElementById('qrisForm').action = '/admin/pembayaran/' + id + '/qris';
 
-    const img = document.getElementById('qrisPreviewImg');
-    const icon = document.getElementById('qrisEmptyIcon');
-    if (imgUrl) {
-        img.src = imgUrl;
+    var img = document.getElementById('qrisPreviewImg');
+    var icon = document.getElementById('qrisEmptyIcon');
+
+    if (imageUrl && imageUrl !== '') {
+        img.src = imageUrl;
         img.style.display = 'block';
         icon.style.display = 'none';
     } else {
@@ -905,15 +914,19 @@ function openQrisConfig(id, namaMerchant, nomorMerchant, imgUrl) {
         img.style.display = 'none';
         icon.style.display = 'block';
     }
+
     openModal('modalQris');
 }
 
+/* ═══════════════════════════════════════
+   QRIS IMAGE PREVIEW
+═══════════════════════════════════════ */
 function previewQrisModal(input) {
     if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = document.getElementById('qrisPreviewImg');
-            const icon = document.getElementById('qrisEmptyIcon');
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var img = document.getElementById('qrisPreviewImg');
+            var icon = document.getElementById('qrisEmptyIcon');
             img.src = e.target.result;
             img.style.display = 'block';
             icon.style.display = 'none';
@@ -922,31 +935,51 @@ function previewQrisModal(input) {
     }
 }
 
-// ── Delete Modal ──
-function openDelete(id, nama) {
-    document.getElementById('deleteForm').action = `/admin/pembayaran/${id}`;
-    document.getElementById('deleteNamaText').textContent = nama;
-    openModal('modalHapus');
-}
+/* ═══════════════════════════════════════
+   TYPE PICKER: tampilkan/sembunyikan kode custom
+═══════════════════════════════════════ */
+document.querySelectorAll('input[name="kode"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        var wrap = document.getElementById('customKodeWrap');
+        if (this.value === 'lain') {
+            wrap.style.display = 'flex';
+        } else {
+            wrap.style.display = 'none';
+        }
+    });
+});
 
-// ── Search/Filter ──
+/* ═══════════════════════════════════════
+   SEARCH / FILTER TABLE
+═══════════════════════════════════════ */
 function filterTable() {
-    const q = document.getElementById('searchInput').value.toLowerCase();
-    document.querySelectorAll('#payTable tbody tr').forEach(row => {
-        const text = row.getAttribute('data-search') || '';
-        row.style.display = text.includes(q) ? '' : 'none';
+    var keyword = document.getElementById('searchInput').value.toLowerCase();
+    var rows = document.querySelectorAll('#payTable tbody tr');
+    rows.forEach(function(row) {
+        var text = row.getAttribute('data-search') || '';
+        row.style.display = text.includes(keyword) ? '' : 'none';
     });
 }
 
-// ── Auto-hide alert ──
-const alertEl = document.getElementById('alertMsg');
+/* ═══════════════════════════════════════
+   AUTO-HIDE ALERT
+═══════════════════════════════════════ */
+var alertEl = document.getElementById('alertMsg');
 if (alertEl) {
-    setTimeout(() => {
-        alertEl.style.transition = 'opacity 0.4s';
+    setTimeout(function() {
         alertEl.style.opacity = '0';
-        setTimeout(() => alertEl.remove(), 400);
+        setTimeout(function() { alertEl.remove(); }, 300);
     }, 4000);
 }
+
+/* ═══════════════════════════════════════
+   BUKA MODAL TAMBAH JIKA ADA VALIDATION ERROR
+   (supaya user tidak kebingungan)
+═══════════════════════════════════════ */
+@if($errors->any())
+    document.addEventListener('DOMContentLoaded', function() {
+        openModal('modalTambah');
+    });
+@endif
 </script>
-</body>
-</html>
+@endpush

@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Addon;
 use App\Models\AddonGroup;
 
 class AddOnsController extends Controller
 {
-    // ======================
-    // INDEX
-    // ======================
     public function index()
     {
         $addons = Addon::with('group')->latest()->get();
@@ -18,9 +16,6 @@ class AddOnsController extends Controller
         return view('admin.addons.index', compact('addons'));
     }
 
-    // ======================
-    // CREATE
-    // ======================
     public function create()
     {
         $groups = AddonGroup::all();
@@ -28,9 +23,6 @@ class AddOnsController extends Controller
         return view('admin.addons.create', compact('groups'));
     }
 
-    // ======================
-    // STORE
-    // ======================
     public function store(Request $request)
     {
         $request->validate([
@@ -51,9 +43,6 @@ class AddOnsController extends Controller
             ->with('success', 'Add-on berhasil ditambahkan');
     }
 
-    // ======================
-    // EDIT
-    // ======================
     public function edit(int $id)
     {
         $addon = Addon::findOrFail($id);
@@ -62,9 +51,6 @@ class AddOnsController extends Controller
         return view('admin.addons.edit', compact('addon', 'groups'));
     }
 
-    // ======================
-    // UPDATE
-    // ======================
     public function update(Request $request, int $id)
     {
         $addon = Addon::findOrFail($id);
@@ -87,9 +73,6 @@ class AddOnsController extends Controller
             ->with('success', 'Add-on berhasil diupdate');
     }
 
-    // ======================
-    // DELETE
-    // ======================
     public function destroy(int $id)
     {
         Addon::findOrFail($id)->delete();

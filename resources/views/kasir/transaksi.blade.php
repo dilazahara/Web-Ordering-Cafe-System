@@ -1,17 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Kasir — Transaksi</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@extends('layouts.kasir')
 
-{{-- DataTables CSS & Scripts --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+@section('title', 'Kasir — Transaksi')
 
+@push('styles')
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -174,104 +165,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   .page-header { flex-direction: column; }
 }
 </style>
-</head>
-<body>
+@endpush
 
-<header class="header">
-  <div class="logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-        <polyline points="9 22 9 12 15 12 15 22"/>
-      </svg>
-    </div>
-    <div class="logo-text">Kasir<span></span></div>
-  </div>
-
-  <div class="header-right">
-    <div class="header-clock">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span id="liveClock">00:00:00</span>
-    </div>
-
-    <div class="profile-wrap">
-      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">
-            @if(Auth::user()->avatar)
-                <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
-            @else
-                {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-            @endif
-        </div>
-        <div class="user-info">
-          <div class="user-name">{{ Auth::user()->name }}</div>
-          <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-
-      <div class="dropdown" id="profileDropdown">
-        <div class="dropdown-header">
-          <div class="dropdown-avatar">
-              @if(Auth::user()->avatar)
-                  <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
-              @else
-                  {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-              @endif
-          </div>
-          <div>
-            <div class="dropdown-name">{{ Auth::user()->name }}</div>
-            <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
-          </div>
-        </div>
-
-        <div class="dropdown-body">
-          <a href="/kasir/account/profil" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            Profil Saya
-          </a>
-          <a href="/kasir/account/ganti-sandi" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            Ganti Password
-          </a>
-          <div class="dropdown-divider"></div>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item danger">
-              <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-              Logout
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<nav class="topnav">
-  <div class="nav-container">
-    <a href="/kasir/dashboard" class="nav-link {{ request()->is('kasir/dashboard') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      <span>Dashboard</span>
-    </a>
-    <a href="/kasir/pesanan" class="nav-link {{ request()->is('kasir/pesanan') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-      <span>Pesanan</span>
-    </a>
-    <a href="/kasir/transaksi" class="nav-link {{ request()->is('kasir/transaksi') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <span>Transaksi</span>
-    </a>
-    <a href="/kasir/laporan" class="nav-link {{ request()->is('kasir/laporan') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span>Laporan</span>
-    </a>
-  </div>
-</nav>
-
-<main class="main">
-  <div class="container">
-    <div class="page-header">
+@section('content')
+<div class="page-header">
       <div>
         <div class="page-title">Transaksi</div>
         <div class="page-sub">{{ now()->translatedFormat('l, d F Y') }} &nbsp;·&nbsp; Riwayat semua transaksi</div>
@@ -377,80 +274,23 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
             </table>
         @endif
     </div>{{-- end table-wrap --}}
-  </div>{{-- end container --}}
-</main>
+@endsection
 
-<!-- ── TOAST KASIR ── -->
-<div id="ksToastContainer" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;"></div>
-
+@push('scripts')
 <script>
-function updateClock() {
-    const now = new Date();
-
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-
-    const clock = document.getElementById('liveClock');
-
-    if (clock) {
-        clock.textContent = `${h}:${m}:${s}`;
-    }
-}
-
-setInterval(updateClock, 1000);
-updateClock();
 
 
 
-/* =========================
+
+
    DROPDOWN PROFILE
-========================= */
-
-function toggleDropdown() {
-
-    const btn = document.getElementById('profileBtn');
-    const dropdown = document.getElementById('profileDropdown');
-
-    if (!btn || !dropdown) return;
-
-    const isOpen = dropdown.classList.contains('show');
-
-    dropdown.classList.toggle('show', !isOpen);
-    btn.classList.toggle('open', !isOpen);
-}
-
-document.addEventListener('click', function (e) {
-
-    const wrap = document.querySelector('.profile-wrap');
-
-    if (wrap && !wrap.contains(e.target)) {
-
-        const dropdown = document.getElementById('profileDropdown');
-        const btn = document.getElementById('profileBtn');
-
-        if (dropdown) dropdown.classList.remove('show');
-        if (btn) btn.classList.remove('open');
-    }
-});
-
-document.addEventListener('keydown', function (e) {
-
-    if (e.key === 'Escape') {
-
-        const dropdown = document.getElementById('profileDropdown');
-        const btn = document.getElementById('profileBtn');
-
-        if (dropdown) dropdown.classList.remove('show');
-        if (btn) btn.classList.remove('open');
-    }
-});
 
 
 
-/* =========================
+
+
+
    DATATABLE
-========================= */
 
 /* ── TOAST ── */
 function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
@@ -511,6 +351,6 @@ $(document).ready(function () {
 
     ksToast('📋 Data transaksi dimuat — ' + dt.data().length + ' transaksi', 'success', 2200);
 });
+
 </script>
-</body>
-</html>
+@endpush

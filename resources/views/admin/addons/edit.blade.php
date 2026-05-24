@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Add-on</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
+
+@section('title', 'Edit Add-on')
+
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
@@ -176,72 +173,10 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 .btn-save:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
 .btn-save:active { transform: scale(0.97); }
 </style>
-</head>
-<body>
+@endpush
 
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <button class="menu-icon-btn" onclick="toggleSidebar()">
-            <i data-lucide="menu" style="width:20px;height:20px;"></i>
-        </button>
-    </div>
-    <div class="topbar-avatar">A</div>
-</div>
-
-<!-- ══ SIDEBAR OVERLAY ══ -->
-<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-
-</div>
-
-<!-- ══ MAIN ══ -->
-<div class="main">
-
-    <div class="page-header">
+@section('content')
+<div class="page-header">
         <div>
             <h1>Edit Add-on</h1>
             <p>Perbarui data add-on yang sudah ada</p>
@@ -332,29 +267,4 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
         @csrf
         @method('DELETE')
     </form>
-</div>
-
-<script>
-lucide.createIcons();
-function toggleSidebar(){
-    document.getElementById('sidebar').classList.toggle('show');
-    document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar(){
-    document.getElementById('sidebar').classList.remove('show');
-    document.getElementById('overlay').classList.remove('show');
-}
-
-function setStatus(val){
-    document.getElementById('statusVal').value = val;
-    document.getElementById('statusAktif').className    = 'status-opt' + (val == 1 ? ' active-status' : '');
-    document.getElementById('statusNonaktif').className = 'status-opt' + (val == 0 ? ' inactive-status' : '');
-}
-function confirmDelete(){
-    if(confirm('Yakin ingin menghapus add-on ini? Tindakan ini tidak bisa dibatalkan.')){
-        document.getElementById('deleteForm').submit();
-    }
-}
-</script>
-</body>
-</html>
+@endsection

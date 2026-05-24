@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dapur — Selesai</title>
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@extends('layouts.dapur')
+
+@section('title', 'Dapur — Selesai')
+
+@push('styles')
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -161,83 +158,9 @@ tr:hover td { background: var(--surface-2); }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 </style>
-</head>
-<body>
+@endpush
 
-<!-- ═══════════════════════════════ HEADER ═══════════════════════════════ -->
-<header class="header">
-  <div class="logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M8 12h8M12 8v8"/></svg>
-    </div>
-    <div class="logo-text">Dapur<span></span></div>
-  </div>
-
-  <div class="header-right">
-    <div class="header-clock">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
-      </svg>
-      <span id="liveClock">00:00:00</span>
-    </div>
-
-    <!-- PROFILE DROPDOWN -->
-    <div class="profile-wrap">
-      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">
-          @if(Auth::user()->avatar)
-            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-          @else
-            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-          @endif
-        </div>
-        <div class="user-info">
-          <div class="user-name">{{ Auth::user()->name }}</div>
-          <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
-
-      <div class="dropdown" id="profileDropdown">
-        <div class="dropdown-header">
-          <div class="dropdown-avatar">
-            @if(Auth::user()->avatar)
-              <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}">
-            @else
-              {{ strtoupper(substr(Auth::user()->name,0,1)) }}
-            @endif
-          </div>
-          <div>
-            <div class="dropdown-name">{{ Auth::user()->name }}</div>
-            <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
-          </div>
-        </div>
-        <div class="dropdown-body">
-          <a href="/dapur/account/profil" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            Profil Saya
-          </a>
-          <a href="/dapur/account/ganti-sandi" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            Ganti Password
-          </a>
-          <div class="dropdown-divider"></div>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item danger">
-              <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-              Logout
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-    <!-- END PROFILE DROPDOWN -->
-  </div>
-</header>
-
-<!-- ═══════════════════════════════ TOPNAV ═══════════════════════════════ -->
+@section('topnav')
 <nav class="topnav">
   <div class="nav-container">
     <a href="/dapur/proses" class="nav-link {{ request()->is('dapur/proses') ? 'active' : '' }}">
@@ -253,12 +176,10 @@ tr:hover td { background: var(--surface-2); }
     </a>
   </div>
 </nav>
+@endsection
 
-<!-- ═══════════════════════════════ MAIN ═══════════════════════════════ -->
-<main class="main">
-  <div class="container">
-
-    <div class="page-header">
+@section('content')
+<div class="page-header">
       <div>
         <div class="page-title">Pesanan Selesai</div>
         <div class="page-sub">Rekap hari ini — {{ now()->translatedFormat('d F Y') }}</div>
@@ -477,51 +398,4 @@ tr:hover td { background: var(--surface-2); }
       </div>
 
     @endif
-
-  </div>
-</main>
-
-<script>
-
-// ═══════════════════════════════
-// LIVE CLOCK
-// ═══════════════════════════════
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-// ═══════════════════════════════
-// DROPDOWN PROFILE
-// ═══════════════════════════════
-function toggleDropdown() {
-  const btn      = document.getElementById('profileBtn');
-  const dropdown = document.getElementById('profileDropdown');
-  const isOpen   = dropdown.classList.contains('show');
-  dropdown.classList.toggle('show', !isOpen);
-  btn.classList.toggle('open', !isOpen);
-}
-
-document.addEventListener('click', function(e) {
-  const wrap = document.querySelector('.profile-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-  }
-});
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-  }
-});
-
-</script>
-</body>
-</html>
+@endsection

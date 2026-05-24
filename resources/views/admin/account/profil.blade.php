@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil Saya</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+@section('title', 'Profil Saya')
 
+@push('styles')
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; }
 body{ background:#F8F9FC; }
@@ -70,11 +64,10 @@ body{ background:#F8F9FC; }
     .card-footer > * { width: 100%; text-align: center; justify-content: center;}
 }
 </style>
-</head>
-<body>
+@endpush
 
-<div class="main">
-    <div class="page-header">
+@section('content')
+<div class="page-header">
         <div>
             <h1>Profil Saya</h1>
             <p>Kelola informasi akun dan foto profil Anda</p>
@@ -201,7 +194,9 @@ body{ background:#F8F9FC; }
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+@endsection
 
+@push('scripts')
 <script>
     lucide.createIcons();
 
@@ -279,6 +274,4 @@ body{ background:#F8F9FC; }
         }
     });
 </script>
-
-</body>
-</html>
+@endpush

@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Kasir — Pesanan</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@extends('layouts.kasir')
+
+@section('title', 'Kasir — Pesanan')
+
+@push('styles')
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -29,7 +26,7 @@ html { scroll-behavior: smooth; }
 body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
 /* ═══════════════════════════════════
-   HEADER (UNTOUCHED)
+   HEADER
 ═══════════════════════════════════ */
 .header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-h); background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 28px; z-index: 100; box-shadow: var(--shadow-header); }
 .logo { display: flex; align-items: center; gap: 10px; }
@@ -76,7 +73,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .dropdown-item.danger:hover .item-icon { background: #fecaca; }
 
 /* ═══════════════════════════════════
-   TOP NAV (UNTOUCHED)
+   TOP NAV
 ═══════════════════════════════════ */
 .topnav { position: fixed; top: var(--header-h); left: 0; right: 0; height: var(--nav-h); background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); display: flex; justify-content: center; z-index: 99; }
 .nav-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: stretch; padding: 0 8px; }
@@ -102,7 +99,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-family: 'Inter', sans-serif; }
 
 /* ═══════════════════════════════════
-   STATUS OVERVIEW BAR (NEW)
+   STATUS OVERVIEW BAR
 ═══════════════════════════════════ */
 .status-overview { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
 .stat-chip { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 12px; border: 1.5px solid; cursor: pointer; transition: all .18s; font-family: 'Inter', sans-serif; user-select: none; }
@@ -125,7 +122,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .chip-done.active  { background: #d1fae5; border-color: var(--green); box-shadow: 0 4px 16px rgba(5,150,105,.18); }
 
 /* ═══════════════════════════════════
-   TOOLBAR: SEARCH + SORT (NEW)
+   TOOLBAR: SEARCH + SORT
 ═══════════════════════════════════ */
 .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
 .search-wrap { flex: 1; min-width: 200px; max-width: 400px; position: relative; }
@@ -143,32 +140,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .section-count { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 
 /* ═══════════════════════════════════
-   PRIORITY LANE LABELS (NEW)
-═══════════════════════════════════ */
-.lane-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 12px; margin-bottom: 12px; margin-top: 24px; }
-.lane-header:first-of-type { margin-top: 0; }
-.lane-icon { font-size: 18px; }
-.lane-title { font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .8px; }
-.lane-count { font-size: 11.5px; font-weight: 700; padding: 2px 8px; border-radius: 20px; font-family: 'Inter', sans-serif; }
-.lane-divider { flex: 1; height: 1px; }
-
-.lane-urgent { background: linear-gradient(to right, #fff7ed, transparent); border-left: 3px solid var(--orange); }
-.lane-urgent .lane-title { color: var(--orange); }
-.lane-urgent .lane-count { background: #fed7aa; color: var(--orange-text); }
-.lane-urgent .lane-divider { background: #fed7aa; }
-
-.lane-process { background: linear-gradient(to right, #eff6ff, transparent); border-left: 3px solid var(--accent); }
-.lane-process .lane-title { color: var(--accent-text); }
-.lane-process .lane-count { background: #bfdbfe; color: var(--accent-text); }
-.lane-process .lane-divider { background: #bfdbfe; }
-
-.lane-done { background: linear-gradient(to right, var(--green-bg), transparent); border-left: 3px solid var(--green); }
-.lane-done .lane-title { color: var(--green-text); }
-.lane-done .lane-count { background: #a7f3d0; color: var(--green-text); }
-.lane-done .lane-divider { background: #a7f3d0; }
-
-/* ═══════════════════════════════════
-   ORDER GRID & CARDS (UPGRADED)
+   ORDER GRID & CARDS
 ═══════════════════════════════════ */
 .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 16px; }
 
@@ -191,7 +163,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 .order-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
-/* ── NEW ORDER PULSE (baru masuk, cash pending, < 5 menit) ── */
 .order-card.is-new-urgent {
   border-color: var(--orange);
   box-shadow: 0 0 0 3px rgba(234,88,12,.12), 0 4px 20px rgba(234,88,12,.18);
@@ -202,7 +173,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   50%      { box-shadow: 0 0 0 5px rgba(234,88,12,.22), 0 6px 28px rgba(234,88,12,.28); }
 }
 
-/* ── STATUS STRIPE (top colored bar per card) ── */
+/* ── STATUS STRIPE ── */
 .status-stripe { height: 4px; width: 100%; }
 .stripe-urgent  { background: linear-gradient(to right, #f97316, #ea580c); }
 .stripe-pending { background: linear-gradient(to right, #fbbf24, #d97706); }
@@ -210,33 +181,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .stripe-done    { background: linear-gradient(to right, #34d399, #059669); }
 .stripe-qris    { background: linear-gradient(to right, #818cf8, #4f46e5); }
 
-/* Cash pending: amber */
 .order-card.is-pending-cash { border-color: #fde68a; }
 .order-card.is-pending-cash .order-card-top { background: #fffdf0; }
-
-/* Cash lunas: hijau */
 .order-card.is-cash-paid { border-color: #a7f3d0; }
 .order-card.is-cash-paid .order-card-top { background: #f0fdf9; }
-
-/* QRIS: indigo */
 .order-card.is-qris { border-color: #c7d2fe; }
 .order-card.is-qris .order-card-top { background: #f5f3ff; }
 
-/* ── QUEUE NUMBER BADGE (NEW) ── */
+/* ── QUEUE NUMBER BADGE ── */
 .queue-badge {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  background: var(--text-primary);
-  color: white;
-  font-size: 10px;
-  font-weight: 800;
-  font-family: 'Inter', sans-serif;
-  padding: 3px 8px;
-  border-radius: 20px;
-  letter-spacing: .4px;
-  z-index: 2;
-  opacity: .75;
+  position: absolute; top: 12px; right: 14px;
+  background: var(--text-primary); color: white;
+  font-size: 10px; font-weight: 800; font-family: 'Inter', sans-serif;
+  padding: 3px 8px; border-radius: 20px; letter-spacing: .4px;
+  z-index: 2; opacity: .75;
 }
 
 /* ── CARD TOP ── */
@@ -244,10 +202,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .oc-left { display: flex; align-items: center; gap: 12px; }
 
 .table-badge {
-  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0;
-  position: relative;
+  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; position: relative;
 }
-/* Glow ring warna per state pada table-badge */
 .table-badge-urgent  { background: #fff7ed; border: 2px solid #fb923c; box-shadow: 0 0 0 4px rgba(251,146,60,.15); }
 .table-badge-pending { background: #fffbeb; border: 2px solid #fbbf24; }
 .table-badge-process { background: var(--accent-bg); border: 2px solid #93c5fd; }
@@ -282,7 +238,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .total-label { font-size: 12px; font-weight: 700; color: var(--accent-text); text-transform: uppercase; letter-spacing: 0.6px; font-family: 'Inter', sans-serif; }
 .total-value { font-size: 18px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
 
-/* ── STATUS BANNERS (inherited, adapted) ── */
+/* ── STATUS BANNERS ── */
 .lunas-banner { margin: 0 20px 12px; padding: 12px 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px; }
 .lunas-banner-cash  { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border: 1.5px solid #6ee7b7; }
 .lunas-banner-qris  { background: linear-gradient(135deg, #ede9fe, #ddd6fe); border: 1.5px solid #a5b4fc; }
@@ -327,25 +283,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .ab-orange { background: linear-gradient(135deg, #f97316, #ea580c); color: white; box-shadow: 0 3px 10px rgb(234 88 12/.28); }
 .ab-orange:hover { box-shadow: 0 6px 16px rgb(234 88 12/.38); filter: brightness(1.07); }
 
-/* ── NO RESULTS ── */
+/* ── EMPTY & NO RESULTS ── */
 .empty-state { grid-column: 1 / -1; text-align: center; padding: 56px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow); }
 .empty-state svg { opacity: .4; }
 .empty-state p { font-size: 14px; color: var(--text-muted); margin-top: 12px; }
 .empty-state small { font-size: 12px; color: var(--text-muted); opacity: .7; margin-top: 4px; display: block; font-family: 'Inter', sans-serif; }
 
-/* ── NO RESULTS SEARCH ── */
 .no-results-msg { display: none; grid-column: 1/-1; text-align: center; padding: 48px; color: var(--text-muted); }
 .no-results-msg.visible { display: block; }
 .no-results-msg svg { opacity: .3; margin-bottom: 12px; }
 .no-results-msg p { font-size: 14px; font-weight: 600; }
 .no-results-msg small { font-size: 12px; font-family: 'Inter', sans-serif; margin-top: 4px; display: block; }
 
-/* ── TOAST ── */
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; color: white; padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; display: flex; align-items: center; gap: 8px; }
-.toast.show { opacity: 1; transform: translateY(0); }
-
 /* ═══════════════════════════════════
-   MODAL CASH (UNTOUCHED LOGIC)
+   MODAL CASH
 ═══════════════════════════════════ */
 .modal-overlay { position: fixed; inset: 0; background: rgba(15, 22, 35, 0.55); backdrop-filter: blur(6px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .modal-overlay.show { opacity: 1; pointer-events: all; }
@@ -415,486 +366,487 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 6px; }
 </style>
-</head>
-<body>
+@endpush
 
-{{-- ══════════════════════════════════════════════
-     HEADER (TIDAK DIUBAH)
-══════════════════════════════════════════════ --}}
-<header class="header">
-  <div class="logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+@section('content')
+
+{{-- PAGE HEADER --}}
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-title">
+      <span class="page-title-dot"></span>
+      Pesanan Aktif
     </div>
-    <div class="logo-text">Kasir<span></span></div>
+    <div class="page-sub">{{ now()->translatedFormat('l, d F Y') }} &nbsp;·&nbsp; Kelola pesanan masuk secara real-time</div>
   </div>
-  <div class="header-right">
-    <div class="header-clock">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span id="liveClock">00:00:00</span>
+</div>
+
+{{-- STATUS OVERVIEW CHIPS --}}
+@php
+  $cntAll     = $orders->count();
+  $cntUrgent  = $orders->where('payment_method','cash')->where('status','pending')->count();
+  $cntPending = $orders->where('status','pending')->count();
+  $cntProcess = $orders->where('status','process')->count();
+  $cntDone    = $orders->whereIn('status',['paid','done','delivered'])->count();
+@endphp
+
+<div class="status-overview" id="statusOverview">
+  <div class="stat-chip chip-all active" data-filter="all" onclick="filterByChip(this,'all')">
+    <div class="stat-chip-icon">📋</div>
+    <div class="stat-chip-body">
+      <div class="stat-chip-count">{{ $cntAll }}</div>
+      <div class="stat-chip-label">Semua</div>
     </div>
-    <div class="profile-wrap">
-      <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
-        <div class="avatar">
-          @if(Auth::user()->avatar)
-            <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
-          @else
-            {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+  </div>
+  @if($cntUrgent > 0)
+  <div class="stat-chip chip-new" data-filter="urgent" onclick="filterByChip(this,'urgent')">
+    <div class="stat-chip-icon">🔥</div>
+    <div class="stat-chip-body">
+      <div class="stat-chip-count">{{ $cntUrgent }}</div>
+      <div class="stat-chip-label">Perlu Konfirmasi</div>
+    </div>
+  </div>
+  @endif
+  <div class="stat-chip chip-pending" data-filter="pending" onclick="filterByChip(this,'pending')">
+    <div class="stat-chip-icon">⏳</div>
+    <div class="stat-chip-body">
+      <div class="stat-chip-count">{{ $cntPending }}</div>
+      <div class="stat-chip-label">Menunggu</div>
+    </div>
+  </div>
+  <div class="stat-chip chip-process" data-filter="process" onclick="filterByChip(this,'process')">
+    <div class="stat-chip-icon">🍳</div>
+    <div class="stat-chip-body">
+      <div class="stat-chip-count">{{ $cntProcess }}</div>
+      <div class="stat-chip-label">Di Dapur</div>
+    </div>
+  </div>
+  <div class="stat-chip chip-done" data-filter="done" onclick="filterByChip(this,'done')">
+    <div class="stat-chip-icon">✅</div>
+    <div class="stat-chip-body">
+      <div class="stat-chip-count">{{ $cntDone }}</div>
+      <div class="stat-chip-label">Lunas</div>
+    </div>
+  </div>
+</div>
+
+{{-- TOOLBAR: SEARCH + SORT --}}
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input
+      type="text"
+      id="searchInput"
+      class="search-input"
+      placeholder="Cari nomor meja, antrian, atau nama menu…"
+      oninput="handleSearch(this.value)"
+      autocomplete="off"
+    >
+    <button class="search-clear" id="searchClear" onclick="clearSearch()" title="Hapus pencarian">✕</button>
+  </div>
+  <select class="sort-select" id="sortSelect" onchange="handleSort(this.value)">
+    <option value="newest">Terbaru</option>
+    <option value="oldest">Terlama</option>
+    <option value="highest">Total Terbesar</option>
+    <option value="lowest">Total Terkecil</option>
+    <option value="table">Nomor Meja</option>
+  </select>
+  <div class="section-count">
+    <span class="pill pill-blue" id="countPill">{{ $orders->count() }} pesanan</span>
+    @if($cntUrgent > 0)
+      <span class="pill pill-orange">🔥 {{ $cntUrgent }} perlu aksi</span>
+    @endif
+  </div>
+</div>
+
+{{-- ORDER CARDS GRID --}}
+<div class="order-grid" id="orderGrid">
+
+  @forelse($orders as $idx => $order)
+  @php
+    if ($order->payment_method === 'cash' && $order->status === 'pending') {
+      $cardClass   = 'is-pending-cash';
+      $stripeClass = 'stripe-urgent';
+      $badgeClass  = 'table-badge-urgent';
+      $filterState = 'urgent pending';
+    } elseif ($order->payment_method === 'cash' && in_array($order->status, ['paid','process','done','delivered'])) {
+      $cardClass   = 'is-cash-paid';
+      $stripeClass = $order->status === 'process' ? 'stripe-process' : 'stripe-done';
+      $badgeClass  = $order->status === 'process' ? 'table-badge-process' : 'table-badge-done';
+      $filterState = $order->status === 'process' ? 'process' : 'done';
+    } elseif ($order->payment_method === 'qris') {
+      $cardClass   = 'is-qris';
+      $stripeClass = in_array($order->status,['paid','done','delivered']) ? 'stripe-done' : 'stripe-qris';
+      $badgeClass  = in_array($order->status,['paid','done','delivered']) ? 'table-badge-done' : 'table-badge-qris';
+      $filterState = in_array($order->status,['paid','done','delivered']) ? 'done' : 'pending';
+    } else {
+      $cardClass   = '';
+      $stripeClass = 'stripe-pending';
+      $badgeClass  = 'table-badge-pending';
+      $filterState = 'pending';
+    }
+
+    $urgentClass = ($order->payment_method === 'cash' && $order->status === 'pending') ? ' is-new-urgent' : '';
+
+    $minutesAgo = $order->created_at->diffInMinutes(now());
+    if ($minutesAgo < 5)       { $elapsedClass = 'elapsed-urgent'; $elapsedText = 'Baru '.$minutesAgo.'m lalu'; }
+    elseif ($minutesAgo < 20)  { $elapsedClass = 'elapsed-warn';   $elapsedText = $minutesAgo.'m lalu'; }
+    else                       { $elapsedClass = 'elapsed-normal';  $elapsedText = $order->created_at->diffForHumans(); }
+
+    $queueNum = str_pad($order->id % 100, 3, '0', STR_PAD_LEFT);
+  @endphp
+
+  <div
+    class="order-card {{ $cardClass }}{{ $urgentClass }}"
+    data-state="{{ $filterState }}"
+    data-table="{{ $order->table_number ?? '' }}"
+    data-queue="{{ $queueNum }}"
+    data-total="{{ $order->total }}"
+    data-created="{{ $order->created_at->timestamp }}"
+    data-search="{{ strtolower(($order->table_number ?? '') . ' ' . $queueNum . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
+    style="animation-delay: {{ $idx * 0.05 }}s"
+  >
+    {{-- COLORED STATUS STRIPE --}}
+    <div class="status-stripe {{ $stripeClass }}"></div>
+
+    {{-- QUEUE NUMBER BADGE --}}
+    <div class="queue-badge">{{ $order->queue_number ?: 'A-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
+
+    {{-- CARD TOP --}}
+    <div class="order-card-top">
+      <div class="oc-left">
+        <div class="table-badge {{ $badgeClass }}">🍽️</div>
+        <div class="oc-info">
+          <h3>Meja {{ $order->table_number ?? '—' }}</h3>
+          <div class="oc-meta">
+            <span class="oc-time-inline">{{ $order->created_at->translatedFormat('H:i') }}</span>
+            <span class="elapsed-badge {{ $elapsedClass }}">{{ $elapsedText }}</span>
+          </div>
+          @if($order->note)
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;font-family:'Inter',sans-serif;">📝 {{ $order->note }}</div>
           @endif
         </div>
-        <div class="user-info">
-          <div class="user-name">{{ Auth::user()->name }}</div>
-          <div class="user-role">{{ ucfirst(Auth::user()->role) }}</div>
-        </div>
-        <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
-      <div class="dropdown" id="profileDropdown">
-        <div class="dropdown-header">
-          <div class="dropdown-avatar">
-            @if(Auth::user()->avatar)
-              <img src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Avatar">
-            @else
-              {{ strtoupper(substr(Auth::user()->name,0,1)) }}
+      <div class="oc-right">
+        @if($order->payment_method === 'cash')
+          <span class="pay-badge pay-cash">💵 Cash</span>
+        @elseif($order->payment_method === 'qris')
+          <span class="pay-badge pay-qris">📱 QRIS</span>
+        @endif
+      </div>
+    </div>
+
+    {{-- ITEM LIST --}}
+    <div class="order-items">
+      @if($order->items && $order->items->count() > 0)
+        @foreach($order->items as $item)
+        <div class="item-row">
+          <div class="item-row-left">
+            <div class="item-name">
+              {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
+              <span class="item-qty">×{{ $item->qty ?? $item->quantity ?? 1 }}</span>
+            </div>
+            @if(!empty($item->notes))
+              <div class="item-notes-small">📝 {{ $item->notes }}</div>
             @endif
           </div>
-          <div>
-            <div class="dropdown-name">{{ Auth::user()->name }}</div>
-            <div class="dropdown-role">{{ ucfirst(Auth::user()->role) }} · Online</div>
-          </div>
+          <span class="item-price">Rp {{ number_format($item->subtotal ?? ($item->price * ($item->qty ?? 1))) }}</span>
         </div>
-        <div class="dropdown-body">
-          <a href="/kasir/account/profil" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            Profil Saya
-          </a>
-          <a href="/kasir/account/ganti-sandi" class="dropdown-item">
-            <div class="item-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-            Ganti Password
-          </a>
-          <div class="dropdown-divider"></div>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="dropdown-item danger">
-              <div class="item-icon"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-              Logout
-            </button>
-          </form>
+        @endforeach
+      @else
+        <div class="item-row">
+          <div class="item-row-left"><div class="item-name">Total Pesanan</div></div>
+          <span class="item-price">Rp {{ number_format($order->total) }}</span>
         </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-{{-- ══════════════════════════════════════════════
-     TOP NAV (TIDAK DIUBAH)
-══════════════════════════════════════════════ --}}
-<nav class="topnav">
-  <div class="nav-container">
-    <a href="/kasir/dashboard" class="nav-link {{ request()->is('kasir/dashboard') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      <span>Dashboard</span>
-    </a>
-    <a href="/kasir/pesanan" class="nav-link {{ request()->is('kasir/pesanan') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-      <span>Pesanan</span>
-    </a>
-    <a href="/kasir/transaksi" class="nav-link {{ request()->is('kasir/transaksi') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <span>Transaksi</span>
-    </a>
-    <a href="/kasir/laporan" class="nav-link {{ request()->is('kasir/laporan') ? 'active' : '' }}">
-      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span>Laporan</span>
-    </a>
-  </div>
-</nav>
-
-{{-- ══════════════════════════════════════════════
-     MAIN (UPGRADED)
-══════════════════════════════════════════════ --}}
-<main class="main">
-  <div class="container">
-
-    {{-- PAGE HEADER --}}
-    <div class="page-header">
-      <div class="page-header-left">
-        <div class="page-title">
-          <span class="page-title-dot"></span>
-          Pesanan Aktif
-        </div>
-        <div class="page-sub">{{ now()->translatedFormat('l, d F Y') }} &nbsp;·&nbsp; Kelola pesanan masuk secara real-time</div>
-      </div>
-    </div>
-
-    {{-- ══════════════════════════════════════
-         STATUS OVERVIEW CHIPS (NEW)
-         Kasir lihat sekilas jumlah per state
-    ══════════════════════════════════════ --}}
-    @php
-      $cntAll     = $orders->count();
-      $cntUrgent  = $orders->where('payment_method','cash')->where('status','pending')->count();
-      $cntPending = $orders->where('status','pending')->count();
-      $cntProcess = $orders->where('status','process')->count();
-      $cntDone    = $orders->whereIn('status',['paid','done','delivered'])->count();
-    @endphp
-
-    <div class="status-overview" id="statusOverview">
-      <div class="stat-chip chip-all active" data-filter="all" onclick="filterByChip(this,'all')">
-        <div class="stat-chip-icon">📋</div>
-        <div class="stat-chip-body">
-          <div class="stat-chip-count">{{ $cntAll }}</div>
-          <div class="stat-chip-label">Semua</div>
-        </div>
-      </div>
-      @if($cntUrgent > 0)
-      <div class="stat-chip chip-new" data-filter="urgent" onclick="filterByChip(this,'urgent')">
-        <div class="stat-chip-icon">🔥</div>
-        <div class="stat-chip-body">
-          <div class="stat-chip-count">{{ $cntUrgent }}</div>
-          <div class="stat-chip-label">Perlu Konfirmasi</div>
-        </div>
-      </div>
       @endif
-      <div class="stat-chip chip-pending" data-filter="pending" onclick="filterByChip(this,'pending')">
-        <div class="stat-chip-icon">⏳</div>
-        <div class="stat-chip-body">
-          <div class="stat-chip-count">{{ $cntPending }}</div>
-          <div class="stat-chip-label">Menunggu</div>
-        </div>
-      </div>
-      <div class="stat-chip chip-process" data-filter="process" onclick="filterByChip(this,'process')">
-        <div class="stat-chip-icon">🍳</div>
-        <div class="stat-chip-body">
-          <div class="stat-chip-count">{{ $cntProcess }}</div>
-          <div class="stat-chip-label">Di Dapur</div>
-        </div>
-      </div>
-      <div class="stat-chip chip-done" data-filter="done" onclick="filterByChip(this,'done')">
-        <div class="stat-chip-icon">✅</div>
-        <div class="stat-chip-body">
-          <div class="stat-chip-count">{{ $cntDone }}</div>
-          <div class="stat-chip-label">Lunas</div>
-        </div>
-      </div>
     </div>
 
-    {{-- ══════════════════════════════════════
-         TOOLBAR: SEARCH + SORT (NEW)
-    ══════════════════════════════════════ --}}
-    <div class="toolbar">
-      <div class="search-wrap">
-        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input
-          type="text"
-          id="searchInput"
-          class="search-input"
-          placeholder="Cari nomor meja, antrian, atau nama menu…"
-          oninput="handleSearch(this.value)"
-          autocomplete="off"
-        >
-        <button class="search-clear" id="searchClear" onclick="clearSearch()" title="Hapus pencarian">✕</button>
-      </div>
-      <select class="sort-select" id="sortSelect" onchange="handleSort(this.value)">
-        <option value="newest">Terbaru</option>
-        <option value="oldest">Terlama</option>
-        <option value="highest">Total Terbesar</option>
-        <option value="lowest">Total Terkecil</option>
-        <option value="table">Nomor Meja</option>
-      </select>
-      <div class="section-count">
-        <span class="pill pill-blue" id="countPill">{{ $orders->count() }} pesanan</span>
-        @if($cntUrgent > 0)
-          <span class="pill pill-orange" style="animation: pulse-dot 2s infinite;">🔥 {{ $cntUrgent }} perlu aksi</span>
-        @endif
-      </div>
+    {{-- TOTAL --}}
+    <div class="total-row">
+      <span class="total-label">Total</span>
+      <span class="total-value">Rp {{ number_format($order->total) }}</span>
     </div>
 
-    {{-- ══════════════════════════════════════
-         ORDER CARDS GRID
-    ══════════════════════════════════════ --}}
-    <div class="order-grid" id="orderGrid">
-
-      @forelse($orders as $idx => $order)
-      @php
-        // Card class (logic sama persis, tidak diubah)
-        if ($order->payment_method === 'cash' && $order->status === 'pending') {
-          $cardClass   = 'is-pending-cash';
-          $stripeClass = 'stripe-urgent';
-          $badgeClass  = 'table-badge-urgent';
-          $filterState = 'urgent pending';
-        } elseif ($order->payment_method === 'cash' && in_array($order->status, ['paid','process','done','delivered'])) {
-          $cardClass   = 'is-cash-paid';
-          $stripeClass = $order->status === 'process' ? 'stripe-process' : 'stripe-done';
-          $badgeClass  = $order->status === 'process' ? 'table-badge-process' : 'table-badge-done';
-          $filterState = $order->status === 'process' ? 'process' : 'done';
-        } elseif ($order->payment_method === 'qris') {
-          $cardClass   = 'is-qris';
-          $stripeClass = in_array($order->status,['paid','done','delivered']) ? 'stripe-done' : 'stripe-qris';
-          $badgeClass  = in_array($order->status,['paid','done','delivered']) ? 'table-badge-done' : 'table-badge-qris';
-          $filterState = in_array($order->status,['paid','done','delivered']) ? 'done' : 'pending';
-        } else {
-          $cardClass   = '';
-          $stripeClass = 'stripe-pending';
-          $badgeClass  = 'table-badge-pending';
-          $filterState = 'pending';
-        }
-
-        // Tambah is-new-urgent untuk cash pending (animasi pulse)
-        $urgentClass = ($order->payment_method === 'cash' && $order->status === 'pending') ? ' is-new-urgent' : '';
-
-        // Waktu elapsed
-        $minutesAgo = $order->created_at->diffInMinutes(now());
-        if ($minutesAgo < 5)       { $elapsedClass = 'elapsed-urgent'; $elapsedText = 'Baru '.$minutesAgo.'m lalu'; }
-        elseif ($minutesAgo < 20)  { $elapsedClass = 'elapsed-warn';   $elapsedText = $minutesAgo.'m lalu'; }
-        else                       { $elapsedClass = 'elapsed-normal';  $elapsedText = $order->created_at->diffForHumans(); }
-
-        // Queue number (gunakan id atau nomor urut)
-        $queueNum = str_pad($order->id % 100, 3, '0', STR_PAD_LEFT);
-      @endphp
-
-      <div
-        class="order-card {{ $cardClass }}{{ $urgentClass }}"
-        data-state="{{ $filterState }}"
-        data-table="{{ $order->table_number ?? '' }}"
-        data-queue="{{ $queueNum }}"
-        data-total="{{ $order->total }}"
-        data-created="{{ $order->created_at->timestamp }}"
-        data-search="{{ strtolower(($order->table_number ?? '') . ' ' . $queueNum . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
-        style="animation-delay: {{ $idx * 0.05 }}s"
-      >
-        {{-- COLORED STATUS STRIPE --}}
-        <div class="status-stripe {{ $stripeClass }}"></div>
-
-        {{-- QUEUE NUMBER BADGE --}}
-        <div class="queue-badge">{{ $order->queue_number ?: 'A-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}</div>
-
-        {{-- CARD TOP --}}
-        <div class="order-card-top">
-          <div class="oc-left">
-            <div class="table-badge {{ $badgeClass }}">🍽️</div>
-            <div class="oc-info">
-              <h3>Meja {{ $order->table_number ?? '—' }}</h3>
-              <div class="oc-meta">
-                <span class="oc-time-inline">{{ $order->created_at->translatedFormat('H:i') }}</span>
-                <span class="elapsed-badge {{ $elapsedClass }}">{{ $elapsedText }}</span>
-              </div>
-              @if($order->note)
-                <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;font-family:'Inter',sans-serif;">📝 {{ $order->note }}</div>
-              @endif
-            </div>
-          </div>
-          <div class="oc-right">
-            @if($order->payment_method === 'cash')
-              <span class="pay-badge pay-cash">💵 Cash</span>
-            @elseif($order->payment_method === 'qris')
-              <span class="pay-badge pay-qris">📱 QRIS</span>
-            @endif
-          </div>
+    {{-- STATUS BANNERS --}}
+    @if($order->payment_method === 'cash' && $order->status === 'pending')
+      <div class="cash-alert">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Terima uang cash dari customer sebelum konfirmasi!
+      </div>
+    @elseif($order->payment_method === 'cash' && in_array($order->status, ['paid','process','done','delivered']))
+      <div class="lunas-banner lunas-banner-cash">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">LUNAS — Pembayaran Cash Diterima</div>
+          <div class="lunas-banner-sub">Pesanan sudah masuk dapur &amp; dicatat ke transaksi</div>
         </div>
-
-        {{-- ITEM LIST (logic tidak diubah) --}}
-        <div class="order-items">
-          @if($order->items && $order->items->count() > 0)
-            @foreach($order->items as $item)
-            <div class="item-row">
-              <div class="item-row-left">
-                <div class="item-name">
-                  {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
-                  <span class="item-qty">×{{ $item->qty ?? $item->quantity ?? 1 }}</span>
-                </div>
-                @if(!empty($item->notes))
-                  <div class="item-notes-small">📝 {{ $item->notes }}</div>
-                @endif
-              </div>
-              <span class="item-price">Rp {{ number_format($item->subtotal ?? ($item->price * ($item->qty ?? 1))) }}</span>
-            </div>
-            @endforeach
-          @else
-            <div class="item-row">
-              <div class="item-row-left"><div class="item-name">Total Pesanan</div></div>
-              <span class="item-price">Rp {{ number_format($order->total) }}</span>
-            </div>
-          @endif
+      </div>
+    @elseif($order->payment_method === 'qris' && in_array($order->status, ['paid','process','done','delivered']))
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">📱</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">LUNAS — Pembayaran QRIS Terverifikasi</div>
+          <div class="lunas-banner-sub">Pembayaran dikonfirmasi otomatis, pesanan masuk dapur</div>
         </div>
+      </div>
+    @elseif($order->payment_method === 'qris' && $order->status === 'pending')
+      <div class="status-info-box box-cash-pending">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Menunggu konfirmasi pembayaran QRIS dari sistem...
+      </div>
+    @endif
 
-        {{-- TOTAL (tidak diubah) --}}
-        <div class="total-row">
-          <span class="total-label">Total</span>
-          <span class="total-value">Rp {{ number_format($order->total) }}</span>
-        </div>
-
-        {{-- STATUS BANNERS (logic tidak diubah) --}}
+    {{-- CARD FOOTER --}}
+    <div class="order-footer">
+      <div class="status-pills">
         @if($order->payment_method === 'cash' && $order->status === 'pending')
-          <div class="cash-alert">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Terima uang cash dari customer sebelum konfirmasi!
-          </div>
-        @elseif($order->payment_method === 'cash' && in_array($order->status, ['paid','process','done','delivered']))
-          <div class="lunas-banner lunas-banner-cash">
-            <div class="lunas-banner-icon">✅</div>
-            <div class="lunas-banner-text">
-              <div class="lunas-banner-title">LUNAS — Pembayaran Cash Diterima</div>
-              <div class="lunas-banner-sub">Pesanan sudah masuk dapur &amp; dicatat ke transaksi</div>
-            </div>
-          </div>
-        @elseif($order->payment_method === 'qris' && in_array($order->status, ['paid','process','done','delivered']))
-          <div class="lunas-banner lunas-banner-qris">
-            <div class="lunas-banner-icon">📱</div>
-            <div class="lunas-banner-text">
-              <div class="lunas-banner-title">LUNAS — Pembayaran QRIS Terverifikasi</div>
-              <div class="lunas-banner-sub">Pembayaran dikonfirmasi otomatis, pesanan masuk dapur</div>
-            </div>
-          </div>
+          <span class="pill pill-amber">⏳ Menunggu Bayar</span>
+          <span class="pill pill-orange">💵 Cash</span>
+        @elseif($order->payment_method === 'cash' && $order->status === 'paid')
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-orange">💵 Cash</span>
+        @elseif($order->payment_method === 'cash' && $order->status === 'process')
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-blue">🍳 Diproses Dapur</span>
+        @elseif($order->payment_method === 'cash' && in_array($order->status, ['done','delivered']))
+          <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
+          <span class="pill pill-orange">💵 Cash</span>
         @elseif($order->payment_method === 'qris' && $order->status === 'pending')
-          <div class="status-info-box box-cash-pending">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Menunggu konfirmasi pembayaran QRIS dari sistem...
-          </div>
+          <span class="pill pill-amber">⏳ Menunggu QRIS</span>
+          <span class="pill pill-indigo">📱 QRIS</span>
+        @elseif($order->payment_method === 'qris' && $order->status === 'process')
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-blue">🔥 Diproses Dapur</span>
+        @elseif($order->payment_method === 'qris' && $order->status === 'paid')
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-indigo">📱 QRIS</span>
+        @elseif($order->payment_method === 'qris' && in_array($order->status, ['done','delivered']))
+          <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
+          <span class="pill pill-indigo">📱 QRIS</span>
+        @else
+          <span class="pill pill-amber">{{ ucfirst($order->status) }}</span>
         @endif
-
-        {{-- CARD FOOTER (logic tidak diubah) --}}
-        <div class="order-footer">
-          <div class="status-pills">
-            @if($order->payment_method === 'cash' && $order->status === 'pending')
-              <span class="pill pill-amber">⏳ Menunggu Bayar</span>
-              <span class="pill pill-orange">💵 Cash</span>
-            @elseif($order->payment_method === 'cash' && $order->status === 'paid')
-              <span class="pill pill-green">✅ Lunas</span>
-              <span class="pill pill-orange">💵 Cash</span>
-            @elseif($order->payment_method === 'cash' && $order->status === 'process')
-              <span class="pill pill-green">✅ Lunas</span>
-              <span class="pill pill-blue">🍳 Diproses Dapur</span>
-            @elseif($order->payment_method === 'cash' && in_array($order->status, ['done','delivered']))
-              <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
-              <span class="pill pill-orange">💵 Cash</span>
-            @elseif($order->payment_method === 'qris' && $order->status === 'pending')
-              <span class="pill pill-amber">⏳ Menunggu QRIS</span>
-              <span class="pill pill-indigo">📱 QRIS</span>
-            @elseif($order->payment_method === 'qris' && $order->status === 'process')
-              <span class="pill pill-green">✅ Lunas</span>
-              <span class="pill pill-blue">🔥 Diproses Dapur</span>
-            @elseif($order->payment_method === 'qris' && $order->status === 'paid')
-              <span class="pill pill-green">✅ Lunas</span>
-              <span class="pill pill-indigo">📱 QRIS</span>
-            @elseif($order->payment_method === 'qris' && in_array($order->status, ['done','delivered']))
-              <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
-              <span class="pill pill-indigo">📱 QRIS</span>
-            @else
-              <span class="pill pill-amber">{{ ucfirst($order->status) }}</span>
-            @endif
-          </div>
-          <div class="action-btns">
-            @if($order->payment_method === 'cash' && $order->status === 'pending')
-              <button type="button" class="act-btn ab-orange"
-                onclick="openCashModal({{ $order->id }}, {{ $order->total }}, '{{ ($order->order_type ?? 'dine_in') === 'takeaway' ? 'Takeaway' : ($order->table_number ?? '-') }}')">
-                💵 Konfirmasi Bayar
-              </button>
-            @elseif($order->status === 'process')
-              <form action="/kasir/pesanan/{{ $order->id }}/selesai" method="POST" style="display:inline;">
-                @csrf @method('PATCH')
-                <button type="submit" class="act-btn ab-success">✅ Selesai</button>
-              </form>
-            @endif
-          </div>
-        </div>
-
-      </div><!-- .order-card -->
-      @empty
-      <div class="empty-state">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-          <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
-        </svg>
-        <p>Belum ada pesanan masuk saat ini.</p>
-        <small>Pesanan baru akan muncul di sini secara otomatis</small>
       </div>
-      @endforelse
-
-      {{-- NO RESULTS AFTER SEARCH --}}
-      <div class="no-results-msg" id="noResults">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <p id="noResultsText">Pesanan tidak ditemukan</p>
-        <small>Coba kata kunci lain atau hapus filter</small>
+      <div class="action-btns">
+        @if($order->payment_method === 'cash' && $order->status === 'pending')
+          {{-- Tombol buka modal cash --}}
+          <button
+            type="button"
+            class="act-btn ab-orange"
+            onclick="openCashModal({{ $order->id }}, {{ $order->total }}, '{{ addslashes(($order->order_type ?? 'dine_in') === 'takeaway' ? 'Takeaway' : ($order->table_number ?? '-')) }}')"
+          >
+            💵 Konfirmasi Bayar
+          </button>
+        @elseif($order->status === 'process')
+          <form action="{{ url('/kasir/pesanan/' . $order->id . '/selesai') }}" method="POST" style="display:inline;" class="form-selesai">
+            @csrf
+            @method('PATCH')
+            <button type="submit" class="act-btn ab-success">✅ Selesai</button>
+          </form>
+        @endif
       </div>
+    </div>
 
-    </div><!-- #orderGrid -->
-
+  </div>{{-- .order-card --}}
+  @empty
+  <div class="empty-state">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+    </svg>
+    <p>Belum ada pesanan masuk saat ini.</p>
+    <small>Pesanan baru akan muncul di sini secara otomatis</small>
   </div>
-</main>
+  @endforelse
 
-{{-- MODAL PEMBAYARAN CASH (TIDAK DIUBAH) --}}
+  {{-- NO RESULTS AFTER SEARCH --}}
+  <div class="no-results-msg" id="noResults">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <p id="noResultsText">Pesanan tidak ditemukan</p>
+    <small>Coba kata kunci lain atau hapus filter</small>
+  </div>
+
+</div>{{-- #orderGrid --}}
+
+{{-- ══════════════════════════════════════
+     MODAL CASH PAYMENT
+══════════════════════════════════════ --}}
 <div class="modal-overlay" id="cashModal" onclick="handleOverlayClick(event)">
   <div class="modal-box">
+
     <div class="modal-head">
       <div class="modal-icon">💵</div>
       <div class="modal-head-info">
-        <h2>Terima Pembayaran Cash</h2>
+        <h2>Konfirmasi Pembayaran Cash</h2>
         <p id="modalTableLabel">Meja —</p>
       </div>
     </div>
+
     <div class="modal-body">
       <div class="modal-total-block">
         <div class="modal-total-label">Total yang Harus Dibayar</div>
         <div class="modal-total-amount" id="modalTotalDisplay">Rp 0</div>
       </div>
+
       <div class="modal-field">
         <label for="cashInput">Uang Diterima dari Customer</label>
         <div class="input-money-wrap">
           <span class="input-money-prefix">Rp</span>
-          <input type="number" id="cashInput" class="input-money" placeholder="0" min="0" autocomplete="off"
-            oninput="calcChange()" onfocus="this.select()">
+          <input
+            type="number"
+            id="cashInput"
+            class="input-money"
+            placeholder="0"
+            oninput="calcChange()"
+            min="0"
+          >
         </div>
         <div class="quick-cash" id="quickCashBtns"></div>
       </div>
+
       <div class="modal-change-block" id="changeBlock">
-        <div class="modal-change-label">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="changeLabel">Kembalian</span>
-        </div>
-        <div class="modal-change-value" id="changeValue">Rp 0</div>
+        <span class="modal-change-label" id="changeLabel">Kembalian</span>
+        <span class="modal-change-value" id="changeValue">Rp 0</span>
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="modal-btn modal-btn-cancel" onclick="closeCashModal()">Batal</button>
-      <form id="cashConfirmForm" method="POST" style="flex:1; display:flex;">
-        @csrf @method('PATCH')
-        <input type="hidden" name="uang_diterima" id="hiddenUangDiterima" value="0">
-        <button type="submit" class="modal-btn modal-btn-confirm" id="confirmBtn" disabled>
-          ✅ Konfirmasi &amp; Proses
+
+    <form id="cashConfirmForm" method="POST" action="">
+      @csrf
+      @method('PATCH')
+      <input type="hidden" name="uang_diterima" id="hiddenUangDiterima" value="0">
+      <div class="modal-foot">
+        <button type="button" class="modal-btn modal-btn-cancel" onclick="closeCashModal()">
+          Batal
         </button>
-      </form>
-    </div>
+        <button type="submit" class="modal-btn modal-btn-confirm" id="confirmBtn" disabled>
+          ✅ Konfirmasi Lunas
+        </button>
+      </div>
+    </form>
+
   </div>
 </div>
 
-<!-- ── TOAST KASIR ── -->
-<div id="ksToastContainer" style="position:fixed;top:80px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;"></div>
+{{-- TOAST CONTAINER --}}
+<div
+  id="ksToastContainer"
+  style="position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999;pointer-events:none;"
+></div>
 
-<div class="toast" id="toast"></div>
+@endsection
 
-@if(session('success'))
+@push('scripts')
 <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    const t = document.getElementById('toast');
-    t.innerHTML = '✅ ' + "{{ session('success') }}";
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-    ksToast('✅ ' + "{{ session('success') }}", 'success', 3500);
+/* ═══════════════════════════════════════════════
+   TOAST SYSTEM — didefinisikan PERTAMA
+═══════════════════════════════════════════════ */
+function ksToast(msg, type, dur) {
+  type = type || 'success';
+  dur  = dur  || 2400;
+  var c = document.getElementById('ksToastContainer');
+  if (!c) return;
+
+  var colors = {
+    success : 'background:linear-gradient(135deg,#059669,#047857);',
+    info    : 'background:linear-gradient(135deg,#2563eb,#1d4ed8);',
+    warning : 'background:linear-gradient(135deg,#d97706,#b45309);',
+    error   : 'background:linear-gradient(135deg,#dc2626,#b91c1c);'
+  };
+  var icons = { success:'✅', info:'ℹ️', warning:'⚠️', error:'❌' };
+
+  var t = document.createElement('div');
+  t.style.cssText = [
+    'pointer-events:auto;display:flex;align-items:center;gap:9px;',
+    'padding:11px 18px;border-radius:12px;',
+    'box-shadow:0 8px 24px rgba(0,0,0,0.18);',
+    'font-size:13px;font-weight:600;',
+    'font-family:"Plus Jakarta Sans",sans-serif;',
+    'white-space:nowrap;color:white;',
+    'opacity:0;transform:translateX(18px) scale(0.95);',
+    'transition:all 0.25s cubic-bezier(.34,1.56,.64,1);',
+    'max-width:340px;',
+    (colors[type] || colors.info)
+  ].join('');
+
+  t.innerHTML = '<span style="font-size:15px;">' + (icons[type] || '📢') + '</span>'
+              + '<span>' + msg + '</span>';
+  c.appendChild(t);
+
+  requestAnimationFrame(function() {
+    t.style.opacity   = '1';
+    t.style.transform = 'translateX(0) scale(1)';
   });
-</script>
-@endif
 
-<script>
-/* ── Feedback submit form "Selesai" ── */
+  setTimeout(function() {
+    t.style.opacity   = '0';
+    t.style.transform = 'translateX(18px) scale(0.95)';
+    setTimeout(function() { t.remove(); }, 260);
+  }, dur);
+}
+
+/* ═══════════════════════════════════════════════
+   LIVE CLOCK
+═══════════════════════════════════════════════ */
+(function startClock() {
+  var el = document.getElementById('liveClock');
+  if (!el) return;
+  function tick() {
+    var now = new Date();
+    el.textContent = now.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* ═══════════════════════════════════════════════
+   DROPDOWN PROFILE
+═══════════════════════════════════════════════ */
+function toggleProfile() {
+  var btn  = document.getElementById('profileBtn');
+  var drop = document.getElementById('profileDropdown');
+  if (!btn || !drop) return;
+  var isOpen = drop.classList.toggle('show');
+  btn.classList.toggle('open', isOpen);
+}
+
+document.addEventListener('click', function(e) {
+  var wrap = document.querySelector('.profile-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    var drop = document.getElementById('profileDropdown');
+    var btn  = document.getElementById('profileBtn');
+    if (drop) drop.classList.remove('show');
+    if (btn)  btn.classList.remove('open');
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var drop = document.getElementById('profileDropdown');
+    var btn  = document.getElementById('profileBtn');
+    if (drop) drop.classList.remove('show');
+    if (btn)  btn.classList.remove('open');
+    closeCashModal();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   SESSION SUCCESS TOAST — dijalankan setelah DOM ready
+═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.order-footer form').forEach(function(form) {
+  @if(session('success'))
+    ksToast('✅ {{ addslashes(session('success')) }}', 'success', 3500);
+  @endif
+
+  /* Feedback form "Selesai" */
+  document.querySelectorAll('.form-selesai').forEach(function(form) {
     form.addEventListener('submit', function() {
       ksToast('⏳ Memproses pesanan...', 'info', 2000);
     });
   });
-  /* ── Feedback submit form Cash Konfirmasi ── */
+
+  /* Feedback form cash konfirmasi */
   var cashForm = document.getElementById('cashConfirmForm');
   if (cashForm) {
     cashForm.addEventListener('submit', function() {
@@ -902,150 +854,112 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
-</script>
 
-<script>
-/* ── TOAST ── */
-function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
-
-/* ══════════════════════════════════════
-   CLOCK (tidak diubah)
-══════════════════════════════════════ */
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-/* ══════════════════════════════════════
-   DROPDOWN PROFILE (tidak diubah)
-══════════════════════════════════════ */
-function toggleDropdown() {
-  const btn = document.getElementById('profileBtn');
-  const dd  = document.getElementById('profileDropdown');
-  const open = dd.classList.toggle('show');
-  btn.classList.toggle('open', open);
-}
-document.addEventListener('click', function(e) {
-  const wrap = document.querySelector('.profile-wrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-  }
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    document.getElementById('profileDropdown').classList.remove('show');
-    document.getElementById('profileBtn').classList.remove('open');
-    closeCashModal();
-  }
-});
-
-/* ══════════════════════════════════════
-   FILTER STATE (chip clicks)
-══════════════════════════════════════ */
-let activeFilter = 'all';
-let activeSearch = '';
+/* ═══════════════════════════════════════════════
+   FILTER BY STATUS CHIP
+═══════════════════════════════════════════════ */
+var activeFilter = 'all';
+var activeSearch = '';
 
 function filterByChip(el, state) {
-  document.querySelectorAll('.stat-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active'); });
   el.classList.add('active');
   activeFilter = state;
-  const labels = { all:'Semua pesanan', urgent:'Perlu konfirmasi', pending:'Menunggu', process:'Di dapur', done:'Lunas' };
+  var labels = { all:'Semua pesanan', urgent:'Perlu konfirmasi', pending:'Menunggu', process:'Di dapur', done:'Lunas' };
   ksToast('Filter: ' + (labels[state] || state), 'info', 1600);
   applyFilters();
 }
 
-/* ══════════════════════════════════════
+/* ═══════════════════════════════════════════════
    SEARCH
-══════════════════════════════════════ */
+═══════════════════════════════════════════════ */
 function handleSearch(val) {
   activeSearch = val.trim().toLowerCase();
-  const clearBtn = document.getElementById('searchClear');
-  clearBtn.classList.toggle('visible', activeSearch.length > 0);
+  var clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.classList.toggle('visible', activeSearch.length > 0);
   applyFilters();
 }
 
 function clearSearch() {
-  document.getElementById('searchInput').value = '';
+  var inp = document.getElementById('searchInput');
+  if (inp) inp.value = '';
   activeSearch = '';
-  document.getElementById('searchClear').classList.remove('visible');
+  var clearBtn = document.getElementById('searchClear');
+  if (clearBtn) clearBtn.classList.remove('visible');
   ksToast('Pencarian dihapus', 'info', 1400);
   applyFilters();
 }
 
-/* ══════════════════════════════════════
+/* ═══════════════════════════════════════════════
    SORT
-══════════════════════════════════════ */
+═══════════════════════════════════════════════ */
 function handleSort(val) {
-  const grid  = document.getElementById('orderGrid');
-  const cards = Array.from(grid.querySelectorAll('.order-card'));
-  cards.sort((a, b) => {
-    if (val === 'newest')  return b.dataset.created - a.dataset.created;
-    if (val === 'oldest')  return a.dataset.created - b.dataset.created;
-    if (val === 'highest') return b.dataset.total   - a.dataset.total;
-    if (val === 'lowest')  return a.dataset.total   - b.dataset.total;
+  var grid  = document.getElementById('orderGrid');
+  var cards = Array.from(grid.querySelectorAll('.order-card'));
+
+  cards.sort(function(a, b) {
+    if (val === 'newest')  return Number(b.dataset.created) - Number(a.dataset.created);
+    if (val === 'oldest')  return Number(a.dataset.created) - Number(b.dataset.created);
+    if (val === 'highest') return Number(b.dataset.total)   - Number(a.dataset.total);
+    if (val === 'lowest')  return Number(a.dataset.total)   - Number(b.dataset.total);
     if (val === 'table') {
-      const ta = a.dataset.table || '999', tb = b.dataset.table || '999';
+      var ta = a.dataset.table || '999', tb = b.dataset.table || '999';
       return ta.localeCompare(tb, undefined, { numeric: true });
     }
     return 0;
   });
-  cards.forEach(c => grid.appendChild(c));
-  const sortLabels = { newest:'Terbaru', oldest:'Terlama', highest:'Total Terbesar', lowest:'Total Terkecil', table:'Nomor Meja' };
-  ksToast('Urutan: ' + (sortLabels[val]||val), 'info', 1500);
+
+  cards.forEach(function(c) { grid.appendChild(c); });
+
+  var sortLabels = { newest:'Terbaru', oldest:'Terlama', highest:'Total Terbesar', lowest:'Total Terkecil', table:'Nomor Meja' };
+  ksToast('Urutan: ' + (sortLabels[val] || val), 'info', 1500);
 }
 
-/* ══════════════════════════════════════
-   APPLY FILTERS (state + search)
-══════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   APPLY FILTERS (state + search digabung)
+═══════════════════════════════════════════════ */
 function applyFilters() {
-  const cards = document.querySelectorAll('.order-card');
-  let visible = 0;
+  var cards   = document.querySelectorAll('.order-card');
+  var visible = 0;
 
-  cards.forEach(card => {
-    const state   = card.dataset.state || '';
-    const search  = card.dataset.search || '';
-    const table   = (card.dataset.table || '').toLowerCase();
-    const queue   = (card.dataset.queue || '').toLowerCase();
+  cards.forEach(function(card) {
+    var state  = card.dataset.state  || '';
+    var search = card.dataset.search || '';
+    var table  = (card.dataset.table || '').toLowerCase();
+    var queue  = (card.dataset.queue || '').toLowerCase();
 
-    // State filter
-    let stateOk = activeFilter === 'all' || state.includes(activeFilter);
-
-    // Search filter
-    let searchOk = true;
+    var stateOk  = (activeFilter === 'all') || state.includes(activeFilter);
+    var searchOk = true;
     if (activeSearch) {
       searchOk = search.includes(activeSearch)
-               || table.includes(activeSearch)
-               || queue.includes(activeSearch);
+              || table.includes(activeSearch)
+              || queue.includes(activeSearch);
     }
 
-    const show = stateOk && searchOk;
+    var show = stateOk && searchOk;
     card.classList.toggle('hidden', !show);
     if (show) visible++;
   });
 
-  // Update count pill
-  document.getElementById('countPill').textContent = visible + ' pesanan';
+  var pill = document.getElementById('countPill');
+  if (pill) pill.textContent = visible + ' pesanan';
 
-  // Show no-results
-  const noRes = document.getElementById('noResults');
-  noRes.classList.toggle('visible', visible === 0);
-  if (visible === 0 && activeSearch) {
-    document.getElementById('noResultsText').textContent = `Tidak ada pesanan untuk "${activeSearch}"`;
-  } else if (visible === 0) {
-    document.getElementById('noResultsText').textContent = 'Tidak ada pesanan di kategori ini';
+  var noRes = document.getElementById('noResults');
+  if (noRes) {
+    noRes.classList.toggle('visible', visible === 0);
+    var txt = document.getElementById('noResultsText');
+    if (txt) {
+      txt.textContent = (visible === 0 && activeSearch)
+        ? 'Tidak ada pesanan untuk "' + activeSearch + '"'
+        : 'Tidak ada pesanan di kategori ini';
+    }
   }
 }
 
-/* ══════════════════════════════════════
-   MODAL CASH (tidak diubah logic-nya)
-══════════════════════════════════════ */
-let _modalTotal = 0;
+/* ═══════════════════════════════════════════════
+   MODAL CASH
+═══════════════════════════════════════════════ */
+var _modalTotal = 0;
 
 function formatRp(n) {
   return 'Rp ' + Math.abs(n).toLocaleString('id-ID');
@@ -1053,66 +967,119 @@ function formatRp(n) {
 
 function openCashModal(orderId, total, tableLabel) {
   _modalTotal = total;
-  document.getElementById('modalTableLabel').textContent = 'Meja ' + tableLabel;
-  document.getElementById('modalTotalDisplay').textContent = formatRp(total);
-  document.getElementById('cashConfirmForm').action = '/kasir/pesanan/' + orderId + '/konfirmasi';
-  const input = document.getElementById('cashInput');
-  input.value = '';
-  input.classList.remove('error');
+
+  var labelEl = document.getElementById('modalTableLabel');
+  if (labelEl) labelEl.textContent = 'Meja ' + tableLabel;
+
+  var totalEl = document.getElementById('modalTotalDisplay');
+  if (totalEl) totalEl.textContent = formatRp(total);
+
+  var form = document.getElementById('cashConfirmForm');
+  if (form) form.action = '/kasir/pesanan/' + orderId + '/konfirmasi';
+
+  var input = document.getElementById('cashInput');
+  if (input) {
+    input.value = '';
+    input.classList.remove('error');
+  }
+
   buildQuickCash(total);
   calcChange();
-  document.getElementById('cashModal').classList.add('show');
-  ksToast('💵 Modal pembayaran cash dibuka — Meja ' + tableLabel, 'info', 2000);
-  setTimeout(() => input.focus(), 280);
+
+  var modal = document.getElementById('cashModal');
+  if (modal) modal.classList.add('show');
+
+  ksToast('💵 Konfirmasi pembayaran — Meja ' + tableLabel, 'info', 2000);
+  setTimeout(function() { if (input) input.focus(); }, 280);
 }
 
 function closeCashModal() {
-  document.getElementById('cashModal').classList.remove('show');
-  ksToast('Modal ditutup', 'info', 1200);
+  var modal = document.getElementById('cashModal');
+  if (modal) modal.classList.remove('show');
 }
 
 function handleOverlayClick(e) {
-  if (e.target === document.getElementById('cashModal')) closeCashModal();
+  if (e.target === document.getElementById('cashModal')) {
+    closeCashModal();
+  }
 }
 
 function buildQuickCash(total) {
-  const container = document.getElementById('quickCashBtns');
+  var container = document.getElementById('quickCashBtns');
+  if (!container) return;
   container.innerHTML = '';
-  const nominals = [total];
-  const rounds   = [5000, 10000, 20000, 50000, 100000];
-  for (const r of rounds) {
-    const val = Math.ceil(total / r) * r;
-    if (val > total && !nominals.includes(val)) nominals.push(val);
+
+  var nominals = [total];
+  var rounds   = [5000, 10000, 20000, 50000, 100000];
+
+  for (var i = 0; i < rounds.length; i++) {
+    var r   = rounds[i];
+    var val = Math.ceil(total / r) * r;
+    if (val > total && nominals.indexOf(val) === -1) nominals.push(val);
     if (nominals.length >= 5) break;
   }
-  nominals.sort((a, b) => a - b);
-  for (const n of nominals) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
+  nominals.sort(function(a, b) { return a - b; });
+
+  nominals.forEach(function(n) {
+    var btn = document.createElement('button');
+    btn.type      = 'button';
     btn.className = 'qc-btn';
-    btn.textContent = n === total ? '💯 Pas ' + formatRp(n) : formatRp(n);
-    btn.onclick = () => { document.getElementById('cashInput').value = n; calcChange(); };
+    btn.textContent = (n === total) ? '💯 Pas ' + formatRp(n) : formatRp(n);
+    btn.onclick = (function(amount) {
+      return function() {
+        var inp = document.getElementById('cashInput');
+        if (inp) inp.value = amount;
+        calcChange();
+      };
+    })(n);
     container.appendChild(btn);
-  }
+  });
 }
 
 function calcChange() {
-  const input       = document.getElementById('cashInput');
-  const changeBlock = document.getElementById('changeBlock');
-  const changeLabel = document.getElementById('changeLabel');
-  const changeValue = document.getElementById('changeValue');
-  const confirmBtn  = document.getElementById('confirmBtn');
-  const hidden      = document.getElementById('hiddenUangDiterima');
-  const received    = parseInt(input.value) || 0;
-  const change      = received - _modalTotal;
-  hidden.value      = received;
+  var input       = document.getElementById('cashInput');
+  var changeBlock = document.getElementById('changeBlock');
+  var changeLabel = document.getElementById('changeLabel');
+  var changeValue = document.getElementById('changeValue');
+  var confirmBtn  = document.getElementById('confirmBtn');
+  var hidden      = document.getElementById('hiddenUangDiterima');
+
+  if (!input || !changeBlock || !changeLabel || !changeValue || !confirmBtn) return;
+
+  var received = parseInt(input.value) || 0;
+  var change   = received - _modalTotal;
+
+  if (hidden) hidden.value = received;
+
   input.classList.remove('error');
   changeBlock.classList.remove('insuf', 'exact');
-  if (received === 0) { changeLabel.textContent = 'Kembalian'; changeValue.textContent = 'Rp 0'; confirmBtn.disabled = true; return; }
-  if (change < 0)     { changeBlock.classList.add('insuf'); changeLabel.textContent = '⚠️ Kurang'; changeValue.textContent = '−' + formatRp(change); confirmBtn.disabled = true; input.classList.add('error'); ksToast('Uang kurang ' + formatRp(Math.abs(change)), 'error', 1800); }
-  else if (change === 0) { changeBlock.classList.add('exact'); changeLabel.textContent = '✨ Pas, tidak ada kembalian'; changeValue.textContent = ''; confirmBtn.disabled = false; ksToast('✨ Uang pas! Bisa langsung konfirmasi', 'success', 1800); }
-  else                { changeLabel.textContent = '💰 Kembalian'; changeValue.textContent = formatRp(change); confirmBtn.disabled = false; ksToast('Kembalian: ' + formatRp(change), 'success', 1800); }
+
+  if (received === 0) {
+    changeLabel.textContent = 'Kembalian';
+    changeValue.textContent = 'Rp 0';
+    confirmBtn.disabled     = true;
+    return;
+  }
+
+  if (change < 0) {
+    changeBlock.classList.add('insuf');
+    changeLabel.textContent = '⚠️ Kurang';
+    changeValue.textContent = '−' + formatRp(change);
+    confirmBtn.disabled     = true;
+    input.classList.add('error');
+    ksToast('Uang kurang ' + formatRp(Math.abs(change)), 'error', 1800);
+  } else if (change === 0) {
+    changeBlock.classList.add('exact');
+    changeLabel.textContent = '✨ Pas, tidak ada kembalian';
+    changeValue.textContent = '';
+    confirmBtn.disabled     = false;
+    ksToast('✨ Uang pas! Bisa langsung konfirmasi', 'success', 1800);
+  } else {
+    changeLabel.textContent = '💰 Kembalian';
+    changeValue.textContent = formatRp(change);
+    confirmBtn.disabled     = false;
+    ksToast('Kembalian: ' + formatRp(change), 'success', 1800);
+  }
 }
 </script>
-</body>
-</html>
+@endpush

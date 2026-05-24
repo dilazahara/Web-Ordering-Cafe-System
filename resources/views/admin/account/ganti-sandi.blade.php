@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('layouts.admin')
 
-<title>Ganti Password</title>
+@section('title', 'Ganti Password')
 
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+@push('styles')
 <style>
-
 *{
     box-sizing:border-box;
     margin:0;
@@ -292,15 +284,11 @@ body{
     }
 
 }
-
 </style>
-</head>
+@endpush
 
-<body>
-
-<div class="main">
-
-    <!-- HEADER -->
+@section('content')
+<!-- HEADER -->
 
     <div class="page-header">
 
@@ -638,7 +626,9 @@ body{
     </form>
 
 </div>
+@endsection
 
+@push('scripts')
 <script>
 
 lucide.createIcons();
@@ -734,6 +724,4 @@ function checkStrength(password){
 }
 
 </script>
-
-</body>
-</html>
+@endpush

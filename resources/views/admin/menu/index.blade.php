@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manajemen Menu</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
+
+@section('title', 'Manajemen Menu')
+
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
@@ -166,6 +163,28 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 }
 
 /* =======================
+   PAGINATION INFO BAR
+======================= */
+.pagination-info-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+    flex-wrap: wrap; gap: 8px;
+}
+.pagination-info-text {
+    font-size: 13px; color: #64748b; font-weight: 400;
+    display: flex; align-items: center; gap: 6px;
+}
+.pagination-info-text strong { color: #334155; font-weight: 600; }
+.pagination-info-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #ede9fe; color: #5b21b6;
+    border-radius: 8px; padding: 3px 10px;
+    font-size: 12px; font-weight: 600;
+}
+
+/* =======================
    TABLE
 ======================= */
 .tbl-wrap { overflow-x: auto; }
@@ -233,6 +252,7 @@ tbody tr:hover { background: #f8fafc; }
     .mobile-list { display: flex; flex-direction: column; gap: 10px; }
     .search-input { width: 150px; }
     .main { padding: 100px 16px 24px; }
+    .pagination-info-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
 
 .m-card {
@@ -261,79 +281,20 @@ tbody tr:hover { background: #f8fafc; }
 .empty-state { text-align: center; padding: 56px 20px; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 </style>
-</head>
-<body>
+@endpush
 
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <i data-lucide="menu" onclick="toggleSidebar()"></i>
-    </div>
-</div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="clipboard-list"></i> Order
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-
-</div>
-
-<!-- ══ MAIN ══ -->
-<div class="main">
-
-    <!-- PAGE HEADER -->
+@section('content')
+<!-- PAGE HEADER -->
     <div class="page-header">
         <div>
             <h1>Manajemen Menu</h1>
             <p>Kelola semua menu yang tersedia di cafe</p>
         </div>
+        {{-- Toolbar hanya muncul jika ada data --}}
+        @if($menus->isNotEmpty())
         <div class="toolbar">
             <form method="GET" action="/admin/menu">
                 <div class="search-wrap">
-                    <i data-lucide="search"></i>
                     <input type="text" name="search" class="search-input"
                         placeholder="Cari menu..."
                         value="{{ request('search') }}"
@@ -345,6 +306,15 @@ tbody tr:hover { background: #f8fafc; }
                 Tambah Menu
             </a>
         </div>
+        @else
+        {{-- Tetap tampilkan tombol tambah saat kosong agar bisa input data --}}
+        <div class="toolbar">
+            <a href="/admin/menu/create" class="btn-add">
+                <i data-lucide="plus" style="width:15px;height:15px;"></i>
+                Tambah Menu
+            </a>
+        </div>
+        @endif
     </div>
 
     <!-- ALERT -->
@@ -358,12 +328,35 @@ tbody tr:hover { background: #f8fafc; }
     <!-- CARD -->
     <div class="card">
 
+        {{-- INFO BAR: hanya muncul jika ada data --}}
+        @if($menus->isNotEmpty())
+        <div class="pagination-info-bar">
+            <div class="pagination-info-text">
+                <i data-lucide="list" style="width:15px;height:15px;color:#94a3b8;"></i>
+                Menampilkan
+                <strong>{{ $menus->firstItem() }}</strong>
+                &ndash;
+                <strong>{{ $menus->lastItem() }}</strong>
+                dari
+                <strong>{{ $menus->total() }}</strong>
+                menu
+                @if(request('search'))
+                    <span style="color:#9ca3af;">untuk pencarian "<em>{{ request('search') }}</em>"</span>
+                @endif
+            </div>
+            <span class="pagination-info-badge">
+                <i data-lucide="layers" style="width:12px;height:12px;"></i>
+                Halaman {{ $menus->currentPage() }} / {{ $menus->lastPage() }}
+            </span>
+        </div>
+        @endif
+
         <!-- DESKTOP TABLE -->
         <div class="tbl-wrap">
         <table>
             <thead>
                 <tr>
-                    <th style="width:44px;">#</th>
+                    <th style="width:44px;">No</th>
                     <th style="width:70px;">Foto</th>
                     <th>Nama Menu</th>
                     <th>Kategori</th>
@@ -375,6 +368,7 @@ tbody tr:hover { background: #f8fafc; }
             <tbody>
             @forelse($menus as $menu)
             <tr>
+                {{-- Nomor urut otomatis sesuai halaman aktif --}}
                 <td style="color:#9CA3AF; font-size:13px;">
                     {{ $menus->firstItem() + $loop->index }}
                 </td>
@@ -480,27 +474,12 @@ tbody tr:hover { background: #f8fafc; }
         @endforelse
         </div>
 
-        <!-- PAGINATION -->
+        {{-- PAGINATION hanya muncul jika ada data --}}
+        @if($menus->isNotEmpty())
         <div class="pagination-wrap">
             {{ $menus->links() }}
         </div>
+        @endif
 
     </div>
-</div>
-
-<script>
-lucide.createIcons();
-
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
-}
-
-
-// Auto-dismiss alert
-setTimeout(() => {
-    const el = document.getElementById('alertSuccess');
-    if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }
-}, 3000);
-</script>
-</body>
-</html>
+@endsection

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Menu;
 use App\Models\Kategori;
@@ -27,7 +28,6 @@ class MenuController extends Controller
         return view('admin.menu.index', compact('menus'));
     }
 
-    // ✅ STEP 3 — ganti $addons jadi $groups
     public function create()
     {
         $kategoris = Kategori::all();
@@ -60,7 +60,6 @@ class MenuController extends Controller
             'image'       => $imagePath,
         ]);
 
-        // ✅ sync addon groups ke pivot
         if ($request->addon_groups) {
             $menu->addonGroups()->sync($request->addon_groups);
         }
@@ -72,7 +71,7 @@ class MenuController extends Controller
     {
         $menu      = Menu::with('addonGroups')->findOrFail($id);
         $kategoris = Kategori::all();
-        $groups    = AddonGroup::with('addons')->get(); // ✅ ganti dari $addons
+        $groups    = AddonGroup::with('addons')->get();
 
         return view('admin.menu.edit', compact('menu', 'kategoris', 'groups'));
     }
@@ -106,7 +105,6 @@ class MenuController extends Controller
             'image'       => $imagePath,
         ]);
 
-        // ✅ update addon groups
         $menu->addonGroups()->sync($request->addon_groups ?? []);
 
         return redirect('/admin/menu')->with('success', 'Menu berhasil diupdate');

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dapur;
 
+use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Meja;
 use App\Models\User;
@@ -44,9 +45,31 @@ class DapurController extends Controller
             ->orderBy('process_at', 'asc')
             ->get();
 
+        // Total order selesai hari ini
+        $totalSelesaiHariIni = Order::where('status', 'done')
+            ->whereDate('created_at', today())
+            ->count();
+
+        // Rata-rata waktu proses (dalam menit), dari process_at → done_at
+        $selesaiHariIni = Order::where('status', 'done')
+            ->whereDate('created_at', today())
+            ->whereNotNull('process_at')
+            ->whereNotNull('done_at')
+            ->get();
+
+        if ($selesaiHariIni->isNotEmpty()) {
+            $totalMenit = $selesaiHariIni->sum(function ($o) {
+                return \Carbon\Carbon::parse($o->process_at)
+                    ->diffInMinutes(\Carbon\Carbon::parse($o->done_at));
+            });
+            $rataRataWaktu = round($totalMenit / $selesaiHariIni->count());
+        } else {
+            $rataRataWaktu = 0;
+        }
+
         return view(
             'dapur.proses',
-            compact('orders')
+            compact('orders', 'totalSelesaiHariIni', 'rataRataWaktu')
         );
     }
 
@@ -71,7 +94,7 @@ class DapurController extends Controller
 
 
     // ═══════════════════════════════
-    // TANDAAI SELESAI
+    // TANDAI SELESAI
     // ═══════════════════════════════
 
     public function selesai(int $id)
@@ -228,8 +251,32 @@ class DapurController extends Controller
             ->select('id')
             ->get();
 
+        // Total selesai hari ini
+        $totalSelesai = Order::where('status', 'done')
+            ->whereDate('created_at', today())
+            ->count();
+
+        // Rata-rata waktu proses hari ini (dalam menit)
+        $selesaiHariIni = Order::where('status', 'done')
+            ->whereDate('created_at', today())
+            ->whereNotNull('process_at')
+            ->whereNotNull('done_at')
+            ->get();
+
+        if ($selesaiHariIni->isNotEmpty()) {
+            $totalMenit = $selesaiHariIni->sum(function ($o) {
+                return \Carbon\Carbon::parse($o->process_at)
+                    ->diffInMinutes(\Carbon\Carbon::parse($o->done_at));
+            });
+            $rataRataWaktu = round($totalMenit / $selesaiHariIni->count());
+        } else {
+            $rataRataWaktu = 0;
+        }
+
         return response()->json([
-            'orders' => $orders
+            'orders'        => $orders,
+            'totalSelesai'  => $totalSelesai,
+            'rataRataWaktu' => $rataRataWaktu,
         ]);
     }
 }

@@ -8,31 +8,29 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 
 // ── ADMIN ─────────────────────────────────────────────
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\MejaController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\AddOnsController;
-use App\Http\Controllers\AddonGroupController;
-use App\Http\Controllers\LaporanController;
-use App\Http\Controllers\AccountAdminController;
-use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\MejaController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\AddOnsController;
+use App\Http\Controllers\Admin\AddonGroupController;
+use App\Http\Controllers\Admin\LaporanController;
+use App\Http\Controllers\Admin\AccountAdminController;
+use App\Http\Controllers\Admin\PaymentMethodController;
+use App\Http\Controllers\Admin\OrderController;
 
 // ── KASIR ─────────────────────────────────────────────
-use App\Http\Controllers\KasirController;
-use App\Http\Controllers\AccountKasirController;
-use App\Http\Controllers\KonfirmasiPesananController;
+use App\Http\Controllers\Kasir\KasirController;
+use App\Http\Controllers\Kasir\AccountKasirController;
+use App\Http\Controllers\Kasir\KonfirmasiPesananController;
 
 // ── DAPUR ─────────────────────────────────────────────
-use App\Http\Controllers\DapurController;
+use App\Http\Controllers\Dapur\DapurController;
 
 // ── PELAYAN ───────────────────────────────────────────
-use App\Http\Controllers\PelayanController;
-use App\Http\Controllers\AccountPelayanController;
-
-// ── ORDER ─────────────────────────────────────────────
-use App\Http\Controllers\OrderController;
+use App\Http\Controllers\Pelayan\PelayanController;
+use App\Http\Controllers\Pelayan\AccountPelayanController;
 
 // ── NOTIFIKASI ────────────────────────────────────────
 use App\Http\Controllers\NotificationController;
@@ -132,7 +130,6 @@ Route::prefix('customer')
         [HomeController::class, 'index']
     )->name('home');
 
-    // ← QR Scan: simpan nomor meja ke session lalu ke home
     Route::get(
         '/scan/{nomor_meja}',
         [HomeController::class, 'scanMeja']
@@ -158,7 +155,6 @@ Route::prefix('customer')
         [CustomerOrderController::class, 'store']
     )->name('order.store');
 
-    // ← BARU: halaman barcode QRIS
     Route::get(
         '/order/qris/{id}',
         [CustomerOrderController::class, 'qrisPayment']
@@ -464,11 +460,10 @@ Route::middleware(['auth', 'role:kasir'])
 
     Route::get('/dashboard', [KasirController::class, 'dashboard'])->name('dashboard');
 
-    // ← TAMBAHKAN INI
     Route::get('/poll', [KasirController::class, 'poll'])->name('poll');
 
     Route::get('/pesanan', [KasirController::class, 'pesanan'])->name('pesanan');
-    // ... sisa routes tetap sama
+
     Route::get(
         '/transaksi',
         [KasirController::class, 'transaksi']
@@ -547,22 +542,16 @@ Route::middleware(['auth', 'role:dapur'])
     ->name('dapur.')
     ->group(function () {
 
-    // HALAMAN UTAMA DAPUR
     Route::get(
         '/proses',
         [DapurController::class, 'proses']
     )->name('proses');
 
-
-    Route::get('/poll-orders', [DapurController::class, 'pollOrders'])->name('pollOrders');
-    
-    // RIWAYAT SELESAI
     Route::get(
-        '/selesai',
-        [DapurController::class, 'selesaiView']
-    )->name('selesai');
+        '/poll-orders',
+        [DapurController::class, 'pollOrders']
+    )->name('pollOrders');
 
-    // TANDAI SELESAI
     Route::post(
         '/selesai/{id}',
         [DapurController::class, 'selesai']
@@ -609,11 +598,6 @@ Route::middleware(['auth', 'role:pelayan'])
         '/poll',
         [PelayanController::class, 'poll']
     )->name('poll');
-
-    Route::get(
-        '/meja',
-        [PelayanController::class, 'meja']
-    )->name('meja');
 
     Route::patch(
         '/antar/{id}/diantar',

@@ -1,18 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Daftar Pesanan</title>
+@extends('layouts.admin')
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@section('title', 'Admin — Daftar Pesanan')
 
-{{-- DataTables CSS & Scripts --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
+@push('styles')
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -134,61 +124,10 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text-
 
 @media (max-width: 768px) { .main { padding: 100px 16px 30px; } }
 </style>
-</head>
-<body>
+@endpush
 
-<div class="topbar">
-    <div class="topbar-left">
-        <button class="menu-icon-btn" onclick="toggleSidebar()">
-            <i data-lucide="menu"></i>
-        </button>
-    </div>
-</div>
-
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<div class="sidebar" id="sidebar">
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="receipt"></i> Orders
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-</div>
-
-<div class="main">
-
-    <div class="page-header">
+@section('content')
+<div class="page-header">
         <div>
             <div class="page-title">Monitoring Pesanan</div>
             <div class="page-subtitle">Pantau aktivitas seluruh pesanan restoran secara real-time</div>
@@ -286,34 +225,4 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text-
             </table>
         </div>
     </div>
-
-</div>
-
-<script>
-lucide.createIcons();
-
-function toggleSidebar(){
-    document.getElementById('sidebar').classList.toggle('show');
-    document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar(){
-    document.getElementById('sidebar').classList.remove('show');
-    document.getElementById('overlay').classList.remove('show');
-}
-
-$(document).ready(function () {
-    $('#ordersTable').DataTable({
-        scrollX: true,
-        pageLength: 15,
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ pesanan",
-            paginate: { previous: "Sebelumnya", next: "Selanjutnya" },
-            emptyTable: "Belum ada pesanan aktif hari ini"
-        }
-    });
-});
-</script>
-</body>
-</html>
+@endsection

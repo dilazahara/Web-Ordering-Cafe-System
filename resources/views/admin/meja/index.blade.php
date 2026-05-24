@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Meja</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+@extends('layouts.admin')
+
+@section('title', 'Data Meja')
+
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
@@ -24,11 +20,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .topbar-left { display: flex; align-items: center; gap: 20px; }
-.topbar-left i {
-    width: 24px; height: 24px; padding: 8px; border-radius: 12px;
-    color: #475569; cursor: pointer; transition: all 0.3s ease;
-}
-.topbar-left i:hover { background: #f1f5f9; color: #1e293b; transform: scale(1.05); }
 
 /* =======================
    SIDEBAR
@@ -48,10 +39,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
 }
 .sidebar.show { transform: translateX(0); }
-
-/* =======================
-   SIDEBAR MENU
-======================= */
 .sidebar a,
 .menu-parent {
     display: flex; align-items: center; gap: 15px;
@@ -60,7 +47,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     font-weight: 400; font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.sidebar i { width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd; }
+.sidebar svg { width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd; flex-shrink: 0; }
 .menu-parent { cursor: pointer; }
 .menu-parent:hover,
 .sidebar a:hover { background: rgba(255,255,255,0.06); color: white; transform: translateX(4px); }
@@ -97,6 +84,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 }
 .btn-add:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
 .btn-add:active { transform: scale(0.97); }
+.btn-add svg { width: 15px; height: 15px; }
 
 /* =======================
    ALERT
@@ -109,6 +97,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     display: flex; align-items: center; gap: 8px;
     transition: opacity 0.4s;
 }
+.alert-success svg { width: 17px; height: 17px; flex-shrink: 0; }
 
 /* =======================
    CARD
@@ -155,7 +144,9 @@ tbody tr:hover { background: #f8fafc; }
     width: 34px; height: 34px; border-radius: 9px; border: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all 0.15s; text-decoration: none; flex-shrink: 0;
+    background: none;
 }
+.act-btn svg { width: 15px; height: 15px; }
 .act-btn:active { transform: scale(0.9); }
 .act-edit   { background: #eff6ff; color: #2563eb; border: 1.5px solid #dbeafe; }
 .act-edit:hover   { background: #dbeafe; border-color: #93c5fd; }
@@ -168,149 +159,96 @@ tbody tr:hover { background: #f8fafc; }
    EMPTY STATE
 ======================= */
 .empty-state { text-align: center; padding: 56px 20px; }
+.empty-state svg { width: 40px; height: 40px; color: #e5e7eb; margin: 0 auto 10px; display: block; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 
 /* ════════════════════════════
    QR MODAL
 ════════════════════════════ */
 .modal-backdrop {
-  display: none;
-  position: fixed; inset: 0; z-index: 2000;
-  background: rgba(15,23,42,.55);
-  backdrop-filter: blur(4px);
-  align-items: center; justify-content: center;
+    display: none;
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(15,23,42,.55);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
 }
 .modal-backdrop.open { display: flex; }
 
 .modal {
-  background: #fff;
-  border-radius: 24px;
-  width: 100%; max-width: 400px;
-  margin: 16px;
-  box-shadow: 0 24px 64px rgba(0,0,0,.2);
-  overflow: hidden;
-  animation: modalIn .25s cubic-bezier(.34,1.56,.64,1);
+    background: #fff;
+    border-radius: 24px;
+    width: 100%; max-width: 400px;
+    margin: 16px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.2);
+    overflow: hidden;
+    animation: modalIn .25s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(.88) translateY(16px); }
-  to   { opacity: 1; transform: scale(1)   translateY(0); }
+    from { opacity: 0; transform: scale(.88) translateY(16px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0); }
 }
 
 .modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 24px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 0;
 }
 .modal-title { font-size: 17px; font-weight: 700; color: #0f172a; }
 .modal-close {
-  width: 34px; height: 34px; border-radius: 9px; border: none;
-  background: #f1f5f9; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  color: #64748b; transition: all .15s;
+    width: 34px; height: 34px; border-radius: 9px; border: none;
+    background: #f1f5f9; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #64748b; transition: all .15s;
 }
 .modal-close:hover { background: #e2e8f0; color: #1e293b; }
+.modal-close svg { width: 16px; height: 16px; }
 
 .modal-body { padding: 20px 24px 0; text-align: center; }
 .modal-table-label {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #f5f3ff; color: #6d28d9;
-  border: 1px solid #ddd6fe; border-radius: 30px;
-  padding: 5px 16px; font-size: 13px; font-weight: 700;
-  margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #f5f3ff; color: #6d28d9;
+    border: 1px solid #ddd6fe; border-radius: 30px;
+    padding: 5px 16px; font-size: 13px; font-weight: 700;
+    margin-bottom: 20px;
 }
+.modal-table-label svg { width: 15px; height: 15px; }
 
 .qr-wrap {
-  background: #fff;
-  border: 2px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 20px;
-  display: inline-flex;
-  align-items: center; justify-content: center;
-  margin-bottom: 16px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 20px;
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    margin-bottom: 16px;
 }
 #qrCanvas { display: block; }
 
 .qr-url {
-  font-size: 11.5px; color: #94a3b8; word-break: break-all;
-  background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
-  padding: 8px 12px; margin-bottom: 20px; text-align: left;
-  font-family: monospace; line-height: 1.6;
+    font-size: 11.5px; color: #94a3b8; word-break: break-all;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    padding: 8px 12px; margin-bottom: 20px; text-align: left;
+    font-family: monospace; line-height: 1.6;
 }
 
 .modal-footer {
-  padding: 16px 24px 24px;
-  display: flex; gap: 10px;
+    padding: 16px 24px 24px;
+    display: flex; gap: 10px;
 }
 .btn-download {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px; border-radius: 12px; border: none; cursor: pointer;
-  font-size: 13.5px; font-weight: 600; font-family: 'Inter', sans-serif;
-  transition: all .18s;
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px; border-radius: 12px; border: none; cursor: pointer;
+    font-size: 13.5px; font-weight: 600; font-family: 'Inter', sans-serif;
+    transition: all .18s;
 }
+.btn-download svg { width: 17px; height: 17px; }
 .btn-dl-png { background: #6366f1; color: #fff; }
 .btn-dl-png:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(99,102,241,.3); }
 .btn-dl-print { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 .btn-dl-print:hover { background: #e2e8f0; color: #1e293b; }
 </style>
-</head>
-<body>
+@endpush
 
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <i data-lucide="menu" onclick="toggleSidebar()"></i>
-    </div>
-</div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="clipboard-list"></i> Order
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-
-</div>
-
-<!-- ══ MAIN ══ -->
+@section('content')
 <div class="main">
 
     <div class="page-header">
@@ -319,14 +257,21 @@ tbody tr:hover { background: #f8fafc; }
             <p>Kelola semua meja dan QR code untuk pemesanan pelanggan</p>
         </div>
         <a href="/admin/meja/create" class="btn-add">
-            <i data-lucide="plus" style="width:15px;height:15px;"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
             Tambah Meja
         </a>
     </div>
 
     @if(session('success'))
     <div class="alert-success" id="alertSuccess">
-        <i data-lucide="check-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
         {{ session('success') }}
     </div>
     @endif
@@ -360,18 +305,37 @@ tbody tr:hover { background: #f8fafc; }
                             @endif
                         </td>
                         <td>
+                            {{-- 
+                                URL QR dibuat di sisi PHP pakai config('app.url')
+                                Pastikan APP_URL di .env sudah diset ke URL ngrok kamu.
+                                Jalankan: php artisan config:clear && php artisan cache:clear
+                                setelah mengubah .env
+                            --}}
                             <button
                                 class="act-btn act-qr"
                                 title="Lihat QR Code"
-                                onclick="openQR('{{ $meja->nomor_meja }}', '{{ config('app.url') }}/customer/scan/{{ $meja->nomor_meja }}')"
+                                onclick="openQR('{{ $meja->nomor_meja }}', '{{ rtrim(config('app.url'), '/') }}/customer/scan/{{ $meja->nomor_meja }}')"
                             >
-                                <i data-lucide="qr-code" style="width:15px;height:15px;"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                    <line x1="14" y1="14" x2="14" y2="14"/><line x1="17" y1="14" x2="17" y2="14"/>
+                                    <line x1="20" y1="14" x2="20" y2="14"/><line x1="14" y1="17" x2="14" y2="17"/>
+                                    <line x1="17" y1="17" x2="17" y2="17"/><line x1="20" y1="17" x2="20" y2="17"/>
+                                    <line x1="14" y1="20" x2="14" y2="20"/><line x1="17" y1="20" x2="17" y2="20"/>
+                                    <line x1="20" y1="20" x2="20" y2="20"/>
+                                </svg>
                             </button>
                         </td>
                         <td>
                             <div class="action-wrap">
                                 <a href="/admin/meja/edit/{{ $meja->id }}" class="act-btn act-edit" title="Edit">
-                                    <i data-lucide="pencil-line" style="width:15px;height:15px;"></i>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
                                 </a>
                                 <form action="/admin/meja/delete/{{ $meja->id }}" method="POST" style="display:inline;">
                                     @csrf
@@ -380,7 +344,13 @@ tbody tr:hover { background: #f8fafc; }
                                         type="submit" class="act-btn act-delete" title="Hapus"
                                         onclick="return confirm('Yakin ingin menghapus meja ini?')"
                                     >
-                                        <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                            <path d="M10 11v6"/><path d="M14 11v6"/>
+                                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                        </svg>
                                     </button>
                                 </form>
                             </div>
@@ -390,7 +360,11 @@ tbody tr:hover { background: #f8fafc; }
                     <tr>
                         <td colspan="5">
                             <div class="empty-state">
-                                <i data-lucide="armchair" style="width:40px;height:40px;color:#e5e7eb;"></i>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                                    <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/>
+                                </svg>
                                 <p>Belum ada data meja</p>
                             </div>
                         </td>
@@ -400,22 +374,31 @@ tbody tr:hover { background: #f8fafc; }
             </table>
         </div>
     </div>
-</div>
+
+</div>{{-- /main --}}
+
 
 <!-- ══ QR MODAL ══ -->
-<div class="modal-backdrop" id="qrModal" onclick="closeOnBackdrop(event)">
+<div class="modal-backdrop" id="qrModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
         <div class="modal-header">
             <div class="modal-title" id="modalTitle">QR Code Meja</div>
             <button class="modal-close" onclick="closeQR()" aria-label="Tutup">
-                <i data-lucide="x" style="width:16px;height:16px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
             </button>
         </div>
 
         <div class="modal-body">
             <div class="modal-table-label">
-                <i data-lucide="armchair" style="width:15px;height:15px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/>
+                    <path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v2H6v-2a2 2 0 0 0-4 0z"/>
+                </svg>
                 <span id="qrMejaLabel">Meja —</span>
             </div>
 
@@ -428,11 +411,20 @@ tbody tr:hover { background: #f8fafc; }
 
         <div class="modal-footer">
             <button class="btn-download btn-dl-png" onclick="downloadQR()">
-                <i data-lucide="download" style="width:17px;height:17px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
                 Download PNG
             </button>
             <button class="btn-download btn-dl-print" onclick="printQR()">
-                <i data-lucide="printer" style="width:17px;height:17px;"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 6 2 18 2 18 9"/>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                    <rect x="6" y="14" width="12" height="8"/>
+                </svg>
                 Print
             </button>
         </div>
@@ -440,121 +432,138 @@ tbody tr:hover { background: #f8fafc; }
     </div>
 </div>
 
+@endsection
+
+@push('scripts')
+{{-- Library QRCode.js (tidak perlu internet, pakai CDN cdnjs) --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
-lucide.createIcons();
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+var currentQRUrl   = '';
+var currentMejaNomor = '';
+var qrInstance     = null;
 
-/* ── SIDEBAR ── */
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
-}
-
-/* ── ALERT AUTO-HIDE ── */
-setTimeout(() => {
-    const el = document.getElementById('alertSuccess');
-    if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }
-}, 3000);
-
-/* ── QR MODAL ── */
-let currentQrUrl   = '';
-let currentMejaNom = '';
-let qrInstance     = null;
-
+/* ══════════════════════════════════════════
+   BUKA MODAL QR
+══════════════════════════════════════════ */
 function openQR(nomorMeja, url) {
-    currentQrUrl   = url;
-    currentMejaNom = nomorMeja;
+    currentQRUrl     = url;
+    currentMejaNomor = nomorMeja;
 
+    // Set label & URL text
     document.getElementById('qrMejaLabel').textContent = 'Meja ' + nomorMeja;
-    document.getElementById('modalTitle').textContent  = 'QR Code — Meja ' + nomorMeja;
-    document.getElementById('qrUrlText').textContent   = url;
+    document.getElementById('qrUrlText').textContent    = url;
 
-    const canvas = document.getElementById('qrCanvas');
+    // Hapus QR lama
+    var canvas = document.getElementById('qrCanvas');
     canvas.innerHTML = '';
 
+    // Generate QR baru
     qrInstance = new QRCode(canvas, {
         text:         url,
-        width:        200,
-        height:       200,
+        width:        220,
+        height:       220,
         colorDark:    '#0f172a',
         colorLight:   '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H,
+        correctLevel: QRCode.CorrectLevel.H
     });
 
+    // Buka modal
     document.getElementById('qrModal').classList.add('open');
     document.body.style.overflow = 'hidden';
-
-    // Re-render lucide icons inside modal
-    lucide.createIcons();
 }
 
+/* ══════════════════════════════════════════
+   TUTUP MODAL QR
+══════════════════════════════════════════ */
 function closeQR() {
     document.getElementById('qrModal').classList.remove('open');
     document.body.style.overflow = '';
 }
 
-function closeOnBackdrop(e) {
-    if (e.target === document.getElementById('qrModal')) closeQR();
-}
+// Klik backdrop untuk tutup
+document.getElementById('qrModal').addEventListener('click', function(e) {
+    if (e.target === this) closeQR();
+});
 
-document.addEventListener('keydown', e => {
+// Tombol ESC untuk tutup
+document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeQR();
 });
 
-/* ── DOWNLOAD PNG ── */
+/* ══════════════════════════════════════════
+   DOWNLOAD QR SEBAGAI PNG
+══════════════════════════════════════════ */
 function downloadQR() {
-    const canvas = document.getElementById('qrCanvas');
-    const img    = canvas.querySelector('img');
-    const cnv    = canvas.querySelector('canvas');
+    // QRCode.js membuat <img> atau <canvas>, ambil salah satunya
+    var canvas = document.getElementById('qrCanvas');
+    var img    = canvas.querySelector('img');
+    var cvs    = canvas.querySelector('canvas');
 
-    if (cnv) {
-        const pad = 24; const labelH = 36;
-        const out = document.createElement('canvas');
-        out.width  = cnv.width  + pad * 2;
-        out.height = cnv.height + pad * 2 + labelH;
-        const ctx  = out.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, out.width, out.height);
-        ctx.drawImage(cnv, pad, pad);
-        ctx.fillStyle = '#0f172a';
-        ctx.font      = 'bold 15px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Meja ' + currentMejaNom, out.width / 2, cnv.height + pad + labelH - 10);
-        const link    = document.createElement('a');
-        link.download = `QR-Meja-${currentMejaNom}.png`;
-        link.href     = out.toDataURL('image/png');
-        link.click();
+    var dataUrl;
+    if (cvs) {
+        dataUrl = cvs.toDataURL('image/png');
     } else if (img) {
-        const link    = document.createElement('a');
-        link.download = `QR-Meja-${currentMejaNom}.png`;
-        link.href     = img.src;
-        link.click();
+        dataUrl = img.src;
+    } else {
+        alert('QR belum siap, coba lagi.');
+        return;
     }
+
+    var link      = document.createElement('a');
+    link.href     = dataUrl;
+    link.download = 'qr-meja-' + currentMejaNomor + '.png';
+    link.click();
 }
 
-/* ── PRINT ── */
+/* ══════════════════════════════════════════
+   PRINT QR
+══════════════════════════════════════════ */
 function printQR() {
-    const canvas = document.getElementById('qrCanvas');
-    const img    = canvas.querySelector('img');
-    const cnv    = canvas.querySelector('canvas');
-    const src    = cnv ? cnv.toDataURL() : (img ? img.src : '');
+    var canvas = document.getElementById('qrCanvas');
+    var img    = canvas.querySelector('img');
+    var cvs    = canvas.querySelector('canvas');
 
-    const win = window.open('', '_blank', 'width=480,height=560');
-    win.document.write(`
-        <!DOCTYPE html><html><head>
-        <title>QR Code Meja ${currentMejaNom}</title>
-        <style>
-            body { margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; font-family: Inter, sans-serif; background: #fff; }
-            img  { width: 240px; height: 240px; image-rendering: pixelated; }
-            h2   { margin-top: 16px; font-size: 20px; color: #0f172a; }
-            p    { font-size: 12px; color: #64748b; margin-top: 6px; word-break: break-all; max-width: 260px; text-align: center; }
-        </style></head><body>
-        <img src="${src}" alt="QR Code Meja ${currentMejaNom}">
-        <h2>Meja ${currentMejaNom}</h2>
-        <p>${currentQrUrl}</p>
-        <script>window.onload=()=>{ window.print(); }<\/script>
-        </body></html>
-    `);
+    var dataUrl;
+    if (cvs) {
+        dataUrl = cvs.toDataURL('image/png');
+    } else if (img) {
+        dataUrl = img.src;
+    } else {
+        alert('QR belum siap, coba lagi.');
+        return;
+    }
+
+    var win = window.open('', '_blank');
+    win.document.write(
+        '<html><head><title>QR Meja ' + currentMejaNomor + '</title>' +
+        '<style>' +
+            'body { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; margin:0; font-family:sans-serif; }' +
+            'img  { width:260px; height:260px; border:2px solid #e2e8f0; border-radius:12px; padding:12px; }' +
+            'h2   { margin:16px 0 6px; font-size:20px; color:#0f172a; }' +
+            'p    { font-size:12px; color:#94a3b8; word-break:break-all; max-width:300px; text-align:center; }' +
+        '</style></head><body>' +
+        '<img src="' + dataUrl + '" alt="QR Code">' +
+        '<h2>Meja ' + currentMejaNomor + '</h2>' +
+        '<p>' + currentQRUrl + '</p>' +
+        '<script>window.onload=function(){window.print();window.close();}<\/script>' +
+        '</body></html>'
+    );
     win.document.close();
 }
+
+/* ══════════════════════════════════════════
+   AUTO-HIDE ALERT
+══════════════════════════════════════════ */
+var alertEl = document.getElementById('alertSuccess');
+if (alertEl) {
+    setTimeout(function() {
+        alertEl.style.opacity = '0';
+        setTimeout(function() { alertEl.remove(); }, 400);
+    }, 4000);
+}
 </script>
-</body>
-</html>
+@endpush

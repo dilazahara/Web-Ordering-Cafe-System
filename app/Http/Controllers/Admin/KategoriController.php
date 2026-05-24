@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
 
@@ -32,22 +33,22 @@ class KategoriController extends Controller
     }
 
     public function edit($id)
-{
-    $kategori = Kategori::findOrFail($id);
+    {
+        $kategori = Kategori::findOrFail($id);
 
-    return view('admin.kategori.edit', compact('kategori'));
-}
+        return view('admin.kategori.edit', compact('kategori'));
+    }
 
     public function update(Request $request, $id)
-{
-    $kategori = Kategori::findOrFail($id);
+    {
+        $kategori = Kategori::findOrFail($id);
 
-    $kategori->update([
-        'name' => $request->nama
-    ]);
+        $kategori->update([
+            'name' => $request->nama
+        ]);
 
-    return redirect('/admin/kategori')->with('success', 'Berhasil update');
-}
+        return redirect('/admin/kategori')->with('success', 'Berhasil update');
+    }
 
     public function destroy($id)
     {

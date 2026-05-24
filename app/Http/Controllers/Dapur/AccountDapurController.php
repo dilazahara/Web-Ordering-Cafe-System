@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dapur;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
-class AccountKasirController extends Controller
+class AccountDapurController extends Controller
 {
     // ════════════════════════════════════════
     // PROFIL
@@ -15,7 +16,7 @@ class AccountKasirController extends Controller
 
     public function profil()
     {
-        return view('kasir.account.profil');
+        return view('dapur.account.profil');
     }
 
     public function updateProfil(Request $request)
@@ -23,7 +24,7 @@ class AccountKasirController extends Controller
         $request->validate([
             'name'   => 'required|string|max:100',
             'email'  => 'required|email|unique:users,email,' . Auth::id(),
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Menggunakan avatar
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         /** @var \App\Models\User $user */
@@ -55,11 +56,10 @@ class AccountKasirController extends Controller
             $user->avatar = $path;
         }
 
-        // Simpan ke database (Aman dari error SQLSTATE dan garis merah)
+        // Simpan ke database
         $user->save();
 
-        // Redirect ke dashboard
-        return redirect('/kasir/dashboard')
+        return redirect('/dapur/proses')
             ->with(
                 'success',
                 'Profil berhasil diperbarui!'
@@ -72,7 +72,7 @@ class AccountKasirController extends Controller
 
     public function gantiSandi()
     {
-        return view('kasir.account.ganti-sandi');
+        return view('dapur.account.ganti-sandi');
     }
 
     public function updatePassword(Request $request)
@@ -102,8 +102,7 @@ class AccountKasirController extends Controller
             )
         ]);
 
-        // Redirect ke dashboard
-        return redirect('/kasir/dashboard')
+        return redirect('/dapur/proses')
             ->with(
                 'success',
                 'Password berhasil diubah!'

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Kasir;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Meja;
@@ -26,7 +27,7 @@ class KasirController extends Controller
 
 
     // ═══════════════════════════════
-    // POLLING NOTIF
+    // POLLING NOTIF & LIVE UPDATE
     // ═══════════════════════════════
 
     public function poll()
@@ -96,7 +97,6 @@ class KasirController extends Controller
             'process_at'    => now(),
         ]);
 
-        // Notifikasi ke dapur: pesanan dikonfirmasi, segera masak
         Notification::kirim(
             'dapur',
             'order_confirmed',
@@ -125,22 +125,15 @@ class KasirController extends Controller
 
         $order->update(['status' => 'delivered']);
 
-        // =====================================
-        // AUTO STATUS MEJA = KOSONG
-        // =====================================
-
         if ($order->table_number) {
-
             Meja::where(
                 'nomor_meja',
                 $order->table_number
             )->update([
                 'status' => 'kosong'
             ]);
-
         }
 
-        // Notifikasi ke admin: transaksi selesai
         Notification::kirim(
             'admin',
             'order_delivered',

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Kasir;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
-class AccountDapurController extends Controller
+class AccountKasirController extends Controller
 {
     // ════════════════════════════════════════
     // PROFIL
@@ -15,7 +16,7 @@ class AccountDapurController extends Controller
 
     public function profil()
     {
-        return view('dapur.account.profil');
+        return view('kasir.account.profil');
     }
 
     public function updateProfil(Request $request)
@@ -23,43 +24,35 @@ class AccountDapurController extends Controller
         $request->validate([
             'name'   => 'required|string|max:100',
             'email'  => 'required|email|unique:users,email,' . Auth::id(),
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Menggunakan avatar
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Update data user dasar
         $user->name  = $request->name;
         $user->email = $request->email;
 
-        // Username
         if ($request->filled('username')) {
             $user->username = $request->username;
         }
 
-        // Phone
         if ($request->filled('phone')) {
             $user->phone = $request->phone;
         }
 
-        // Logika Upload Foto Profil (Menggunakan kolom avatar)
         if ($request->hasFile('avatar')) {
-            // Hapus foto lama jika ada di dalam folder public
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            // Simpan foto baru ke folder 'public/avatars'
             $path = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $path;
         }
 
-        // Simpan ke database (Aman dari error SQLSTATE dan garis merah)
         $user->save();
 
-        // Redirect ke dashboard
-        return redirect('/dapur/proses')
+        return redirect('/kasir/dashboard')
             ->with(
                 'success',
                 'Profil berhasil diperbarui!'
@@ -72,7 +65,7 @@ class AccountDapurController extends Controller
 
     public function gantiSandi()
     {
-        return view('dapur.account.ganti-sandi');
+        return view('kasir.account.ganti-sandi');
     }
 
     public function updatePassword(Request $request)
@@ -85,7 +78,6 @@ class AccountDapurController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Cek password lama
         if (!Hash::check(
             $request->current_password,
             $user->password
@@ -95,15 +87,13 @@ class AccountDapurController extends Controller
             ]);
         }
 
-        // Update password baru
         $user->update([
             'password' => Hash::make(
                 $request->new_password
             )
         ]);
 
-        // Redirect ke dashboard
-        return redirect('/dapur/proses')
+        return redirect('/kasir/dashboard')
             ->with(
                 'success',
                 'Password berhasil diubah!'

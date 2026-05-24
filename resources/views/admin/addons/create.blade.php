@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tambah Add-on</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
+
+@section('title', 'Tambah Add-on')
+
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
@@ -208,73 +205,10 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 .t-x{margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;opacity:.55;color:inherit;padding:0 0 0 6px;line-height:1;}
 .t-x:hover{opacity:1;}
 </style>
-</head>
-<body>
-<div id="t-wrap"></div>
+@endpush
 
-
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <button class="menu-icon-btn" onclick="toggleSidebar()">
-            <i data-lucide="menu" style="width:20px;height:20px;"></i>
-        </button>
-    </div>
-</div>
-
-<!-- ══ SIDEBAR OVERLAY ══ -->
-<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-
-</div>
-
-<!-- ══ MAIN ══ -->
-<div class="main">
-
-    <div class="page-header">
+@section('content')
+<div class="page-header">
         <div>
             <h1>Tambah Add-on</h1>
             <p>Buat add-on baru sebagai opsi tambahan untuk menu</p>
@@ -379,84 +313,4 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             <button class="btn-modal-save" onclick="simpanGroup()">Simpan Group</button>
         </div>
     </div>
-</div>
-
-<script>
-/* ── Toast function ── */
-function showToast(msg,type,dur){
-  dur=dur||4000;
-  var w=document.getElementById('t-wrap');
-  if(!w||!msg)return;
-  var icons={
-    ok:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-    err:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-    warn:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>'
-  };
-  var cls='t-box '+(type==='err'?'t-err':type==='warn'?'t-warn':'t-ok');
-  var ico=icons[type]||icons.ok;
-  var el=document.createElement('div');
-  el.className=cls;
-  el.innerHTML=ico+'<span>'+msg+'</span><button class="t-x" onclick="this.closest(\'.t-box\').remove()">&#x2715;</button>';
-  w.appendChild(el);
-  requestAnimationFrame(function(){requestAnimationFrame(function(){el.classList.add('show');});});
-  setTimeout(function(){el.classList.remove('show');setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},350);},dur);
-}
-
-lucide.createIcons();
-
-@if(session('success'))showToast(@js(session('success')),'ok');@endif
-@if(session('error'))showToast(@js(session('error')),'err');@endif
-@if(session('warning'))showToast(@js(session('warning')),'warn');@endif
-@if($errors->any())showToast(@js($errors->first()),'err');@endif
-
-function toggleSidebar(){
-    document.getElementById('sidebar').classList.toggle('show');
-    document.getElementById('overlay').classList.toggle('show');
-}
-function closeSidebar(){
-    document.getElementById('sidebar').classList.remove('show');
-    document.getElementById('overlay').classList.remove('show');
-}
-
-function setStatus(val){
-    document.getElementById('statusVal').value = val;
-    document.getElementById('statusAktif').className    = 'status-opt' + (val == 1 ? ' active-status' : '');
-    document.getElementById('statusNonaktif').className = 'status-opt' + (val == 0 ? ' inactive-status' : '');
-}
-function bukaModal(){
-    document.getElementById('modalGroup').classList.add('show');
-    document.getElementById('inputNamaGroup').focus();
-}
-function tutupModal(){
-    document.getElementById('modalGroup').classList.remove('show');
-    document.getElementById('inputNamaGroup').value = '';
-    document.getElementById('inputMax').value = '';
-    document.getElementById('inputRequired').value = '0';
-}
-async function simpanGroup(){
-    const nama     = document.getElementById('inputNamaGroup').value.trim();
-    const max      = document.getElementById('inputMax').value;
-    const required = document.getElementById('inputRequired').value;
-    if(!nama){ showToast('Nama group tidak boleh kosong!','err'); return; }
-    const response = await fetch('/admin/addon-groups/store', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        body: JSON.stringify({ name: nama, max: max || null, required: required })
-    });
-    const data = await response.json();
-    if(data.success){
-        const select = document.getElementById('selectGroup');
-        const option = new Option(data.group.name, data.group.id, true, true);
-        select.add(option);
-        tutupModal();
-        showToast('Group add-on berhasil ditambahkan!','ok');
-    } else {
-        showToast('Gagal menyimpan group: ' + (data.message ?? 'Coba lagi'),'err');
-    }
-}
-document.getElementById('modalGroup').addEventListener('click', function(e){
-    if(e.target === this) tutupModal();
-});
-</script>
-</body>
-</html>
+@endsection

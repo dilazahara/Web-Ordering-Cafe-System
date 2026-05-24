@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User</title>
+@extends('layouts.admin')
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@section('title', 'User')
 
+@push('styles')
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
@@ -189,72 +184,10 @@ tbody tr:hover { background: #f8fafc; }
 .empty-state { text-align: center; padding: 56px 20px; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 </style>
-</head>
+@endpush
 
-<body>
-
-<!-- ══ TOPBAR ══ -->
-<div class="topbar">
-    <div class="topbar-left">
-        <i data-lucide="menu" onclick="toggleSidebar()"></i>
-        <span style="font-weight: 600; font-size: 20px;">User</span>
-    </div>
-</div>
-
-<!-- ══ SIDEBAR ══ -->
-<div class="sidebar" id="sidebar">
-
-    <div class="menu-section">MAIN</div>
-    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
-        <i data-lucide="layout-dashboard"></i> Dashboard
-    </a>
-
-    <a href="/admin/order" class="{{ request()->is('admin/order*') ? 'active' : '' }}">
-        <i data-lucide="clipboard-list"></i> Order
-    </a>
-
-    <div class="menu-section">KATALOG</div>
-
-    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
-        <i data-lucide="utensils"></i> Menu
-    </a>
-
-    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
-        <i data-lucide="folder"></i> Kategori
-    </a>
-
-    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
-        <i data-lucide="plus-circle"></i> Add-ons
-    </a>
-
-    <div class="menu-section">OPERASIONAL</div>
-
-    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
-        <i data-lucide="armchair"></i> Meja
-    </a>
-
-    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
-        <i data-lucide="credit-card"></i> Pembayaran
-    </a>
-
-    <div class="menu-section">ANALITIK</div>
-
-    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
-        <i data-lucide="bar-chart-3"></i> Laporan
-    </a>
-
-    <div class="menu-section">SYSTEM</div>
-
-    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
-        <i data-lucide="users"></i> User
-    </a>
-
-</div>
-
-<!-- ══ MAIN ══ -->
-<div class="main">
-
-    <div class="page-header">
+@section('content')
+<div class="page-header">
         <div>
             <h1>Manajemen User</h1>
             <p>Kelola akun pengguna sistem</p>
@@ -321,23 +254,4 @@ tbody tr:hover { background: #f8fafc; }
             </tbody>
         </table>
     </div>
-
-</div>
-
-<script>
-lucide.createIcons();
-
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('show');
-}
-
-
-// Auto-dismiss alert
-setTimeout(() => {
-    const el = document.getElementById('alertSuccess');
-    if (el) { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }
-}, 3000);
-</script>
-
-</body>
-</html>
+@endsection

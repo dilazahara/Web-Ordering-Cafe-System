@@ -28,7 +28,7 @@
                 <th width="3%">No</th>
                 <th width="15%">Waktu Transaksi</th>
                 <th width="10%">ID Order</th>
-                <th width="12%">Meja/Tipe</th>
+                <th width="12%">Meja</th>
                 <th width="25%">Detail Pesanan</th>
                 <th width="10%">Metode</th>
                 <th width="10%">Status</th>

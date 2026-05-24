@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 
 class UserController extends Controller
 {
-    // ===============================
-    // TAMPILKAN DATA
-    // ===============================
     public function index()
     {
         $users = User::all();
@@ -17,17 +15,11 @@ class UserController extends Controller
         return view('admin.user.index', compact('users'));
     }
 
-    // ===============================
-    // FORM TAMBAH
-    // ===============================
     public function create()
     {
         return view('admin.user.create');
     }
 
-    // ===============================
-    // SIMPAN DATA
-    // ===============================
     public function store(Request $request)
     {
         User::create([
@@ -41,9 +33,6 @@ class UserController extends Controller
             ->with('success', 'User berhasil ditambahkan!');
     }
 
-    // ===============================
-    // FORM EDIT
-    // ===============================
     public function edit(int $id)
     {
         $item = User::findOrFail($id);
@@ -51,9 +40,6 @@ class UserController extends Controller
         return view('admin.user.edit', compact('item'));
     }
 
-    // ===============================
-    // UPDATE
-    // ===============================
     public function update(Request $request, int $id)
     {
         $request->validate([
@@ -62,14 +48,12 @@ class UserController extends Controller
 
         $user = User::findOrFail($id);
 
-        // proteksi admin utama
         if ($user->email == 'admin@gmail.com') {
             return back()->withErrors(
                 'Role admin utama tidak boleh diubah'
             );
         }
 
-        // update role saja
         $user->role = $request->role;
 
         $user->save();
@@ -78,9 +62,6 @@ class UserController extends Controller
             ->with('success', 'Role berhasil diupdate!');
     }
 
-    // ===============================
-    // DELETE
-    // ===============================
     public function delete(int $id)
     {
         User::findOrFail($id)->delete();

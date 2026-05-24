@@ -1,10 +1,26 @@
-@extends('layouts.admin')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Admin Panel')</title>
 
-@section('title', 'Dashboard Admin')
+    {{-- Google Fonts: Inter --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-@push('styles')
-<style>
-/* ══════════════════════════════════════
+    {{-- Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    {{-- Chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {{-- DataTables --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+    <style>
+        /* ══════════════════════════════════════
            CSS VARIABLES — sumber kebenaran tunggal
         ══════════════════════════════════════ */
         :root {
@@ -366,239 +382,163 @@
             .main { padding: 88px var(--space-md) 30px; }
         }
         @media (max-width: 540px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
-</style>
-@endpush
+    
+    </style>
 
-@section('content')
-<div class="page-title">
-        <h1>Selamat datang, {{ auth()->user()->name }}! 👋</h1>
-        <p>Berikut ringkasan aktivitas cafe hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+    @stack('styles')
+</head>
+<body>
+
+
+@php
+    $userAvatar  = auth()->user()->avatar ?? null;
+    $avatarUrl   = $userAvatar ? asset('storage/' . $userAvatar) : null;
+    $userInitial = strtoupper(substr(auth()->user()->name, 0, 1));
+@endphp
+
+<div class="topbar">
+    <div class="topbar-left">
+        <button class="menu-btn" onclick="toggleSidebar()">
+            <i data-lucide="menu" style="width:20px;height:20px;"></i>
+        </button>
     </div>
 
-    {{-- Stats Grid --}}
-    <div class="stats-grid">
-        <div class="stat-card orange">
-            <div class="stat-icon orange"><i data-lucide="banknote"></i></div>
-            <div>
-                <div class="stat-val">Rp {{ number_format($totalPenjualan,0,',','.') }}</div>
-                <div class="stat-lbl">Total Penjualan</div>
-                <div class="stat-trend neutral">💰 Kumulatif transaksi selesai</div>
-            </div>
-        </div>
-        <div class="stat-card blue">
-            <div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalOrder }}</div>
-                <div class="stat-lbl">Total Order</div>
-                <div class="stat-trend up">📦 Semua status</div>
-            </div>
-        </div>
-        <div class="stat-card cyan">
-            <div class="stat-icon cyan"><i data-lucide="chef-hat"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalDiproses }}</div>
-                <div class="stat-lbl">Sedang Diproses</div>
-                <div class="stat-trend neutral">🔥 Di dapur sekarang</div>
-            </div>
-        </div>
-        <div class="stat-card green">
-            <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalSelesai }}</div>
-                <div class="stat-lbl">Order Selesai</div>
-                <div class="stat-trend up">✅ Berhasil diantar</div>
-            </div>
-        </div>
-        <div class="stat-card purple">
-            <div class="stat-icon purple"><i data-lucide="armchair"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalMeja }}</div>
-                <div class="stat-lbl">Total Meja</div>
-                <div class="stat-trend neutral">🪑 Meja tersedia</div>
-            </div>
-        </div>
-        <div class="stat-card red">
-            <div class="stat-icon red"><i data-lucide="receipt"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalTransaksi }}</div>
-                <div class="stat-lbl">Total Transaksi</div>
-                <div class="stat-trend up">💳 Semua transaksi</div>
-            </div>
-        </div>
-        <div class="stat-card dark">
-            <div class="stat-icon dark"><i data-lucide="users"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalUser }}</div>
-                <div class="stat-lbl">Total User</div>
-                <div class="stat-trend neutral">👤 Pengguna sistem</div>
-            </div>
-        </div>
-        <div class="stat-card pink">
-            <div class="stat-icon pink"><i data-lucide="utensils"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalMenu }}</div>
-                <div class="stat-lbl">Total Menu</div>
-                <div class="stat-trend up">🍔 Menu tersedia</div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Content Grid --}}
-    <div class="content-grid">
-        <div class="box">
-            <div class="box-header">
-                <div><h3>Grafik Penjualan 7 Hari Terakhir</h3></div>
-                <div style="font-size:var(--text-sm);color:var(--text-muted);font-weight:600;">
-                    Hari ini: Rp {{ number_format($totalPenjualan,0,',','.') }}
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="chart-wrap">
-                    <canvas id="chartPenjualan"></canvas>
-                </div>
-            </div>
+    <div class="topbar-right">
+        <div class="live-clock">
+            <i data-lucide="clock" style="width:14px;height:14px;color:#7c3aed;"></i>
+            <span id="clock">--:--:--</span>
         </div>
 
-        <div class="box">
-            <div class="box-header">
-                <h3>🏆 Menu Terlaris</h3>
-            </div>
-            <div class="box-body">
-                @if($menuTerlaris->isEmpty())
-                    <p style="color:var(--text-muted);font-size:var(--text-base);text-align:center;padding:20px 0;">Belum ada data hari ini</p>
-                @else
-                    <div class="menu-rank">
-                        @foreach($menuTerlaris as $i => $item)
-                        <div class="menu-rank-item">
-                            <div class="rank-num {{ $i===0?'r1':($i===1?'r2':($i===2?'r3':'rn')) }}">{{ $i+1 }}</div>
-                            <img src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}" alt="{{ $item->menu->name ?? 'Menu' }}" class="rank-img">
-                            <div class="rank-info">
-                                <div class="rank-name">{{ $item->menu->name ?? 'Menu Tidak Ditemukan' }}</div>
-                                <div class="rank-sub">Menu paling sering dipesan</div>
-                            </div>
-                            <div class="rank-qty">{{ $item->total_qty }}x</div>
-                        </div>
-                        @endforeach
+        <div class="profile-wrap">
+            <div class="user-btn" id="profileBtn" onclick="toggleDropdown()">
+                @if($avatarUrl)
+                    <div class="user-avatar has-photo">
+                        <img src="{{ $avatarUrl }}" alt="{{ auth()->user()->name }}">
                     </div>
+                @else
+                    <div class="user-avatar">{{ $userInitial }}</div>
                 @endif
+                <div>
+                    <div class="user-name">{{ auth()->user()->name }}</div>
+                    <div class="user-role">{{ ucfirst(auth()->user()->role) }}</div>
+                </div>
+                <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+
+            <div class="dropdown" id="dropdownMenu">
+                <div class="dp-head">
+                    @if($avatarUrl)
+                        <div class="dp-av has-photo">
+                            <img src="{{ $avatarUrl }}" alt="{{ auth()->user()->name }}">
+                        </div>
+                    @else
+                        <div class="dp-av">{{ $userInitial }}</div>
+                    @endif
+                    <div>
+                        <div class="dp-nm">{{ auth()->user()->name }}</div>
+                        <div class="dp-rl">{{ ucfirst(auth()->user()->role) }} · Online</div>
+                    </div>
+                </div>
+                <div class="dp-body">
+                    <a href="/admin/account/profil" class="dp-item">
+                        <div class="dp-ico">
+                            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        Profil Saya
+                    </a>
+                    <a href="/admin/account/ganti-sandi" class="dp-item">
+                        <div class="dp-ico">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        Ganti Password
+                    </a>
+                    <div class="dp-divider"></div>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dp-item danger">
+                            <div class="dp-ico">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            </div>
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <div class="menu-section">MAIN</div>
+    <a href="/admin/dashboard" class="{{ request()->is('admin/dashboard') ? 'active' : '' }}">
+        <i data-lucide="layout-dashboard"></i> Dashboard
+    </a>
+
+    <div class="menu-section">KATALOG</div>
+    <a href="/admin/menu" class="{{ request()->is('admin/menu*') ? 'active' : '' }}">
+        <i data-lucide="utensils"></i> Menu
+    </a>
+    <a href="/admin/kategori" class="{{ request()->is('admin/kategori*') ? 'active' : '' }}">
+        <i data-lucide="folder"></i> Kategori
+    </a>
+    <a href="/admin/addons" class="{{ request()->is('admin/addons*') ? 'active' : '' }}">
+        <i data-lucide="plus-circle"></i> Add-ons
+    </a>
+    <div class="menu-section">OPERASIONAL</div>
+    <a href="/admin/meja" class="{{ request()->is('admin/meja*') ? 'active' : '' }}">
+        <i data-lucide="armchair"></i> Meja
+    </a>
+    <a href="/admin/pembayaran" class="{{ request()->is('admin/pembayaran*') ? 'active' : '' }}">
+        <i data-lucide="credit-card"></i> Pembayaran
+    </a>
+    <div class="menu-section">ANALITIK</div>
+    <a href="/admin/laporan" class="{{ request()->is('admin/laporan*') ? 'active' : '' }}">
+        <i data-lucide="bar-chart-3"></i> Laporan
+    </a>
+    <div class="menu-section">SYSTEM</div>
+    <a href="/admin/user" class="{{ request()->is('admin/user*') ? 'active' : '' }}">
+        <i data-lucide="users"></i> User
+    </a>
+</div>
+
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
 
+<div class="main">
+    @yield('content')
+</div>
 
 <script>
-const ctx = document.getElementById('chartPenjualan').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {!! json_encode($chartLabels) !!},
-        datasets: [{
-            label: 'Penjualan',
-            data: {!! json_encode($chartData) !!},
-            borderColor: '#7c3aed',
-            backgroundColor: 'rgba(124,58,237,0.08)',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#7c3aed',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            fill: true,
-            tension: 0.4,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: {
-                    color: '#94a3b8', font: { size: 11, family: 'Inter' },
-                    callback: v => 'Rp ' + (v/1000).toFixed(0) + 'rb'
-                }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
-            }
-        }
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('show');
+    document.getElementById('overlay').classList.toggle('show');
+}
+function toggleDropdown() {
+    const btn  = document.getElementById('profileBtn');
+    const menu = document.getElementById('dropdownMenu');
+    btn.classList.toggle('open');
+    menu.classList.toggle('show');
+}
+document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.profile-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('profileBtn').classList.remove('open');
+        document.getElementById('dropdownMenu').classList.remove('show');
     }
 });
+lucide.createIcons();
 </script>
 
-<script>
-$(document).ready(function () {
-    $('#recentOrdersTable').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        searching: false,
-        ordering: false,
-        language: {
-            info:     "Showing _START_ to _END_ of _TOTAL_ entries",
-            paginate: { previous: "Previous", next: "Next" },
-            emptyTable: "Belum ada pesanan hari ini"
-        }
-    });
-});
-</script>
-@endsection
-
-@push('scripts')
-<script>
-const ctx = document.getElementById('chartPenjualan').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {!! json_encode($chartLabels) !!},
-        datasets: [{
-            label: 'Penjualan',
-            data: {!! json_encode($chartData) !!},
-            borderColor: '#7c3aed',
-            backgroundColor: 'rgba(124,58,237,0.08)',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#7c3aed',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            fill: true,
-            tension: 0.4,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: {
-                    color: '#94a3b8', font: { size: 11, family: 'Inter' },
-                    callback: v => 'Rp ' + (v/1000).toFixed(0) + 'rb'
-                }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
-            }
-        }
-    }
-});
-</script>
-<script>
-$(document).ready(function () {
-    $('#recentOrdersTable').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        searching: false,
-        ordering: false,
-        language: {
-            info:     "Showing _START_ to _END_ of _TOTAL_ entries",
-            paginate: { previous: "Previous", next: "Next" },
-            emptyTable: "Belum ada pesanan hari ini"
-        }
-    });
-});
-</script>
-@endpush
+@stack('scripts')
+</body>
+</html>

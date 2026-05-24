@@ -1,15 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Meja;
 
 class MejaController extends Controller
 {
-    // =====================================
-    // LIST DATA MEJA
-    // =====================================
     public function index()
     {
         $mejas = Meja::latest()->get();
@@ -20,17 +18,11 @@ class MejaController extends Controller
         );
     }
 
-    // =====================================
-    // HALAMAN TAMBAH MEJA
-    // =====================================
     public function create()
     {
         return view('admin.meja.create');
     }
 
-    // =====================================
-    // SIMPAN MEJA
-    // =====================================
     public function store(Request $request)
     {
         $request->validate([
@@ -49,9 +41,6 @@ class MejaController extends Controller
             );
     }
 
-    // =====================================
-    // HALAMAN EDIT MEJA
-    // =====================================
     public function edit($id)
     {
         $meja = Meja::findOrFail($id);
@@ -62,9 +51,6 @@ class MejaController extends Controller
         );
     }
 
-    // =====================================
-    // UPDATE MEJA
-    // =====================================
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -85,9 +71,6 @@ class MejaController extends Controller
             );
     }
 
-    // =====================================
-    // HAPUS MEJA
-    // =====================================
     public function destroy($id)
     {
         $meja = Meja::findOrFail($id);
@@ -101,9 +84,6 @@ class MejaController extends Controller
             );
     }
 
-    // =====================================
-    // MONITOR MEJA
-    // =====================================
     public function monitor()
     {
         $mejas = Meja::with([
