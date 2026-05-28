@@ -3,227 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bayar dengan QRIS</title>
+    <title>Pembayaran QRIS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
         body { background: linear-gradient(135deg, #eef2ff 0%, #ffffff 50%, #ede9fe 100%); min-height: 100vh; }
 
-        .glass-card {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.7);
+        /* ── QRIS Card ── */
+        .qris-card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(99,102,241,0.18);
+            overflow: hidden;
         }
 
-        @keyframes fadeUp {
-            from { opacity:0; transform: translateY(20px); }
-            to   { opacity:1; transform: translateY(0); }
-        }
-        .fade-up { animation: fadeUp 0.55s ease forwards; }
-
-        @keyframes scanLine {
-            0%   { top: 8px; }
-            50%  { top: calc(100% - 8px); }
-            100% { top: 8px; }
-        }
-        .scan-line {
-            animation: scanLine 2.5s ease-in-out infinite;
-            position: absolute;
-            left: 8px; right: 8px; height: 2px;
-            background: linear-gradient(90deg, transparent, #6366f1, transparent);
-            border-radius: 999px; z-index: 10;
+        /* Header merah-pink seperti QRIS bank asli */
+        .qris-header {
+            background: linear-gradient(135deg, #e11d48, #be123c);
+            padding: 18px 20px 14px;
+            position: relative;
         }
 
-        @keyframes pulseRing {
-            0%   { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
-            70%  { box-shadow: 0 0 0 14px rgba(99,102,241,0); }
-            100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
-        }
-        .qr-wrapper { animation: pulseRing 2.5s infinite; border-radius: 24px; }
+        /* QR wrapper */
+        #qrcode canvas, #qrcode img { display: block; margin: 0 auto; }
 
-        /* Confirm button */
-        .btn-confirm {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            box-shadow: 0 10px 20px -4px rgba(99,102,241,0.4);
-            transition: all 0.25s;
+        /* Timer */
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+            70%  { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
         }
-        .btn-confirm:hover  { filter: brightness(1.07); transform: translateY(-1px); }
-        .btn-confirm:active { transform: scale(0.97); box-shadow: none; }
-        .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .btn-cancel { background:#f1f5f9; color:#64748b; transition: all 0.2s; }
-        .btn-cancel:hover { background: #e2e8f0; }
-        .btn-cancel:active { transform: scale(0.97); }
-
-        /* Countdown bar */
-        @keyframes shrink {
-            from { width: 100%; }
-            to   { width: 0%; }
-        }
+        .timer-pulse { animation: pulse-ring 1.5s infinite; }
 
         /* Spinner */
         @keyframes spin { to { transform: rotate(360deg); } }
-        .spinner {
-            width: 18px; height: 18px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
+        .spin-anim { animation: spin 0.8s linear infinite; }
+
+        /* Fade in */
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(16px); }
+            to   { opacity:1; transform:translateY(0); }
         }
+        .fade-up { animation: fadeUp 0.5s ease forwards; }
+
+        /* Success overlay */
+        .success-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .success-overlay.show { opacity: 1; pointer-events: auto; }
+        .success-box {
+            background: #fff;
+            border-radius: 24px;
+            padding: 36px 28px;
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            transform: scale(0.85);
+            transition: transform 0.3s;
+        }
+        .success-overlay.show .success-box { transform: scale(1); }
+
+        @keyframes checkmark {
+            from { stroke-dashoffset: 100; }
+            to   { stroke-dashoffset: 0; }
+        }
+        .check-path { stroke-dasharray: 100; stroke-dashoffset: 100; animation: checkmark 0.6s 0.3s ease forwards; }
     </style>
 </head>
-<body class="flex items-center justify-center p-5 min-h-screen">
+<body class="flex items-center justify-center p-4 min-h-screen">
 
+{{-- ── SUCCESS OVERLAY ── --}}
+<div class="success-overlay" id="successOverlay">
+    <div class="success-box fade-up">
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" stroke="#22c55e" stroke-width="3" fill="#dcfce7"/>
+                <path class="check-path" d="M11 20l7 7 11-13" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <h2 class="text-xl font-black text-gray-800 mb-1">Pembayaran Berhasil!</h2>
+        <p class="text-sm text-gray-500 mb-1">Pesanan <span class="font-bold text-indigo-600">{{ $order->queue_number }}</span></p>
+        <p class="text-sm text-gray-400">Mengalihkan ke halaman pesanan...</p>
+    </div>
+</div>
+
+{{-- ── MAIN CARD ── --}}
 <div class="w-full max-w-sm fade-up">
+    <div class="qris-card">
 
-    <div class="glass-card rounded-[32px] shadow-2xl overflow-hidden">
-
-        {{-- HEADER --}}
-        <div class="relative bg-gradient-to-r from-indigo-500 to-violet-600 px-8 pt-8 pb-14 text-center">
-            <div class="absolute top-0 left-0 w-36 h-36 bg-white/10 rounded-full -translate-x-16 -translate-y-16"></div>
-            <div class="absolute bottom-0 right-0 w-28 h-28 bg-white/10 rounded-full translate-x-10 translate-y-10"></div>
-            <div class="relative z-10">
-                <span class="text-4xl">📱</span>
-                <h1 class="mt-3 text-2xl font-extrabold text-white tracking-tight">Bayar dengan QRIS</h1>
-                <p class="mt-1 text-indigo-100 text-sm">Scan barcode di bawah untuk membayar</p>
-                <div class="mt-4 inline-flex items-center gap-2 bg-white/20 px-4 py-1.5 rounded-full text-white text-xs font-bold">
-                    <span>Pesanan {{ $order->queue_number }}</span>
-                    <span>·</span>
-                    <span>Meja {{ $order->table_number ?? '-' }}</span>
+        {{-- HEADER (mirip tampilan QRIS resmi) --}}
+        <div class="qris-header">
+            <div class="flex items-center justify-between">
+                <div>
+                    {{-- Logo QRIS --}}
+                    <div class="flex items-center gap-2 mb-1">
+                        <div class="bg-white rounded px-2 py-0.5">
+                            <span class="text-red-600 font-black text-xs tracking-widest">QRIS</span>
+                        </div>
+                        <span class="text-white/70 text-xs">Bayar dengan QRIS</span>
+                    </div>
+                    <p class="text-white font-bold text-lg leading-none">
+                        Rp {{ number_format($order->total, 0, ',', '.') }}
+                    </p>
+                    <p class="text-white/60 text-xs mt-0.5">Pesanan {{ $order->queue_number }}
+                        @if($order->table_number)· Meja {{ $order->table_number }}@endif
+                    </p>
+                </div>
+                <div class="text-right">
+                    {{-- Timer --}}
+                    <div class="bg-white/20 rounded-xl px-3 py-2 text-center timer-pulse" id="timerBox">
+                        <p class="text-white text-[10px] font-semibold mb-0.5">Batas waktu</p>
+                        <p class="text-white font-black text-base tabular-nums" id="timerDisplay">05:00</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {{-- CONTENT --}}
-        <div class="px-6 pb-7 -mt-8 relative z-20">
-
-            {{-- TOTAL --}}
-            <div class="bg-white rounded-2xl shadow-md border border-indigo-50 p-4 mb-5 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Pembayaran</p>
-                    <p class="text-2xl font-black text-indigo-600 mt-1">Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+        {{-- QR CODE AREA --}}
+        <div class="bg-gray-50 px-6 py-5 text-center border-b border-gray-100">
+            {{-- Merchant name badge --}}
+            <div class="flex items-center justify-center gap-1.5 mb-4">
+                <div class="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center">
+                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl">💳</div>
+                <span class="text-sm font-bold text-gray-700">Cafe Tugas Akhir</span>
+                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">✓ Terverifikasi</span>
             </div>
 
-            {{-- QR CODE --}}
-            <div class="qr-wrapper bg-white p-4 rounded-3xl shadow-lg border-2 border-indigo-100 relative">
-                <div class="relative" style="line-height:0;">
-                    <div class="scan-line"></div>
-
-                    @if(isset($qrisImageUrl) && $qrisImageUrl)
-                        <img src="{{ $qrisImageUrl }}"
-                             alt="QRIS Barcode"
-                             class="w-full rounded-2xl"
-                             style="image-rendering: pixelated;">
-                    @else
-                        <div class="w-full aspect-square bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl flex flex-col items-center justify-center gap-3 border-2 border-dashed border-indigo-200">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5">
-                                <rect x="3" y="3" width="7" height="7" rx="1"/>
-                                <rect x="14" y="3" width="7" height="7" rx="1"/>
-                                <rect x="3" y="14" width="7" height="7" rx="1"/>
-                                <path d="M14 14h.01M14 17h.01M17 14h.01M20 14h.01M17 17h3M20 20h.01M17 20h.01"/>
-                            </svg>
-                            <p class="text-xs text-indigo-400 font-semibold text-center px-4 leading-relaxed">
-                                QRIS belum dikonfigurasi.<br>Upload gambar QR di menu admin → Pembayaran.
-                            </p>
-                        </div>
-                    @endif
+            {{-- QR Code --}}
+            <div class="relative inline-block">
+                <div class="bg-white p-3 rounded-2xl shadow-md border border-gray-200 inline-block">
+                    <div id="qrcode"></div>
                 </div>
-
-                {{-- Corner decorators --}}
-                <div class="absolute top-3 left-3 w-6 h-6 border-t-4 border-l-4 border-indigo-500 rounded-tl-lg pointer-events-none"></div>
-                <div class="absolute top-3 right-3 w-6 h-6 border-t-4 border-r-4 border-indigo-500 rounded-tr-lg pointer-events-none"></div>
-                <div class="absolute bottom-3 left-3 w-6 h-6 border-b-4 border-l-4 border-indigo-500 rounded-bl-lg pointer-events-none"></div>
-                <div class="absolute bottom-3 right-3 w-6 h-6 border-b-4 border-r-4 border-indigo-500 rounded-br-lg pointer-events-none"></div>
+                {{-- Corner decorations (mirip QRIS asli) --}}
+                <div class="absolute top-1 left-1 w-6 h-6 border-t-4 border-l-4 border-red-500 rounded-tl-lg"></div>
+                <div class="absolute top-1 right-1 w-6 h-6 border-t-4 border-r-4 border-red-500 rounded-tr-lg"></div>
+                <div class="absolute bottom-1 left-1 w-6 h-6 border-b-4 border-l-4 border-red-500 rounded-bl-lg"></div>
+                <div class="absolute bottom-1 right-1 w-6 h-6 border-b-4 border-r-4 border-red-500 rounded-br-lg"></div>
             </div>
 
-            {{-- INSTRUKSI --}}
-            <div class="mt-4 bg-indigo-50 rounded-2xl p-4 space-y-2">
-                <p class="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2">Cara Pembayaran</p>
+            <p class="text-xs text-gray-400 mt-3 leading-relaxed">
+                Scan QR di atas menggunakan aplikasi<br>
+                <span class="font-semibold text-gray-600">GoPay · OVO · Dana · ShopeePay · M-Banking</span>
+            </p>
+
+            {{-- NMID / merchant ID (realistis) --}}
+            <p class="text-[10px] text-gray-300 mt-2 font-mono">
+                NMID: ID{{ str_pad($order->id, 10, '0', STR_PAD_LEFT) }}{{ strtoupper(substr(md5($order->id), 0, 6)) }}
+            </p>
+        </div>
+
+        {{-- INFO & AKSI --}}
+        <div class="px-5 py-4 space-y-3">
+
+            {{-- Status badge --}}
+            <div id="statusBadge" class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5">
+                <span id="statusIcon" class="text-base">⏳</span>
+                <p id="statusText" class="text-xs font-semibold text-amber-700">Menunggu pembayaran...</p>
+            </div>
+
+            {{-- Cara bayar ringkas --}}
+            <div class="bg-gray-50 rounded-xl p-3 space-y-1.5">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Cara Pembayaran</p>
                 @foreach([
-                    ['1', 'Buka aplikasi dompet digital atau mobile banking kamu'],
-                    ['2', 'Pilih fitur Scan QR / QRIS'],
-                    ['3', 'Arahkan kamera ke barcode di atas'],
-                    ['4', 'Masukkan nominal & selesaikan pembayaran'],
-                    ['5', 'Klik tombol <strong>Sudah Bayar</strong> di bawah'],
-                ] as [$num, $text])
-                <div class="flex items-start gap-3">
-                    <div class="w-5 h-5 rounded-full bg-indigo-500 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0 mt-0.5">{{ $num }}</div>
-                    <p class="text-xs text-indigo-700 leading-relaxed">{!! $text !!}</p>
+                    ['📱', 'Buka aplikasi dompet digital / m-banking kamu'],
+                    ['📷', 'Pilih "Bayar / Scan QR" lalu arahkan ke QR di atas'],
+                    ['✅', 'Konfirmasi nominal & selesaikan pembayaran'],
+                ] as [$icon, $text])
+                <div class="flex items-start gap-2">
+                    <span class="text-sm leading-tight">{{ $icon }}</span>
+                    <p class="text-xs text-gray-600 leading-tight">{{ $text }}</p>
                 </div>
                 @endforeach
             </div>
 
-            {{-- STATUS --}}
-            <div id="statusBadge" class="mt-4 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-50 border border-amber-100">
-                <span class="text-amber-500 text-base" id="statusIcon">⏳</span>
-                <p class="text-xs font-bold text-amber-700" id="statusText">Menunggu pembayaran QRIS...</p>
-            </div>
+            {{-- TOMBOL SIMULASI (untuk demo sidang) --}}
+            <button id="btnSimulate" onclick="simulatePayment()"
+                class="w-full py-3.5 rounded-2xl font-extrabold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-95"
+                style="background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 8px 20px -4px rgba(34,197,94,0.45);">
+                ✅ Simulasi Pembayaran Berhasil
+            </button>
 
-            {{-- TOMBOL KONFIRMASI --}}
-            <form action="{{ route('customer.order.success', $order->id) }}" method="GET" id="confirmForm" class="mt-4">
-                <button type="submit" id="btnConfirm"
-                        class="btn-confirm w-full text-white py-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-2">
-                    ✅ Sudah Bayar — Konfirmasi
-                </button>
-            </form>
-
-            {{-- KEMBALI --}}
             <a href="/customer/checkout"
-               class="btn-cancel mt-3 w-full py-3 rounded-2xl font-bold text-sm text-center block text-center">
+               class="block w-full py-2.5 rounded-2xl font-semibold text-xs text-center text-gray-400 bg-gray-50 hover:bg-gray-100 transition-colors">
                 ← Kembali ke Checkout
             </a>
 
         </div>
+
+        {{-- Footer logo QRIS --}}
+        <div class="px-5 pb-4 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+                <div class="bg-red-600 rounded px-1.5 py-0.5">
+                    <span class="text-white font-black text-[10px] tracking-widest">QRIS</span>
+                </div>
+                <span class="text-[10px] text-gray-400">by Bank Indonesia</span>
+            </div>
+            <span class="text-[10px] text-gray-300">Aman & Terpercaya 🔒</span>
+        </div>
+
     </div>
 
-    <p class="text-center text-xs text-slate-400 mt-4 px-4 leading-relaxed">
-        Tekan <strong>Sudah Bayar</strong> hanya setelah pembayaran QRIS berhasil dikonfirmasi di aplikasimu.
+    <p class="text-center text-[11px] text-slate-400 mt-3 px-4">
+        Pembayaran aman diproses melalui jaringan <strong>QRIS</strong> Bank Indonesia
     </p>
-
 </div>
 
 <script>
-// ═══ TOAST ═══
-(function(){
-    const el = document.createElement('div');
-    el.id = 'toastContainer';
-    el.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:max-content;max-width:calc(100vw - 32px);';
-    document.body.appendChild(el);
-})();
-function showToast(msg, type='success', duration=2200){
-    const c=document.getElementById('toastContainer');
-    const colors={success:'background:#22c55e;color:white;',info:'background:#1e293b;color:white;',warning:'background:#f59e0b;color:white;',error:'background:#ef4444;color:white;'};
-    const icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};
-    const t=document.createElement('div');
-    t.style.cssText=`pointer-events:auto;display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-size:13px;font-weight:600;white-space:nowrap;opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;${colors[type]||colors.info}`;
-    t.innerHTML=`<span>${icons[type]||'📢'}</span><span>${msg}</span>`;
-    c.appendChild(t);
-    requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateY(0) scale(1)';});
-    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-10px) scale(0.95)';setTimeout(()=>t.remove(),260);},duration);
+// ── Data dari controller ──
+const qrisString  = "{{ $qrisString }}";
+const confirmUrl  = "{{ route('customer.order.qris.confirm', $order->id) }}";
+const successUrl  = "{{ route('customer.order.success', $order->id) }}";
+const csrfToken   = "{{ csrf_token() }}";
+
+// ── Generate QR Code ──
+new QRCode(document.getElementById('qrcode'), {
+    text:           qrisString,
+    width:          200,
+    height:         200,
+    colorDark:      '#000000',
+    colorLight:     '#ffffff',
+    correctLevel:   QRCode.CorrectLevel.M,
+});
+
+// ── Timer 5 menit ──
+let seconds = 300;
+const timerDisplay = document.getElementById('timerDisplay');
+const timerBox     = document.getElementById('timerBox');
+
+const timerInterval = setInterval(() => {
+    seconds--;
+    if (seconds <= 0) {
+        clearInterval(timerInterval);
+        timerDisplay.textContent = '00:00';
+        timerBox.style.background = 'rgba(239,68,68,0.3)';
+        setStatus('error', '❌', 'Waktu pembayaran habis. Silakan buat pesanan baru.');
+        document.getElementById('btnSimulate').disabled = true;
+        document.getElementById('btnSimulate').style.opacity = '0.5';
+        return;
+    }
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    timerDisplay.textContent = m + ':' + s;
+
+    // Warna timer merah saat < 1 menit
+    if (seconds < 60) {
+        timerDisplay.style.color = '#fca5a5';
+    }
+}, 1000);
+
+// ── Set Status Badge ──
+function setStatus(type, icon, text) {
+    const badge = document.getElementById('statusBadge');
+    const map = {
+        waiting: 'bg-amber-50 border-amber-200',
+        success: 'bg-green-50 border-green-200',
+        error:   'bg-red-50 border-red-200',
+        loading: 'bg-blue-50 border-blue-200',
+    };
+    const textMap = {
+        waiting: 'text-amber-700',
+        success: 'text-green-700',
+        error:   'text-red-700',
+        loading: 'text-blue-700',
+    };
+    badge.className = 'flex items-center gap-2 rounded-xl px-4 py-2.5 border ' + (map[type] || map.loading);
+    document.getElementById('statusIcon').textContent  = icon;
+    document.getElementById('statusText').className   = 'text-xs font-semibold ' + (textMap[type] || textMap.loading);
+    document.getElementById('statusText').textContent = text;
 }
 
-// Klik konfirmasi → tampilkan loading state
-document.getElementById('confirmForm').addEventListener('submit', function() {
-    const btn = document.getElementById('btnConfirm');
+// ── Simulasi Bayar ──
+async function simulatePayment() {
+    const btn = document.getElementById('btnSimulate');
     btn.disabled = true;
-    btn.innerHTML = `<span class="spinner"></span> Mengonfirmasi...`;
+    btn.innerHTML = '<span class="spin-anim inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Memproses...';
 
-    // Update status badge
-    document.getElementById('statusIcon').textContent = '✅';
-    document.getElementById('statusText').textContent = 'Pembayaran dikonfirmasi!';
-    document.getElementById('statusBadge').className =
-        'mt-4 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-50 border border-emerald-100';
-    document.getElementById('statusText').className = 'text-xs font-bold text-emerald-700';
+    setStatus('loading', '🔄', 'Memproses pembayaran...');
 
-    showToast('Pembayaran QRIS dikonfirmasi! 🎉', 'success', 3000);
-    // Bersihkan cart
-    localStorage.removeItem('cart');
-    localStorage.removeItem('checkoutCart');
-});
+    try {
+        const res = await fetch(confirmUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'X-CSRF-TOKEN':  csrfToken,
+                'Accept':        'application/json',
+            },
+        });
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+            clearInterval(timerInterval);
+            setStatus('success', '✅', 'Pembayaran berhasil!');
+
+            // Tampilkan success overlay
+            document.getElementById('successOverlay').classList.add('show');
+
+            // Redirect ke halaman sukses
+            setTimeout(() => {
+                window.location.href = data.redirect || successUrl;
+            }, 2000);
+        } else {
+            throw new Error('Unexpected response');
+        }
+    } catch (e) {
+        setStatus('error', '❌', 'Gagal konfirmasi. Coba lagi.');
+        btn.disabled = false;
+        btn.innerHTML = '✅ Simulasi Pembayaran Berhasil';
+    }
+}
 </script>
 </body>
 </html>

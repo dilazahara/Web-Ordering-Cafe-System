@@ -13,57 +13,34 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .glass-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(226,232,240,0.8); }
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-
-        /* ── ORDER TYPE ── */
-        .otype-btn {
-            flex: 1; padding: 14px 10px; border-radius: 16px; border: 2px solid #f1f5f9;
-            background: #fff; cursor: pointer; transition: all .22s; text-align: center;
-            display: flex; flex-direction: column; align-items: center; gap: 6px;
-        }
-        .otype-btn:hover { border-color: #f97316; background: #fffbf5; }
-        .otype-btn.selected-dine { border-color: #f97316; background: #fff7ed; box-shadow: 0 4px 14px rgba(249,115,22,.14); }
-        .otype-btn.selected-take { border-color: #6366f1; background: #eef2ff; box-shadow: 0 4px 14px rgba(99,102,241,.14); }
-        .otype-icon { font-size: 28px; line-height: 1; }
-        .otype-label { font-size: 12px; font-weight: 800; letter-spacing: .3px; }
-        .otype-desc  { font-size: 10.5px; color: #94a3b8; font-weight: 500; }
-
-        /* Payment option cards */
         .payment-item { padding: 14px 16px; border-radius: 16px; cursor: pointer; background: #ffffff; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); border: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
         .payment-item:hover { border-color: #fdba74; background: #fffbf5; }
         .payment-item.selected { background: #fff7ed; border-color: #f97316; box-shadow: 0 4px 12px rgba(249,115,22,0.12); }
         .payment-item .check-icon { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: auto; transition: all 0.2s; }
         .payment-item.selected .check-icon { background: #f97316; border-color: #f97316; }
         .payment-item.selected .check-icon::after { content: ''; width: 10px; height: 6px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translateY(-1px); display: block; }
-
         .qty-btn { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; transition: all 0.18s; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 18px; line-height: 1; color: #475569; border: none; cursor: pointer; }
         .qty-btn:hover { background: #f1f5f9; }
         .qty-btn:active { transform: scale(0.9); }
-
         .btn-order { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 10px 20px -4px rgba(249,115,22,0.35); transition: all 0.2s; }
         .btn-order:active { transform: scale(0.98); box-shadow: none; }
         .btn-order:disabled { opacity: 0.7; cursor: not-allowed; }
-
         textarea:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
-
         @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
         .animate-fade { animation: fadeUp 0.35s ease-out forwards; }
-
         .info-box { border-radius: 18px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
         .info-box-icon { width: 44px; height: 44px; border-radius: 14px; background: white; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
         .item-row { display: flex; gap: 14px; align-items: center; }
         .item-img { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; border: 1px solid #f1f5f9; flex-shrink: 0; }
         .divider-dash { border: none; border-top: 2px dashed #f1f5f9; margin: 10px 0; }
-
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
-
-        /* meja panel */
         #mejaPanelWrap { transition: all .3s ease; }
     </style>
 </head>
 <body class="pb-12">
 
-<!-- ══ TOPBAR ══ -->
+<!-- TOPBAR -->
 <div class="glass-header px-4 py-3.5 flex items-center gap-4 sticky top-0 z-50">
     <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm active:scale-90 transition-transform">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,8 +54,30 @@
 
 <div class="max-w-xl mx-auto p-4 space-y-4">
 
+    {{-- ── ERROR SESSION DARI MIDTRANS / CONTROLLER ── --}}
+    @if(session('error'))
+    <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade">
+        <span class="text-red-500 text-xl flex-shrink-0">❌</span>
+        <div>
+            <p class="text-red-700 font-bold text-sm">Pesanan Gagal</p>
+            <p class="text-red-600 text-xs mt-0.5">{{ session('error') }}</p>
+        </div>
+    </div>
+    @endif
 
-    {{-- ── NOMOR MEJA (hanya tampil jika Dine In) ── --}}
+    {{-- ── ERROR VALIDASI DARI FORM ── --}}
+    @if($errors->any())
+    <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 animate-fade">
+        <p class="text-red-700 font-bold text-sm mb-1">⚠️ Ada masalah saat memesan:</p>
+        <ul class="text-red-600 text-xs space-y-1">
+            @foreach($errors->all() as $error)
+                <li>• {{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    {{-- ── NOMOR MEJA ── --}}
     <div id="mejaPanelWrap" class="animate-fade">
         <div class="bg-white p-4 rounded-2xl card-shadow flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -202,7 +201,7 @@
     @endif
 
     {{-- ── FORM PESAN ── --}}
-    <form action="/customer/order" method="POST" id="orderForm" class="pt-2">
+    <form action="{{ route('customer.order.store') }}" method="POST" id="orderForm" class="pt-2">
         @csrf
         <input type="hidden" name="cart"           id="cartInput">
         <input type="hidden" name="note"           id="noteHidden">
@@ -225,11 +224,11 @@
         @endif
     </form>
 
-</div>{{-- /max-w --}}
+</div>
 
 <script>
 // ══════════════════════════════════════════════════════
-//  TOAST NOTIFICATION SYSTEM
+//  TOAST
 // ══════════════════════════════════════════════════════
 (function initToast() {
     const el = document.createElement('div');
@@ -256,12 +255,10 @@ function showToast(msg, type = 'success', duration = 2200) {
 const paymentMethods = @json($paymentMethods->values());
 const pmMap = {};
 paymentMethods.forEach(pm => { pmMap[pm.kode] = pm; });
-
-// ── SERVER-SIDE table number (dari session PHP) ──
 const serverTableNumber = @json($tableNumber ?? null);
 
 // ══════════════════════════════════════════════════════
-//  INFO BOX TEMPLATES
+//  INFO BOX
 // ══════════════════════════════════════════════════════
 function getInfoBox(kode) {
     const pm = pmMap[kode];
@@ -285,7 +282,6 @@ let selectedKode = paymentMethods.length > 0 ? paymentMethods[0].kode : 'cash';
 //  INIT
 // ══════════════════════════════════════════════════════
 (function init() {
-    // Prioritaskan server-side session, fallback ke localStorage
     const tableNum = serverTableNumber || localStorage.getItem('table_number');
     if (tableNum) {
         localStorage.setItem('table_number', tableNum);
@@ -295,7 +291,6 @@ let selectedKode = paymentMethods.length > 0 ? paymentMethods[0].kode : 'cash';
             disp.textContent = 'Meja ' + tableNum;
         }
     }
-
     renderCart();
     renderInfoBox(selectedKode);
 })();
@@ -358,7 +353,7 @@ function changeQty(id, delta) {
         cart = cart.filter(i => i.id !== id);
         showToast('Item dihapus dari pesanan', 'warning', 1800);
     } else {
-        showToast(delta > 0 ? `Jumlah ${item.name}: ${item.quantity}` : `Jumlah ${item.name}: ${item.quantity}`, 'info', 1400);
+        showToast(`Jumlah ${item.name}: ${item.quantity}`, 'info', 1400);
     }
     saveCart(); renderCart();
 }
@@ -370,6 +365,7 @@ function updateItemNote(id, value) {
 
 function saveCart() {
     localStorage.setItem('checkoutCart', JSON.stringify(cart));
+    localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 // ══════════════════════════════════════════════════════
@@ -401,17 +397,16 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         return;
     }
 
-    // wajib scan meja
-const tn = document.getElementById('tableNumberInput').value;
-
-if (!tn) {
-    e.preventDefault();
-    showToast('⚠️ Scan QR Code meja dulu!', 'warning', 2800);
-    return;
-}
+    const tn = document.getElementById('tableNumberInput').value;
+    if (!tn || tn.trim() === '') {
+        e.preventDefault();
+        showToast('⚠️ Scan QR Code meja dulu!', 'warning', 2800);
+        return;
+    }
 
     document.getElementById('cartInput').value  = JSON.stringify(cart);
     document.getElementById('noteHidden').value = document.getElementById('noteInput').value;
+    document.getElementById('paymentMethodInput').value = selectedKode;
 
     showToast('Pesanan sedang diproses... 🍽️', 'success', 2500);
     const btn = document.getElementById('btnSubmitOrder');
@@ -422,10 +417,23 @@ if (!tn) {
 });
 
 // ══════════════════════════════════════════════════════
+//  RESET TOMBOL SAAT BROWSER BACK (bfcache)
+// ══════════════════════════════════════════════════════
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        const btn = document.getElementById('btnSubmitOrder');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '🛒 Pesan Sekarang';
+        }
+    }
+});
+
+// ══════════════════════════════════════════════════════
 //  HELPERS
 // ══════════════════════════════════════════════════════
 function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 </script>
 </body>

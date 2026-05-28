@@ -11,13 +11,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Daftarkan alias 'role' untuk RoleMiddleware
+        $middleware->prepend(\App\Http\Middleware\TrustProxies::class); // ← tambahkan ini
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
 
-        // Skip ngrok browser warning
         $middleware->append(\App\Http\Middleware\NgrokSkipWarning::class);
+
+        // ✅ Exclude webhook Midtrans dari CSRF
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

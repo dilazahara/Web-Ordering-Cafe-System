@@ -7,51 +7,65 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // halaman login
+    // =========================================
+    // HALAMAN LOGIN
+    // =========================================
     public function login()
     {
         return view('auth.login');
     }
 
-    // proses login
+    // =========================================
+    // PROSES LOGIN
+    // =========================================
     public function loginProses(Request $request)
     {
+        // ✅ FIX: Tambah validasi — sebelumnya tidak ada validasi sama sekali
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ], [
+            'email.required'    => 'Email wajib diisi.',
+            'email.email'       => 'Format email tidak valid.',
+            'password.required' => 'Password wajib diisi.',
+        ]);
+
         $credentials = [
-            'email' => $request->email,
-            'password' => $request->password
+            'email'    => $request->email,
+            'password' => $request->password,
         ];
 
-        if(Auth::attempt($credentials))
-        {
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // redirect sesuai role
+            $role = Auth::user()->role;
 
-            if(Auth::user()->role == 'admin')
-            {
-                return redirect('/admin/dashboard');
+            // ✅ FIX: Gunakan map agar lebih bersih & mudah dikembangkan
+            $redirectMap = [
+                'admin'  => '/admin/dashboard',
+                'kasir'  => '/kasir/dashboard',
+                'pelayan'=> '/pelayan/dashboard',
+                'dapur'  => '/dapur/proses',
+            ];
+
+            if (array_key_exists($role, $redirectMap)) {
+                return redirect($redirectMap[$role]);
             }
 
-            if(Auth::user()->role == 'kasir')
-            {
-                return redirect('/kasir/dashboard');
-            }
-
-            if(Auth::user()->role == 'pelayan')
-            {
-                return redirect('/pelayan/dashboard');
-            }
-
-            if(Auth::user()->role == 'dapur')
-            {
-                return redirect('/dapur/proses');
-            }
+            // ✅ FIX: Jika role tidak dikenali, logout paksa daripada diam
+            Auth::logout();
+            return back()->with('error', 'Akun Anda tidak memiliki hak akses yang valid. Hubungi administrator.');
         }
 
-        return back()->with('error', 'Email atau Password salah');
+        // ✅ FIX: withInput() agar email tidak hilang dari form saat gagal login
+        return back()
+            ->with('error', 'Email atau Password salah.')
+            ->withInput($request->only('email'));
     }
 
-    // logout
+    // =========================================
+    // LOGOUT
+    // =========================================
     public function logout(Request $request)
     {
         Auth::logout();

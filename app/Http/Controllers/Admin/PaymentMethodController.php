@@ -3,18 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PaymentMethodController extends Controller
 {
+    // =========================================
+    // INDEX
+    // =========================================
     public function index()
     {
         $paymentMethods = PaymentMethod::orderBy('created_at', 'asc')->get();
         return view('admin.pembayaran', compact('paymentMethods'));
     }
 
+    // =========================================
+    // STORE
+    // =========================================
     public function store(Request $request)
     {
         $request->validate([
@@ -23,9 +30,11 @@ class PaymentMethodController extends Controller
             'kode_custom' => 'nullable|string|max:50|regex:/^[a-z0-9_]+$/',
             'aktif'       => 'required|in:0,1',
         ], [
-            'nama.required'          => 'Nama metode wajib diisi.',
-            'kode.required'          => 'Tipe pembayaran wajib dipilih.',
-            'kode_custom.regex'      => 'Kode hanya boleh huruf kecil, angka, dan underscore.',
+            'nama.required'     => 'Nama metode wajib diisi.',
+            'kode.required'     => 'Tipe pembayaran wajib dipilih.',
+            'kode_custom.regex' => 'Kode hanya boleh huruf kecil, angka, dan underscore.',
+            'aktif.required'    => 'Status aktif wajib dipilih.',
+            'aktif.in'          => 'Nilai status tidak valid.',
         ]);
 
         $kode = $request->kode === 'lain'
@@ -33,7 +42,9 @@ class PaymentMethodController extends Controller
             : $request->kode;
 
         if (empty($kode)) {
-            return back()->withErrors(['kode_custom' => 'Kode wajib diisi untuk tipe Lainnya.'])->withInput();
+            return back()
+                ->withErrors(['kode_custom' => 'Kode wajib diisi untuk tipe Lainnya.'])
+                ->withInput();
         }
 
         if (PaymentMethod::where('kode', $kode)->exists()) {
@@ -51,33 +62,52 @@ class PaymentMethodController extends Controller
         return back()->with('success', "Metode pembayaran \"{$request->nama}\" berhasil ditambahkan.");
     }
 
+    // =========================================
+    // UPDATE
+    // =========================================
     public function update(Request $request, $id)
     {
         $method = PaymentMethod::findOrFail($id);
 
+        // ✅ FIX: Tambah validasi field 'aktif' yang sebelumnya tidak divalidasi
         $request->validate([
-            'nama' => 'required|string|max:100',
-            'kode' => 'nullable|string|max:50|regex:/^[a-z0-9_]+$/',
+            'nama'  => 'required|string|max:100',
+            'kode'  => 'nullable|string|max:50|regex:/^[a-z0-9_]+$/',
+            'aktif' => 'nullable|in:0,1',
         ], [
             'nama.required' => 'Nama metode wajib diisi.',
             'kode.regex'    => 'Kode hanya boleh huruf kecil, angka, dan underscore.',
+            'aktif.in'      => 'Nilai status tidak valid.',
         ]);
 
         $kode = $request->kode ? strtolower(trim($request->kode)) : $method->kode;
+
+        // ✅ Cek duplikasi kode hanya jika kode berubah
         if ($kode !== $method->kode && PaymentMethod::where('kode', $kode)->exists()) {
-            return back()->withErrors(['kode' => "Kode '{$kode}' sudah digunakan."])->withInput();
+            return back()
+                ->withErrors(['kode' => "Kode '{$kode}' sudah digunakan."])
+                ->withInput();
         }
 
-        $method->nama = $request->nama;
-        $method->kode = $kode;
+        $method->nama  = $request->nama;
+        $method->kode  = $kode;
+
+        // ✅ FIX: Update aktif hanya jika ada di request, jika tidak pertahankan nilai lama
+        $method->aktif = $request->has('aktif')
+            ? (bool) $request->aktif
+            : $method->aktif;
+
         $method->save();
 
         return back()->with('success', "Metode \"{$method->nama}\" berhasil diperbarui.");
     }
 
+    // =========================================
+    // TOGGLE AKTIF / NON-AKTIF
+    // =========================================
     public function toggle($id)
     {
-        $method = PaymentMethod::findOrFail($id);
+        $method        = PaymentMethod::findOrFail($id);
         $method->aktif = !$method->aktif;
         $method->save();
 
@@ -85,6 +115,9 @@ class PaymentMethodController extends Controller
         return back()->with('success', "{$method->nama} berhasil {$status}.");
     }
 
+    // =========================================
+    // UPDATE QRIS
+    // =========================================
     public function updateQris(Request $request, $id)
     {
         $method = PaymentMethod::findOrFail($id);
@@ -93,9 +126,14 @@ class PaymentMethodController extends Controller
             'nama_merchant'  => 'nullable|string|max:100',
             'nomor_merchant' => 'nullable|string|max:50',
             'image'          => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+        ], [
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format QRIS harus png, jpg, atau jpeg.',
+            'image.max'   => 'Ukuran gambar QRIS maksimal 2MB.',
         ]);
 
         if ($request->hasFile('image')) {
+            // Hapus gambar QRIS lama sebelum simpan yang baru
             if ($method->qris_image) {
                 Storage::disk('public')->delete($method->qris_image);
             }
@@ -109,9 +147,22 @@ class PaymentMethodController extends Controller
         return back()->with('success', 'Konfigurasi QRIS berhasil disimpan.');
     }
 
+    // =========================================
+    // DESTROY
+    // =========================================
     public function destroy($id)
     {
         $method = PaymentMethod::findOrFail($id);
+
+        // ✅ FIX: Cegah hapus metode pembayaran yang masih digunakan order aktif
+        $orderCount = Order::where('payment_method', $method->kode)
+            ->whereIn('status', ['pending', 'process', 'done', 'paid', 'lunas'])
+            ->count();
+
+        if ($orderCount > 0) {
+            return back()
+                ->with('error', "Metode '{$method->nama}' tidak dapat dihapus karena masih ada {$orderCount} order aktif yang menggunakannya.");
+        }
 
         if ($method->qris_image) {
             Storage::disk('public')->delete($method->qris_image);

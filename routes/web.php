@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\OrderController;
 // ── KASIR ─────────────────────────────────────────────
 use App\Http\Controllers\Kasir\KasirController;
 use App\Http\Controllers\Kasir\AccountKasirController;
-use App\Http\Controllers\Kasir\KonfirmasiPesananController;
+use App\Http\Controllers\KonfirmasiPesananController;
 
 // ── DAPUR ─────────────────────────────────────────────
 use App\Http\Controllers\Dapur\DapurController;
@@ -66,11 +66,6 @@ Route::post(
     '/login',
     [LoginController::class, 'login']
 )->name('login.post');
-
-Route::get(
-    '/register',
-    [RegisterController::class, 'index']
-);
 
 Route::middleware('auth')->group(function () {
 
@@ -118,6 +113,15 @@ Route::middleware('auth')
 });
 
 // ══════════════════════════════════════════════════════
+// MIDTRANS WEBHOOK — ✅ TAMBAHAN BARU, tanpa CSRF
+// ══════════════════════════════════════════════════════
+
+Route::post(
+    '/midtrans/webhook',
+    [CustomerOrderController::class, 'webhook']
+)->name('midtrans.webhook');
+
+// ══════════════════════════════════════════════════════
 // CUSTOMER
 // ══════════════════════════════════════════════════════
 
@@ -159,6 +163,11 @@ Route::prefix('customer')
         '/order/qris/{id}',
         [CustomerOrderController::class, 'qrisPayment']
     )->name('order.qris');
+
+    Route::post(
+        '/order/qris/{id}/confirm',
+        [CustomerOrderController::class, 'qrisConfirm']
+    )->name('order.qris.confirm');
 
     Route::get(
         '/order/success/{id}',

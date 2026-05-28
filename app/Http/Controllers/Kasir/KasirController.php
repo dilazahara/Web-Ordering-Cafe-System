@@ -51,13 +51,19 @@ class KasirController extends Controller
             ->whereDate('created_at', today())
             ->where(function ($q) {
 
-                // CASH — semua status
+                // CASH — semua status tampil
                 $q->where('payment_method', 'cash')
 
-                // QRIS — sudah bukan pending
+                // QRIS — tampilkan semua status kecuali pending
+                // (pending = belum bayar, sudah bayar = process/paid/done/delivered)
                 ->orWhere(function ($q2) {
                     $q2->where('payment_method', 'qris')
-                        ->where('status', '!=', 'pending');
+                        ->whereIn('status', [
+                            'paid',
+                            'process',
+                            'done',
+                            'delivered',
+                        ]);
                 });
 
             })
