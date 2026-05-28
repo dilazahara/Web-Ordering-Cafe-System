@@ -8,7 +8,8 @@
 body{ background:#F8F9FC; }
 
 /* ── MAIN ── */
-.main{ padding:40px 20px; max-width:780px; margin:auto; }
+
+.main { padding: 60px 60px 60px; max-width: 700px; margin: 0 auto; }
 
 /* ── PAGE HEADER ── */
 .page-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }

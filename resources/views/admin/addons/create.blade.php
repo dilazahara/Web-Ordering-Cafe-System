@@ -7,102 +7,20 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 
-/* ══ TOPBAR ══ */
-.topbar {
-    position: fixed; top: 0; left: 0; right: 0; height: 80px;
-    backdrop-filter: blur(20px);
-    background: rgba(255,255,255,0.95);
-    border-bottom: 1px solid #e2e8f0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 30px; z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.topbar-left { display: flex; align-items: center; gap: 20px; }
-.topbar-left span { font-weight: 600; font-size: 18px; color: #1e293b; }
-.menu-icon-btn {
-    display: flex; align-items: center; justify-content: center;
-    width: 40px; height: 40px; border-radius: 12px;
-    border: none; background: transparent; cursor: pointer;
-    color: #475569; transition: all 0.3s ease;
-}
-.menu-icon-btn:hover { background: #f1f5f9; color: #1e293b; transform: scale(1.05); }
-.topbar-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, #F97316, #FB923C);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 13px; font-weight: 700;
-}
+.main { padding: 30px 30px 40px; max-width: 700px; margin: 0 auto; }
 
-/* ══ SIDEBAR ══ */
-.sidebar {
-    width: 240px; height: 100vh; position: fixed;
-    background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px 20px; padding-top: 100px;
-    color: white; overflow-y: auto;
-    transform: translateX(-100%);
-    transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
-    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.15);
-    display: flex; flex-direction: column; gap: 4px;
-}
-.sidebar.show { transform: translateX(0); }
-.sidebar-overlay {
-    display: none; position: fixed; inset: 0; z-index: 998;
-    background: rgba(0,0,0,0.35); backdrop-filter: blur(2px);
-}
-.sidebar-overlay.show { display: block; }
-.menu-section {
-    font-size: 11px; letter-spacing: 1px; font-weight: 600;
-    color: #a78bfa; margin: 18px 10px 6px; opacity: 0.8; text-transform: uppercase;
-}
-.sidebar a, .menu-parent {
-    display: flex; align-items: center; gap: 14px;
-    padding: 11px 14px; border-radius: 12px;
-    text-decoration: none; color: #94a3b8;
-    font-weight: 400; font-size: 14.5px;
-    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-.sidebar a i, .menu-parent i { width: 18px; height: 18px; stroke-width: 2.2; color: #c4b5fd; flex-shrink: 0; }
-.menu-parent { cursor: pointer; }
-.menu-parent:hover, .sidebar a:hover { background: rgba(255,255,255,0.06); color: white; transform: translateX(4px); }
-.sidebar a.active { background: rgba(139,92,246,0.25); color: #c4b5fd; box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4); }
-.submenu { display: none; flex-direction: column; margin-left: 32px; gap: 3px; margin-top: 3px; }
-.submenu-item {
-    padding: 10px 14px; border-radius: 10px;
-    font-size: 13.5px; color: #cbd5e1;
-    text-decoration: none; transition: all 0.25s ease; display: block;
-}
-.submenu-item:hover { background: #334155; color: white; padding-left: 18px; }
-.submenu-item.active { background: #3b82f6; color: white; }
-.s-arrow { margin-left: auto; transition: all 0.35s ease; width: 16px !important; height: 16px !important; }
-.s-arrow.open { transform: rotate(180deg); }
-
-/* ══ MAIN ══ */
-.main { padding: 110px 30px 40px; max-width: 700px; margin: 0 auto; }
-
-/* ══ PAGE HEADER ══ */
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .page-header h1 { font-size: 28px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
 .page-header p  { font-size: 14px; color: #64748b; }
-.btn-back {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; border-radius: 12px;
-    border: 1.5px solid #e2e8f0; background: white;
-    color: #374151; font-size: 13px; font-weight: 600;
-    text-decoration: none; transition: all 0.2s; white-space: nowrap; font-family: 'Inter', sans-serif;
-}
-.btn-back:hover { background: #f8fafc; border-color: #cbd5e1; transform: translateY(-1px); }
 
-/* ══ CARD ══ */
 .card { background: white; border-radius: 20px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07); overflow: hidden; }
 .card-section { padding: 22px 24px; border-bottom: 1px solid #f8fafc; }
 .card-section:last-child { border-bottom: none; }
 .card-section-title { font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 18px; }
 
-/* ══ FORM GRID ══ */
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
 
-/* ══ FORM ELEMENTS ══ */
 .form-group { display: flex; flex-direction: column; gap: 7px; }
 .form-label { font-size: 13px; font-weight: 600; color: #374151; }
 .form-input, .form-select, .form-textarea {
@@ -115,18 +33,15 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 .form-textarea { resize: none; }
 .form-input::placeholder, .form-textarea::placeholder { color: #9ca3af; }
 
-/* ══ STATUS TOGGLE ══ */
 .status-toggle { display: flex; gap: 8px; }
 .status-opt {
     flex: 1; padding: 11px; border-radius: 11px; text-align: center;
     border: 1.5px solid #e5e7eb; cursor: pointer; font-size: 13px;
-    font-weight: 600; color: #9ca3af; transition: all 0.18s;
+    font-weight: 600; color: #9ca3af; transition: all 0.18s; user-select: none;
 }
 .status-opt.active-status   { border-color: #22c55e; color: #15803d; background: #f0fdf4; }
 .status-opt.inactive-status { border-color: #f87171; color: #dc2626; background: #fef2f2; }
-.status-opt:hover { background: #f9fafb; }
 
-/* ══ GROUP ROW ══ */
 .group-row { display: flex; gap: 8px; align-items: stretch; }
 .group-row .form-select { flex: 1; }
 .btn-add-group {
@@ -139,7 +54,6 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 }
 .btn-add-group:hover { background: #ede9fe; border-color: #7c3aed; }
 
-/* ══ MODAL ══ */
 .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
@@ -152,7 +66,6 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     box-shadow: 0 20px 60px rgba(0,0,0,0.18);
 }
 .modal-title { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 22px; }
-.modal .form-group { margin-bottom: 14px; }
 .modal-actions { display: flex; gap: 10px; margin-top: 22px; }
 .btn-modal-cancel {
     flex: 1; padding: 11px; border-radius: 11px;
@@ -168,9 +81,8 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     font-family: 'Inter', sans-serif; transition: all 0.18s;
     box-shadow: 0 4px 12px rgba(99,102,241,0.3);
 }
-.btn-modal-save:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
+.btn-modal-save:hover { transform: translateY(-1px); }
 
-/* ══ CARD FOOTER ══ */
 .card-footer {
     padding: 18px 24px; background: #f8fafc;
     border-top: 1px solid #f1f5f9;
@@ -180,7 +92,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     padding: 11px 22px; border-radius: 11px;
     border: 1.5px solid #e5e7eb; background: white;
     color: #374151; font-size: 14px; font-weight: 600;
-    text-decoration: none; transition: all 0.15s; cursor: pointer; font-family: 'Inter', sans-serif;
+    text-decoration: none; transition: all 0.15s; font-family: 'Inter', sans-serif;
 }
 .btn-cancel:hover { background: #f3f4f6; }
 .btn-save {
@@ -194,34 +106,38 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 .btn-save:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
 .btn-save:active { transform: scale(0.97); }
 
-/* ── TOAST NOTIFICATION ── */
-#t-wrap{position:fixed;top:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;}
-.t-box{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;min-width:280px;max-width:390px;font-size:13.5px;font-weight:600;pointer-events:all;box-shadow:0 8px 30px rgba(0,0,0,.13);transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease;opacity:0;}
-.t-box.show{transform:translateX(0);opacity:1;}
-.t-ok{background:#f0fdf4;border:1.5px solid #86efac;color:#15803d;}
-.t-err{background:#fef2f2;border:1.5px solid #fca5a5;color:#dc2626;}
-.t-warn{background:#fffbeb;border:1.5px solid #fcd34d;color:#92400e;}
-.t-box svg{flex-shrink:0;width:18px;height:18px;}
-.t-x{margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;opacity:.55;color:inherit;padding:0 0 0 6px;line-height:1;}
-.t-x:hover{opacity:1;}
+/* TOAST */
+#t-wrap { position:fixed; top:24px; right:24px; z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
+.t-box { display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:14px; min-width:280px; max-width:390px; font-size:13.5px; font-weight:600; pointer-events:all; box-shadow:0 8px 30px rgba(0,0,0,.13); transform:translateX(120%); transition:transform .35s cubic-bezier(.4,0,.2,1), opacity .35s ease; opacity:0; }
+.t-box.show { transform:translateX(0); opacity:1; }
+.t-ok  { background:#f0fdf4; border:1.5px solid #86efac; color:#15803d; }
+.t-err { background:#fef2f2; border:1.5px solid #fca5a5; color:#dc2626; }
+.t-x   { margin-left:auto; background:none; border:none; font-size:18px; cursor:pointer; opacity:.55; color:inherit; padding:0 0 0 6px; line-height:1; }
+.t-x:hover { opacity:1; }
 </style>
 @endpush
 
 @section('content')
-<div class="page-header">
+<div class="main">
+
+    <div class="page-header">
         <div>
             <h1>Tambah Add-on</h1>
             <p>Buat add-on baru sebagai opsi tambahan untuk menu</p>
         </div>
-        <a href="/admin/addons" class="btn-back">
-        </a>
     </div>
+
+    @if($errors->any())
+    <div style="background:#fef2f2;color:#dc2626;border:1px solid #fee2e2;border-radius:14px;padding:13px 17px;margin-bottom:18px;font-size:13px;font-weight:500;">
+        @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
+    </div>
+    @endif
 
     <form action="/admin/addons/store" method="POST">
     @csrf
     <div class="card">
 
-        <!-- ── INFORMASI ADD-ON ── -->
+        <!-- INFORMASI ADD-ON -->
         <div class="card-section">
             <p class="card-section-title">Informasi Add-on</p>
             <div style="display:grid; gap:16px;">
@@ -244,7 +160,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             </div>
         </div>
 
-        <!-- ── GROUP & STATUS ── -->
+        <!-- GROUP & STATUS -->
         <div class="card-section">
             <p class="card-section-title">Group & Status</p>
             <div style="display:grid; gap:16px;">
@@ -258,7 +174,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
                             @endforeach
                         </select>
                         <button type="button" class="btn-add-group" onclick="bukaModal()">
-                            <i data-lucide="plus" style="width:14px;height:14px;"></i> Buat Group
+                            + Buat Group
                         </button>
                     </div>
                 </div>
@@ -274,23 +190,24 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             </div>
         </div>
 
-        <!-- ── FOOTER ── -->
+        <!-- FOOTER -->
         <div class="card-footer">
             <a href="/admin/addons" class="btn-cancel">Batal</a>
             <button type="submit" class="btn-save">
-                <i data-lucide="save" style="width:16px;height:16px;"></i> Simpan Add-on
+                💾 Simpan Add-on
             </button>
         </div>
     </div>
     </form>
-</div>
 
-<!-- ══ MODAL BUAT GROUP ══ -->
+</div>{{-- /main --}}
+
+<!-- MODAL BUAT GROUP -->
 <div class="modal-overlay" id="modalGroup">
     <div class="modal">
         <p class="modal-title">Buat Group Baru</p>
         <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Nama Group</label>
+            <label class="form-label">Nama Group <span style="color:#EF4444;">*</span></label>
             <input type="text" id="inputNamaGroup" class="form-input" placeholder="Contoh: Ukuran, Topping...">
         </div>
         <div class="form-group" style="margin-bottom:14px;">
@@ -309,8 +226,102 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             </select>
         </div>
         <div class="modal-actions">
-            <button class="btn-modal-cancel" onclick="tutupModal()">Batal</button>
-            <button class="btn-modal-save" onclick="simpanGroup()">Simpan Group</button>
+            <button type="button" class="btn-modal-cancel" onclick="tutupModal()">Batal</button>
+            <button type="button" class="btn-modal-save" onclick="simpanGroup()">Simpan Group</button>
         </div>
     </div>
+</div>
+
+<!-- TOAST -->
+<div id="t-wrap"></div>
+
 @endsection
+
+@push('scripts')
+<script>
+/* ══ STATUS TOGGLE ══ */
+function setStatus(val) {
+    document.getElementById('statusVal').value = val;
+    var aktif    = document.getElementById('statusAktif');
+    var nonaktif = document.getElementById('statusNonaktif');
+    if (val == 1) {
+        aktif.className    = 'status-opt active-status';
+        nonaktif.className = 'status-opt';
+    } else {
+        aktif.className    = 'status-opt';
+        nonaktif.className = 'status-opt inactive-status';
+    }
+}
+
+/* ══ MODAL GROUP ══ */
+function bukaModal() {
+    document.getElementById('modalGroup').classList.add('show');
+}
+
+function tutupModal() {
+    document.getElementById('modalGroup').classList.remove('show');
+    document.getElementById('inputNamaGroup').value = '';
+    document.getElementById('inputMax').value       = '';
+    document.getElementById('inputRequired').value  = '0';
+}
+
+// Tutup modal klik backdrop
+document.getElementById('modalGroup').addEventListener('click', function(e) {
+    if (e.target === this) tutupModal();
+});
+
+function simpanGroup() {
+    var nama     = document.getElementById('inputNamaGroup').value.trim();
+    var max      = document.getElementById('inputMax').value;
+    var required = document.getElementById('inputRequired').value;
+
+    if (!nama) {
+        showToast('Nama group tidak boleh kosong!', 'err');
+        return;
+    }
+
+    fetch('/admin/addon-groups/store', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ name: nama, max_select: max, required: required })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            var select = document.getElementById('selectGroup');
+            var option = document.createElement('option');
+            option.value       = data.group.id;
+            option.textContent = data.group.name;
+            option.selected    = true;
+            select.appendChild(option);
+            tutupModal();
+            showToast('Group "' + nama + '" berhasil dibuat!', 'ok');
+        } else {
+            showToast(data.message || 'Gagal membuat group.', 'err');
+        }
+    })
+    .catch(function() {
+        showToast('Terjadi kesalahan, coba lagi.', 'err');
+    });
+}
+
+/* ══ TOAST ══ */
+function showToast(msg, type) {
+    var wrap = document.getElementById('t-wrap');
+    var box  = document.createElement('div');
+    box.className = 't-box t-' + type;
+    box.innerHTML = msg + '<button class="t-x" onclick="this.parentElement.remove()">×</button>';
+    wrap.appendChild(box);
+    requestAnimationFrame(function() {
+        requestAnimationFrame(function() { box.classList.add('show'); });
+    });
+    setTimeout(function() {
+        box.classList.remove('show');
+        setTimeout(function() { box.remove(); }, 400);
+    }, 3500);
+}
+</script>
+@endpush

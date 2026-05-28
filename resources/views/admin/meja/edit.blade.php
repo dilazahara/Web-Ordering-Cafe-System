@@ -134,18 +134,11 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 <body>
 <div class="container">
 
-    <a href="/admin/meja" class="back-link">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-        </svg>
-        Kembali ke Daftar Meja
-    </a>
 
     <div class="card">
         <div class="title">
             <h2>Edit Meja</h2>
-            <p>Perbarui data meja restoran</p>
+            <p>Perbarui data meja cafe</p>
         </div>
 
         @if($errors->any())
@@ -278,24 +271,6 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         </div>
 
         </form>
-
-        {{-- Tombol Hapus terpisah di luar form utama --}}
-        <form action="/admin/meja/delete/{{ $meja->id }}" method="POST" id="deleteForm">
-            @csrf
-            @method('DELETE')
-        </form>
-        <button type="button" class="btn-delete-full" onclick="confirmDelete()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                <path d="M10 11v6"/><path d="M14 11v6"/>
-                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-            </svg>
-            Hapus Meja Ini
-        </button>
-    </div>
-</div>
 
 <script>
 // APP_URL dari Laravel — pakai ini supaya URL selalu pakai ngrok, bukan window.location.origin

@@ -7,9 +7,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 
-/* =======================
-   TOPBAR
-======================= */
 .topbar {
     position: fixed; top: 0; left: 0; right: 0; height: 80px;
     backdrop-filter: blur(20px);
@@ -21,9 +18,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 }
 .topbar-left { display: flex; align-items: center; gap: 20px; }
 
-/* =======================
-   SIDEBAR
-======================= */
 .sidebar {
     width: 240px; height: 100vh; position: fixed;
     background: linear-gradient(180deg, #0f172a, #1e1b4b);
@@ -56,14 +50,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
 }
 
-/* =======================
-   MAIN
-======================= */
-.main { padding: 110px 30px 30px; max-width: 1100px; margin: 0 auto; }
+/* ✅ FIX: padding-top dikurangi dari 110px → 30px */
+.main { padding: 50px 50px 50px; max-width: 1100px; margin: 0 auto; }
 
-/* =======================
-   PAGE HEADER
-======================= */
 .page-header {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
@@ -71,9 +60,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 .page-header h1 { font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
 .page-header p  { font-size: 14px; color: #64748b; }
 
-/* =======================
-   BUTTON
-======================= */
 .btn-add {
     display: inline-flex; align-items: center; gap: 7px;
     padding: 10px 18px; border-radius: 12px;
@@ -86,9 +72,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 .btn-add:active { transform: scale(0.97); }
 .btn-add svg { width: 15px; height: 15px; }
 
-/* =======================
-   ALERT
-======================= */
 .alert-success {
     background: #f0fdf4; color: #15803d;
     border: 1px solid #bbf7d0; border-radius: 12px;
@@ -99,9 +82,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 }
 .alert-success svg { width: 17px; height: 17px; flex-shrink: 0; }
 
-/* =======================
-   CARD
-======================= */
 .card {
     background: white; border-radius: 20px;
     border: 1px solid #f1f5f9;
@@ -109,9 +89,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     overflow: hidden;
 }
 
-/* =======================
-   TABLE
-======================= */
 .tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 thead { background: #f8fafc; }
@@ -126,9 +103,6 @@ tbody tr { transition: background 0.15s; }
 tbody tr:last-child { border-bottom: none; }
 tbody tr:hover { background: #f8fafc; }
 
-/* =======================
-   STATUS BADGE
-======================= */
 .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border-radius: 20px; font-size: 12px; font-weight: 600; }
 .status-kosong { background: #f0fdf4; color: #15803d; }
 .status-terisi { background: #fef2f2; color: #dc2626; }
@@ -136,9 +110,6 @@ tbody tr:hover { background: #f8fafc; }
 .dot-kosong { background: #22c55e; }
 .dot-terisi { background: #ef4444; }
 
-/* =======================
-   ACTION BUTTONS
-======================= */
 .action-wrap { display: flex; align-items: center; gap: 6px; justify-content: center; }
 .act-btn {
     width: 34px; height: 34px; border-radius: 9px; border: none;
@@ -155,16 +126,10 @@ tbody tr:hover { background: #f8fafc; }
 .act-qr     { background: #f5f3ff; color: #7c3aed; border: 1.5px solid #ddd6fe; }
 .act-qr:hover     { background: #ede9fe; border-color: #c4b5fd; }
 
-/* =======================
-   EMPTY STATE
-======================= */
 .empty-state { text-align: center; padding: 56px 20px; }
 .empty-state svg { width: 40px; height: 40px; color: #e5e7eb; margin: 0 auto 10px; display: block; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 
-/* ════════════════════════════
-   QR MODAL
-════════════════════════════ */
 .modal-backdrop {
     display: none;
     position: fixed; inset: 0; z-index: 2000;
@@ -245,6 +210,32 @@ tbody tr:hover { background: #f8fafc; }
 .btn-dl-png:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(99,102,241,.3); }
 .btn-dl-print { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 .btn-dl-print:hover { background: #e2e8f0; color: #1e293b; }
+
+.delete-icon-wrap {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: #fef2f2; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 16px;
+}
+.delete-icon-wrap svg { width: 28px; height: 28px; color: #dc2626; }
+
+.btn-secondary {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 11px;
+    background: #f1f5f9; color: #475569;
+    border: 1.5px solid #e2e8f0; font-family: 'Inter', sans-serif;
+    font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { background: #e2e8f0; }
+
+.btn-danger {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 11px;
+    background: #dc2626; color: white; border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.btn-danger:hover { background: #b91c1c; }
+.btn-danger svg { width: 15px; height: 15px; }
 </style>
 @endpush
 
@@ -305,12 +296,6 @@ tbody tr:hover { background: #f8fafc; }
                             @endif
                         </td>
                         <td>
-                            {{-- 
-                                URL QR dibuat di sisi PHP pakai config('app.url')
-                                Pastikan APP_URL di .env sudah diset ke URL ngrok kamu.
-                                Jalankan: php artisan config:clear && php artisan cache:clear
-                                setelah mengubah .env
-                            --}}
                             <button
                                 class="act-btn act-qr"
                                 title="Lihat QR Code"
@@ -337,22 +322,21 @@ tbody tr:hover { background: #f8fafc; }
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                     </svg>
                                 </a>
-                                <form action="/admin/meja/delete/{{ $meja->id }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button
-                                        type="submit" class="act-btn act-delete" title="Hapus"
-                                        onclick="return confirm('Yakin ingin menghapus meja ini?')"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <polyline points="3 6 5 6 21 6"/>
-                                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                                            <path d="M10 11v6"/><path d="M14 11v6"/>
-                                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                                        </svg>
-                                    </button>
-                                </form>
+
+                                <button
+                                    type="button"
+                                    class="act-btn act-delete"
+                                    title="Hapus"
+                                    onclick="openDeleteModal({{ $meja->id }}, '{{ $meja->nomor_meja }}')"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -378,13 +362,13 @@ tbody tr:hover { background: #f8fafc; }
 </div>{{-- /main --}}
 
 
-<!-- ══ QR MODAL ══ -->
+{{-- MODAL: QR CODE --}}
 <div class="modal-backdrop" id="qrModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
 
         <div class="modal-header">
             <div class="modal-title" id="modalTitle">QR Code Meja</div>
-            <button class="modal-close" onclick="closeQR()" aria-label="Tutup">
+            <button class="modal-close" onclick="closeModal('qrModal')" aria-label="Tutup">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -432,36 +416,100 @@ tbody tr:hover { background: #f8fafc; }
     </div>
 </div>
 
+
+{{-- MODAL: HAPUS MEJA --}}
+<div class="modal-backdrop" id="modalHapus">
+    <div class="modal" style="max-width:400px;" role="dialog" aria-modal="true">
+
+        <div class="modal-body" style="padding: 32px 28px 8px; text-align: center;">
+            <div class="delete-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+            </div>
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:8px; color:#0f172a;">Hapus Meja?</h3>
+            <p style="font-size:14px; color:#64748b; margin-bottom:4px;">Kamu akan menghapus:</p>
+            <p style="font-weight:700; color:#dc2626; font-size:15px;" id="deleteMejaText"></p>
+        </div>
+
+        <div class="modal-footer" style="justify-content:center; gap:12px; padding: 20px 28px 28px;">
+            <button type="button" class="btn-secondary" onclick="closeModal('modalHapus')">Batal</button>
+            <form id="deleteForm" action="" method="POST" style="margin:0;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                    </svg>
+                    Ya, Hapus
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
-{{-- Library QRCode.js (tidak perlu internet, pakai CDN cdnjs) --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-/* ══════════════════════════════════════════
-   STATE
-══════════════════════════════════════════ */
-var currentQRUrl   = '';
-var currentMejaNomor = '';
-var qrInstance     = null;
+function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+}
 
-/* ══════════════════════════════════════════
-   BUKA MODAL QR
-══════════════════════════════════════════ */
+document.querySelectorAll('.modal-backdrop').forEach(function(backdrop) {
+    backdrop.addEventListener('click', function(e) {
+        if (e.target === backdrop) {
+            backdrop.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.open').forEach(function(m) {
+            m.classList.remove('open');
+        });
+        document.body.style.overflow = '';
+    }
+});
+
+function openDeleteModal(id, nomorMeja) {
+    document.getElementById('deleteMejaText').textContent = 'Meja ' + nomorMeja;
+    document.getElementById('deleteForm').action = '/admin/meja/delete/' + id;
+    openModal('modalHapus');
+}
+
+var currentQRUrl     = '';
+var currentMejaNomor = '';
+var qrInstance       = null;
+
 function openQR(nomorMeja, url) {
     currentQRUrl     = url;
     currentMejaNomor = nomorMeja;
 
-    // Set label & URL text
     document.getElementById('qrMejaLabel').textContent = 'Meja ' + nomorMeja;
-    document.getElementById('qrUrlText').textContent    = url;
+    document.getElementById('qrUrlText').textContent   = url;
 
-    // Hapus QR lama
     var canvas = document.getElementById('qrCanvas');
     canvas.innerHTML = '';
 
-    // Generate QR baru
     qrInstance = new QRCode(canvas, {
         text:         url,
         width:        220,
@@ -471,39 +519,15 @@ function openQR(nomorMeja, url) {
         correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Buka modal
-    document.getElementById('qrModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+    openModal('qrModal');
 }
 
-/* ══════════════════════════════════════════
-   TUTUP MODAL QR
-══════════════════════════════════════════ */
-function closeQR() {
-    document.getElementById('qrModal').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-// Klik backdrop untuk tutup
-document.getElementById('qrModal').addEventListener('click', function(e) {
-    if (e.target === this) closeQR();
-});
-
-// Tombol ESC untuk tutup
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeQR();
-});
-
-/* ══════════════════════════════════════════
-   DOWNLOAD QR SEBAGAI PNG
-══════════════════════════════════════════ */
 function downloadQR() {
-    // QRCode.js membuat <img> atau <canvas>, ambil salah satunya
-    var canvas = document.getElementById('qrCanvas');
-    var img    = canvas.querySelector('img');
-    var cvs    = canvas.querySelector('canvas');
-
+    var canvas  = document.getElementById('qrCanvas');
+    var img     = canvas.querySelector('img');
+    var cvs     = canvas.querySelector('canvas');
     var dataUrl;
+
     if (cvs) {
         dataUrl = cvs.toDataURL('image/png');
     } else if (img) {
@@ -519,15 +543,12 @@ function downloadQR() {
     link.click();
 }
 
-/* ══════════════════════════════════════════
-   PRINT QR
-══════════════════════════════════════════ */
 function printQR() {
-    var canvas = document.getElementById('qrCanvas');
-    var img    = canvas.querySelector('img');
-    var cvs    = canvas.querySelector('canvas');
-
+    var canvas  = document.getElementById('qrCanvas');
+    var img     = canvas.querySelector('img');
+    var cvs     = canvas.querySelector('canvas');
     var dataUrl;
+
     if (cvs) {
         dataUrl = cvs.toDataURL('image/png');
     } else if (img) {
@@ -555,9 +576,6 @@ function printQR() {
     win.document.close();
 }
 
-/* ══════════════════════════════════════════
-   AUTO-HIDE ALERT
-══════════════════════════════════════════ */
 var alertEl = document.getElementById('alertSuccess');
 if (alertEl) {
     setTimeout(function() {

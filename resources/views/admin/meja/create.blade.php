@@ -112,14 +112,6 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 <body>
 <div class="container">
 
-    <a href="/admin/meja" class="back-link">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"/>
-        </svg>
-        Kembali ke Daftar Meja
-    </a>
-
     <div class="card">
         <div class="title">
             <h2>Tambah Meja</h2>

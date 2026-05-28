@@ -68,7 +68,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; color:
 .overlay.show { display: block; }
 
 /* ── MAIN ── */
-.main { padding: 100px 28px 40px; max-width: 1180px; margin: 0 auto; }
+.main { padding: 50px 50px 40px; max-width: 1180px; margin: 0 auto; }
 
 /* ── PAGE HEADER ── */
 .page-header {
@@ -814,9 +814,6 @@ select.form-control { cursor: pointer; }
                 Kamu akan menghapus metode pembayaran:
             </p>
             <p style="font-weight:700;color:#dc2626;font-size:15px;" id="deleteNamaText"></p>
-            <p style="font-size:13px;color:#94a3b8;margin-top:8px;">
-                Tindakan ini tidak bisa dibatalkan.
-            </p>
         </div>
         <div class="modal-footer" style="justify-content:center;gap:12px;">
             <button type="button" class="btn-secondary" onclick="closeModal('modalHapus')">Batal</button>
