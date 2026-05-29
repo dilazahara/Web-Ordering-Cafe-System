@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class PaymentMethod extends Model
 {
+    protected $table = 'payment_methods';
+
     protected $fillable = [
-        'kode',
         'nama',
+        'kode',
         'aktif',
         'qris_image',
         'nama_rekening',
@@ -19,51 +22,90 @@ class PaymentMethod extends Model
         'aktif' => 'boolean',
     ];
 
-    // ── Accessor: $pm->is_active ──────────────────────
-    public function getIsActiveAttribute(): bool
+    /*
+    |--------------------------------------------------------------------------
+    | ACCESSOR
+    |--------------------------------------------------------------------------
+    */
+
+    public function getIsQrisAttribute(): bool
     {
-        return (bool) $this->aktif;
+        return $this->kode === 'qris';
     }
 
-    // ── Mutator: $pm->is_active = true ───────────────
-    public function setIsActiveAttribute($value): void
+    public function getStatusLabelAttribute(): string
     {
-        $this->aktif = $value;
+        return $this->aktif ? 'Aktif' : 'Nonaktif';
     }
 
-    // ── Accessor: $pm->image ─────────────────────────
-    public function getImageAttribute(): ?string
+    public function getQrisUrlAttribute(): ?string
     {
-        return $this->qris_image;
+        return $this->qris_image
+            ? asset('storage/' . $this->qris_image)
+            : null;
     }
 
-    // ── Mutator: $pm->image = '...' ──────────────────
-    public function setImageAttribute($value): void
+    /*
+    |--------------------------------------------------------------------------
+    | MUTATOR
+    |--------------------------------------------------------------------------
+    */
+
+    public function setNamaAttribute(mixed $value): void
     {
-        $this->qris_image = $value;
+        $this->attributes['nama'] = trim((string) $value);
     }
 
-    // ── Accessor: $pm->nama_merchant ─────────────────
-    public function getNamaMerchantAttribute(): ?string
+    public function setKodeAttribute(mixed $value): void
     {
-        return $this->nama_rekening;
+        $this->attributes['kode'] = strtolower(
+            trim((string) $value)
+        );
     }
 
-    // ── Mutator: $pm->nama_merchant = '...' ──────────
-    public function setNamaMerchantAttribute($value): void
+    public function setNamaRekeningAttribute(mixed $value): void
     {
-        $this->nama_rekening = $value;
+        $this->attributes['nama_rekening'] = filled($value)
+            ? trim((string) $value)
+            : null;
     }
 
-    // ── Accessor: $pm->nomor_merchant ────────────────
-    public function getNomorMerchantAttribute(): ?string
+    public function setNoRekeningAttribute(mixed $value): void
     {
-        return $this->no_rekening;
+        $this->attributes['no_rekening'] = filled($value)
+            ? trim((string) $value)
+            : null;
     }
 
-    // ── Mutator: $pm->nomor_merchant = '...' ─────────
-    public function setNomorMerchantAttribute($value): void
+    /*
+    |--------------------------------------------------------------------------
+    | SCOPES
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeAktif(Builder $query): Builder
     {
-        $this->no_rekening = $value;
+        return $query->where('aktif', true);
+    }
+
+    public function scopeNonaktif(Builder $query): Builder
+    {
+        return $query->where('aktif', false);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPER
+    |--------------------------------------------------------------------------
+    */
+
+    public function isQris(): bool
+    {
+        return $this->kode === 'qris';
+    }
+
+    public function isCash(): bool
+    {
+        return $this->kode === 'cash';
     }
 }

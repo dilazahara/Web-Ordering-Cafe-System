@@ -4,20 +4,17 @@ namespace App\Http\Controllers\Dapur;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\Meja;
 use App\Models\User;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
+use Carbon\Carbon;
 
 class DapurController extends Controller
 {
-    // ═══════════════════════════════
-    // PESANAN MASUK
-    // ═══════════════════════════════
-
     public function index()
     {
         $orders = Order::with(['items.menu'])
@@ -26,106 +23,112 @@ class DapurController extends Controller
             ->latest()
             ->get();
 
-        return view(
-            'dapur.pesanan',
-            compact('orders')
-        );
+        return view('dapur.pesanan', compact('orders'));
     }
-
-
-    // ═══════════════════════════════
-    // SEDANG DIPROSES
-    // ═══════════════════════════════
 
     public function proses()
     {
-        $orders = Order::with(['items.menu'])
+        $query = Order::with(['items.menu'])
             ->where('status', 'process')
-            ->whereDate('created_at', today())
-            ->orderBy('process_at', 'asc')
-            ->get();
+            ->whereDate('created_at', today());
 
-        // Total order selesai hari ini
+        if (Schema::hasColumn('orders', 'process_at')) {
+            $query->orderBy('process_at', 'asc');
+        } else {
+            $query->orderBy('created_at', 'asc');
+        }
+
+        $orders = $query->get();
+
         $totalSelesaiHariIni = Order::where('status', 'done')
             ->whereDate('created_at', today())
             ->count();
 
-        // Rata-rata waktu proses (dalam menit), dari process_at → done_at
-        $selesaiHariIni = Order::where('status', 'done')
-            ->whereDate('created_at', today())
-            ->whereNotNull('process_at')
-            ->whereNotNull('done_at')
-            ->get();
+        $rataRataWaktu = 0;
 
-        if ($selesaiHariIni->isNotEmpty()) {
-            $totalMenit = $selesaiHariIni->sum(function ($o) {
-                return \Carbon\Carbon::parse($o->process_at)
-                    ->diffInMinutes(\Carbon\Carbon::parse($o->done_at));
-            });
-            $rataRataWaktu = round($totalMenit / $selesaiHariIni->count());
-        } else {
-            $rataRataWaktu = 0;
+        if (
+            Schema::hasColumn('orders', 'process_at') &&
+            Schema::hasColumn('orders', 'done_at')
+        ) {
+            $selesaiHariIni = Order::where('status', 'done')
+                ->whereDate('created_at', today())
+                ->whereNotNull('process_at')
+                ->whereNotNull('done_at')
+                ->get();
+
+            if ($selesaiHariIni->isNotEmpty()) {
+                $totalMenit = $selesaiHariIni->sum(function ($o) {
+                    return Carbon::parse($o->process_at)
+                        ->diffInMinutes(Carbon::parse($o->done_at));
+                });
+
+                $rataRataWaktu = round(
+                    $totalMenit / $selesaiHariIni->count()
+                );
+            }
         }
 
-        return view(
-            'dapur.proses',
-            compact('orders', 'totalSelesaiHariIni', 'rataRataWaktu')
-        );
+        return view('dapur.proses', compact(
+            'orders',
+            'totalSelesaiHariIni',
+            'rataRataWaktu'
+        ));
     }
-
-
-    // ═══════════════════════════════
-    // PESANAN SELESAI
-    // ═══════════════════════════════
 
     public function selesaiView()
     {
-        $orders = Order::with(['items.menu'])
+        $query = Order::with(['items.menu'])
             ->where('status', 'done')
-            ->whereDate('created_at', today())
-            ->orderBy('done_at', 'desc')
-            ->get();
+            ->whereDate('created_at', today());
 
-        return view(
-            'dapur.selesai',
-            compact('orders')
-        );
+        if (Schema::hasColumn('orders', 'done_at')) {
+            $query->orderBy('done_at', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        $orders = $query->get();
+
+        return view('dapur.selesai', compact('orders'));
     }
-
-
-    // ═══════════════════════════════
-    // TANDAI SELESAI
-    // ═══════════════════════════════
 
     public function selesai(int $id)
     {
         $order = Order::findOrFail($id);
 
-        // VALIDASI
         abort_if(
             $order->status !== 'process',
             422,
             'Pesanan belum diproses.'
         );
 
-        // UPDATE STATUS
-        $order->update([
-            'status'  => 'done',
-            'done_at' => now(),
-        ]);
+        $updateData = [
+            'status' => 'done',
+        ];
 
-        // NOTIF KE PELAYAN
-        Notification::kirim(
-            'pelayan',
-            'order_done',
-            '🍽️ Makanan Siap Diantar',
-            "Pesanan {$order->queue_number}" .
-            ($order->table_number
-                ? " meja {$order->table_number}"
-                : '') .
-            " sudah selesai dimasak.",
-            $order
-        );
+        if (Schema::hasColumn('orders', 'done_at')) {
+            $updateData['done_at'] = now();
+        }
+
+        $order->update($updateData);
+
+        if (class_exists(Notification::class)) {
+            try {
+                Notification::kirim(
+                    'pelayan',
+                    'order_done',
+                    '🍽️ Makanan Siap Diantar',
+                    "Pesanan {$order->queue_number}" .
+                    ($order->table_number
+                        ? " meja {$order->table_number}"
+                        : '') .
+                    " sudah selesai dimasak.",
+                    $order
+                );
+            } catch (\Throwable $e) {
+                // skip
+            }
+        }
 
         return back()->with(
             'success',
@@ -133,16 +136,10 @@ class DapurController extends Controller
         );
     }
 
-
-    // ═══════════════════════════════
-    // PROFIL
-    // ═══════════════════════════════
-
     public function profil()
     {
         return view('dapur.account.profil');
     }
-
 
     public function updateProfil(Request $request)
     {
@@ -155,95 +152,67 @@ class DapurController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $user->name  = $request->name;
+        $user->name = $request->name;
         $user->email = $request->email;
 
-        // USERNAME
         if ($request->filled('username')) {
             $user->username = $request->username;
         }
 
-        // PHONE
         if ($request->filled('phone')) {
             $user->phone = $request->phone;
         }
 
-        // UPLOAD AVATAR
         if ($request->hasFile('avatar')) {
-
-            // Hapus foto lama jika ada
-            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            if (
+                $user->avatar &&
+                Storage::disk('public')->exists($user->avatar)
+            ) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            // Simpan foto baru
-            $path = $request->file('avatar')->store('avatars', 'public');
-
-            $user->avatar = $path;
+            $user->avatar = $request
+                ->file('avatar')
+                ->store('avatars', 'public');
         }
 
         $user->save();
 
         return redirect('/dapur/proses')
-            ->with(
-                'success',
-                'Profil berhasil diperbarui!'
-            );
+            ->with('success', 'Profil berhasil diperbarui!');
     }
-
-
-    // ═══════════════════════════════
-    // GANTI PASSWORD
-    // ═══════════════════════════════
 
     public function gantiSandi()
     {
         return view('dapur.account.ganti-sandi');
     }
 
-
     public function updatePassword(Request $request)
     {
         $request->validate([
             'current_password' => 'required',
-            'new_password'     => 'required|min:8|confirmed',
+            'new_password' => 'required|min:8|confirmed',
         ]);
 
         /** @var User $user */
         $user = Auth::user();
 
-        // CEK PASSWORD LAMA
-        if (
-            !Hash::check(
-                $request->current_password,
-                $user->password
-            )
-        ) {
-
+        if (!Hash::check(
+            $request->current_password,
+            $user->password
+        )) {
             return back()->withErrors([
                 'current_password' =>
                     'Password lama yang kamu masukkan salah!'
             ]);
         }
 
-        // UPDATE PASSWORD BARU
-        $user->update([
-            'password' => Hash::make(
-                $request->new_password
-            )
-        ]);
+        $user->password = Hash::make($request->new_password);
+        $user->save();
 
         return redirect('/dapur/proses')
-            ->with(
-                'success',
-                'Password berhasil diubah!'
-            );
+            ->with('success', 'Password berhasil diubah!');
     }
-
-
-    // ═══════════════════════════════
-    // POLLING ORDER REALTIME
-    // ═══════════════════════════════
 
     public function pollOrders()
     {
@@ -251,31 +220,37 @@ class DapurController extends Controller
             ->select('id')
             ->get();
 
-        // Total selesai hari ini
         $totalSelesai = Order::where('status', 'done')
             ->whereDate('created_at', today())
             ->count();
 
-        // Rata-rata waktu proses hari ini (dalam menit)
-        $selesaiHariIni = Order::where('status', 'done')
-            ->whereDate('created_at', today())
-            ->whereNotNull('process_at')
-            ->whereNotNull('done_at')
-            ->get();
+        $rataRataWaktu = 0;
 
-        if ($selesaiHariIni->isNotEmpty()) {
-            $totalMenit = $selesaiHariIni->sum(function ($o) {
-                return \Carbon\Carbon::parse($o->process_at)
-                    ->diffInMinutes(\Carbon\Carbon::parse($o->done_at));
-            });
-            $rataRataWaktu = round($totalMenit / $selesaiHariIni->count());
-        } else {
-            $rataRataWaktu = 0;
+        if (
+            Schema::hasColumn('orders', 'process_at') &&
+            Schema::hasColumn('orders', 'done_at')
+        ) {
+            $selesaiHariIni = Order::where('status', 'done')
+                ->whereDate('created_at', today())
+                ->whereNotNull('process_at')
+                ->whereNotNull('done_at')
+                ->get();
+
+            if ($selesaiHariIni->isNotEmpty()) {
+                $totalMenit = $selesaiHariIni->sum(function ($o) {
+                    return Carbon::parse($o->process_at)
+                        ->diffInMinutes(Carbon::parse($o->done_at));
+                });
+
+                $rataRataWaktu = round(
+                    $totalMenit / $selesaiHariIni->count()
+                );
+            }
         }
 
         return response()->json([
-            'orders'        => $orders,
-            'totalSelesai'  => $totalSelesai,
+            'orders' => $orders,
+            'totalSelesai' => $totalSelesai,
             'rataRataWaktu' => $rataRataWaktu,
         ]);
     }

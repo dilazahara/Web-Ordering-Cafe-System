@@ -318,8 +318,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         @if($order->items && $order->items->count() > 0)
                             @foreach($order->items->take(2) as $item)
                                 <span style="font-size:13px;">
-                                    {{ $item->qty ?? $item->quantity ?? 1 }}x
-                                    {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
+                                    {{ $item->qty ?: ($item->quantity ?? 1) }}x{{ $item->name ?: ($item->menu->name ?? $item->menu->nama ?? '-') }}{{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
                                     @if(!$loop->last)<br>@endif
                                 </span>
                             @endforeach

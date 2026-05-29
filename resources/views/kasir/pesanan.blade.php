@@ -539,20 +539,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     {{-- ITEM LIST --}}
     <div class="order-items">
       @if($order->items && $order->items->count() > 0)
-        @foreach($order->items as $item)
-        <div class="item-row">
-          <div class="item-row-left">
-            <div class="item-name">
-              {{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
-              <span class="item-qty">×{{ $item->qty ?? $item->quantity ?? 1 }}</span>
-            </div>
-            @if(!empty($item->notes))
-              <div class="item-notes-small">📝 {{ $item->notes }}</div>
-            @endif
-          </div>
-          <span class="item-price">Rp {{ number_format($item->subtotal ?? ($item->price * ($item->qty ?? 1))) }}</span>
+     @foreach($order->items as $item)
+<div class="item-row">
+    <div class="item-row-left">
+
+        <div class="item-name">
+            {{ !empty($item->name) ? $item->name : ($item->menu->name ?? '-') }}
+            <span class="item-qty">
+                ×{{ $item->qty ?? 1 }}
+            </span>
         </div>
-        @endforeach
+
+        @if(!empty($item->notes))
+            <div class="item-notes-small">
+                📝 {{ $item->notes }}
+            </div>
+        @endif
+
+    </div>
+
+    <span class="item-price">
+        Rp {{ number_format(($item->subtotal > 0 ? $item->subtotal : (($item->price ?? 0) * ($item->qty ?? 1))), 0, ',', '.') }}
+    </span>
+</div>
+@endforeach
       @else
         <div class="item-row">
           <div class="item-row-left"><div class="item-name">Total Pesanan</div></div>

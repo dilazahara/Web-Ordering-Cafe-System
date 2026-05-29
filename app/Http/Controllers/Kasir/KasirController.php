@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Meja;
 use App\Models\Notification;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Schema;
 
 class KasirController extends Controller
 {
@@ -50,22 +51,16 @@ class KasirController extends Controller
         $orders = Order::with('items.menu')
             ->whereDate('created_at', today())
             ->where(function ($q) {
-
-                // CASH — semua status tampil
                 $q->where('payment_method', 'cash')
-
-                // QRIS — tampilkan semua status kecuali pending
-                // (pending = belum bayar, sudah bayar = process/paid/done/delivered)
-                ->orWhere(function ($q2) {
-                    $q2->where('payment_method', 'qris')
-                        ->whereIn('status', [
-                            'paid',
-                            'process',
-                            'done',
-                            'delivered',
-                        ]);
-                });
-
+                    ->orWhere(function ($q2) {
+                        $q2->where('payment_method', 'qris')
+                            ->whereIn('status', [
+                                'paid',
+                                'process',
+                                'done',
+                                'delivered',
+                            ]);
+                    });
             })
             ->latest()
             ->get();
@@ -96,22 +91,42 @@ class KasirController extends Controller
             'Status pesanan tidak valid.'
         );
 
-        $order->update([
-            'status'        => 'process',
-            'uang_diterima' => $request->input('uang_diterima', 0),
-            'confirmed_at'  => now(),
-            'process_at'    => now(),
-        ]);
+        $updateData = [
+            'status' => 'process',
+        ];
 
-        Notification::kirim(
-            'dapur',
-            'order_confirmed',
-            '🔥 Pesanan Dikonfirmasi',
-            "Pesanan {$order->queue_number} sudah dikonfirmasi kasir. Segera dimasak!",
-            $order
+        if (Schema::hasColumn('orders', 'uang_diterima')) {
+            $updateData['uang_diterima'] = $request->input('uang_diterima', 0);
+        }
+
+        if (Schema::hasColumn('orders', 'confirmed_at')) {
+            $updateData['confirmed_at'] = now();
+        }
+
+        if (Schema::hasColumn('orders', 'process_at')) {
+            $updateData['process_at'] = now();
+        }
+
+        $order->update($updateData);
+
+        if (class_exists(Notification::class)) {
+            try {
+                Notification::kirim(
+                    'dapur',
+                    'order_confirmed',
+                    '🔥 Pesanan Dikonfirmasi',
+                    "Pesanan {$order->queue_number} sudah dikonfirmasi kasir. Segera dimasak!",
+                    $order
+                );
+            } catch (\Throwable $e) {
+                // skip kalau notif belum aktif
+            }
+        }
+
+        return back()->with(
+            'success',
+            'Pesanan berhasil dikonfirmasi & diteruskan ke dapur 🔥'
         );
-
-        return back()->with('success', 'Pesanan langsung diproses dapur 🔥');
     }
 
 
@@ -129,7 +144,9 @@ class KasirController extends Controller
             'Status tidak valid.'
         );
 
-        $order->update(['status' => 'delivered']);
+        $order->update([
+            'status' => 'delivered'
+        ]);
 
         if ($order->table_number) {
             Meja::where(
@@ -140,15 +157,24 @@ class KasirController extends Controller
             ]);
         }
 
-        Notification::kirim(
-            'admin',
-            'order_delivered',
-            '✅ Transaksi Selesai',
-            "Pesanan {$order->queue_number} sudah diantar & selesai.",
-            $order
-        );
+        if (class_exists(Notification::class)) {
+            try {
+                Notification::kirim(
+                    'admin',
+                    'order_delivered',
+                    '✅ Transaksi Selesai',
+                    "Pesanan {$order->queue_number} sudah diantar & selesai.",
+                    $order
+                );
+            } catch (\Throwable $e) {
+                // skip kalau notif belum aktif
+            }
+        }
 
-        return back()->with('success', "{$order->queue_number} selesai diantar 🍽️");
+        return back()->with(
+            'success',
+            "{$order->queue_number} selesai diantar 🍽️"
+        );
     }
 
 
