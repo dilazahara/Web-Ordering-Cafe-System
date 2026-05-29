@@ -232,3 +232,18 @@ https://xxxx-xxxx.ngrok-free.app
   Project ini dibuat untuk kebutuhan akademik, pembelajaran, dan tugas akhir. <br/>
   © 2026 Politeknik Negeri Batam — Teknik Informatika
 </p>
+
+---
+
+<p align="center">
+  <table align="center">
+    <tr>
+      <td align="center">
+        <img src="public/logo-polibatam.png" width="160" alt="Logo Politeknik Negeri Batam"/>
+      </td>
+      <td align="center">
+        <img src="public/logo-prodi-if.png" width="160" alt="Logo Prodi Teknik Informatika"/>
+      </td>
+    </tr>
+  </table>
+</p>
