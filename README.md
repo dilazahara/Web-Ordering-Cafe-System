@@ -1,166 +1,166 @@
-# Sistem Pemesanan Menu Cafe Momoo Juice Bar Coffee Windsor Batam Berbasis Web
+<p align="center">
+  <img src="public/logo.png" alt="Momoo Juice Bar Coffee Logo" width="180"/>
+</p>
 
-## Deskripsi
+<h1 align="center">Sistem Pemesanan Menu Cafe Momoo Juice Bar Coffee Windsor Batam</h1>
 
-Sistem Pemesanan Cafe Momoo Berbasis Web adalah aplikasi yang dibuat untuk mempermudah proses pemesanan makanan dan minuman di cafe secara digital.
+<p align="center">
+  Aplikasi pemesanan berbasis web yang mempermudah proses pemesanan makanan & minuman secara digital — dari pelanggan hingga dapur, kasir, dan pelayan.
+</p>
 
-Aplikasi ini memungkinkan customer melihat menu, menambahkan pesanan ke keranjang, melakukan checkout, memilih metode pembayaran, dan memantau status pesanan secara online.
-
-Pesanan yang masuk akan diproses oleh dapur, dikonfirmasi oleh kasir, dan diselesaikan oleh pelayan hingga pesanan diterima customer.
-
-Project ini dibuat menggunakan framework **Laravel** sebagai bagian dari **Tugas Akhir / Project Pengembangan Aplikasi Web**.
-
----
-
-# Fitur Utama
-
-## Customer
-
-* Registrasi akun
-* Login customer
-* Melihat daftar menu makanan & minuman
-* Melihat detail menu
-* Menambahkan menu ke keranjang
-* Menambahkan topping / add-ons
-* Checkout pesanan
-* Memilih metode pembayaran
-* Melihat status pesanan
-* Melihat riwayat transaksi
+<p align="center">
+  <img src="https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel&logoColor=white"/>
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Vite-Frontend-646CFF?logo=vite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/License-Academic-green"/>
+</p>
 
 ---
 
-## Admin
+## 📖 Deskripsi
 
-* Dashboard admin
-* CRUD menu
-* CRUD kategori menu
-* CRUD meja
-* CRUD add-ons / topping
-* CRUD metode pembayaran
-* Kelola data user
-* Monitoring transaksi
-* Laporan penjualan
-* Export laporan PDF
+**Sistem Pemesanan Cafe Momoo** adalah aplikasi web yang dirancang untuk mendigitalisasi proses pemesanan di cafe secara menyeluruh. Pelanggan dapat melihat menu, menambahkan ke keranjang, checkout, memilih metode pembayaran, dan memantau status pesanan secara real-time.
+
+Pesanan yang masuk diproses oleh dapur, dikonfirmasi kasir, lalu diantarkan pelayan ke meja pelanggan — semua terintegrasi dalam satu sistem.
+
+> 🎓 Project ini dibuat sebagai **Tugas Akhir** Program Studi Teknik Informatika, Politeknik Negeri Batam.
 
 ---
 
-## Kasir
+## ✨ Fitur Utama
 
-* Melihat daftar pesanan
-* Verifikasi pembayaran
-* Mengelola transaksi pembayaran
-* Eksport laporan harian PDF
+### 👤 Customer
+- Registrasi & Login akun
+- Melihat daftar & detail menu makanan/minuman
+- Menambahkan menu ke keranjang
+- Menambahkan topping / add-ons
+- Checkout & memilih metode pembayaran
+- Memantau status pesanan secara real-time
+- Melihat riwayat transaksi
 
----
+### 🛡️ Admin
+- Dashboard monitoring lengkap
+- CRUD Menu, Kategori, Meja, Add-ons, Metode Pembayaran
+- Kelola data user & role
+- Monitoring & laporan transaksi
+- Export laporan penjualan ke PDF
 
-## Dapur
+### 🧾 Kasir
+- Melihat daftar pesanan masuk
+- Verifikasi & konfirmasi pembayaran
+- Mengelola transaksi pembayaran
+- Export laporan harian PDF
 
-* Melihat pesanan masuk
-* Memproses pesanan
-* Update status pesanan
+### 🍳 Dapur
+- Melihat pesanan masuk secara langsung
+- Memproses & mengupdate status pesanan
 
----
-
-## Pelayan
-
-* Melihat pesanan siap antar
-* Mengantar pesanan ke meja customer
-* Menyelesaikan status pesanan
-
----
-
-# Teknologi yang Digunakan
-
-Project ini dibangun menggunakan:
-
-* PHP 8+
-* Laravel
-* MySQL / MariaDB
-* Blade Template
-* Bootstrap / Tailwind CSS
-* JavaScript
-* Composer
-* NPM / Vite
+### 🛎️ Pelayan
+- Melihat daftar pesanan siap antar
+- Mengantarkan pesanan ke meja customer
+- Menyelesaikan status pesanan
 
 ---
 
-# Instalasi Project
+## 🔄 Alur Sistem
 
-## Clone Repository
+```text
+Customer Memesan Menu
+        ↓
+  Pesanan Masuk ke Sistem
+        ↓
+  Dapur Memproses Pesanan
+        ↓
+  Kasir Mengonfirmasi Pembayaran
+        ↓
+  Pelayan Mengantar Pesanan
+        ↓
+    Pesanan Selesai ✅
+```
+
+---
+
+## 🛠️ Teknologi yang Digunakan
+
+| Teknologi | Deskripsi |
+|---|---|
+| **PHP 8.2** | Bahasa pemrograman utama |
+| **Laravel 12** | Framework backend utama |
+| **MySQL / MariaDB** | Database relasional |
+| **Blade Template** | Template engine bawaan Laravel |
+| **Tailwind CSS / Bootstrap** | Styling & komponen UI |
+| **JavaScript** | Interaktivitas frontend |
+| **Vite** | Build tool frontend |
+| **Composer** | Package manager PHP |
+| **NPM** | Package manager JavaScript |
+
+---
+
+## 🚀 Instalasi
+
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/username/nama-project.git
 cd nama-project
 ```
 
----
-
-## Install Dependency
+### 2. Install Dependency PHP
 
 ```bash
 composer install
 ```
 
----
-
-## Install Frontend Dependency
+### 3. Install Dependency Frontend
 
 ```bash
 npm install
 ```
 
----
-
-## Copy File Environment
+### 4. Konfigurasi Environment
 
 ```bash
 cp .env.example .env
 ```
 
----
-
-## Generate Application Key
-
-```bash
-php artisan key:generate
-```
-
----
-
-## Konfigurasi Database
-
-Edit file `.env`
+Edit file `.env` sesuai konfigurasi database kamu:
 
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=nama_database
+DB_DATABASE=tugasakhir
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
----
+### 5. Generate Application Key
 
-## Jalankan Migration
+```bash
+php artisan key:generate
+```
+
+### 6. Jalankan Migration & Seeder
 
 ```bash
 php artisan migrate
-```
-
----
-
-## Jalankan Seeder
-
-```bash
 php artisan db:seed
 ```
 
----
+### 7. Link Storage
 
-## Menjalankan Project
+```bash
+php artisan storage:link
+```
 
-Jalankan server Laravel:
+### 8. Build Frontend
+
+```bash
+npm run dev
+```
+
+### 9. Jalankan Server
 
 ```bash
 php artisan serve
@@ -168,93 +168,67 @@ php artisan serve
 
 Aplikasi akan berjalan di:
 
-```bash
+```
 http://127.0.0.1:8000
 ```
 
-Jika ingin diakses dari perangkat lain atau melalui internet/public URL, jalankan Ngrok:
+---
+
+## 🌐 Akses via Ngrok (Public URL)
+
+Jika ingin diakses dari perangkat lain atau melalui internet:
 
 ```bash
 ngrok http 8000
 ```
 
-Lalu gunakan URL Ngrok yang muncul, contoh:
+Gunakan URL Ngrok yang muncul, contoh:
 
-```bash
+```
 https://xxxx-xxxx.ngrok-free.app
 ```
 
+---
 
-# Alur Sistem
+## 👥 Struktur Role User
 
-```text
-Customer Memesan Menu
-↓
-Pesanan Masuk ke Sistem
-↓
-Dapur Memproses Pesanan
-↓
-Kasir Mengonfirmasi Pembayaran
-↓
-Pelayan Mengantar Pesanan
-↓
-Pesanan Selesai
-```
+| Role | Akses |
+|---|---|
+| 🛡️ **Admin** | Full akses — kelola semua data & laporan |
+| 👤 **Customer** | Pesan menu, pantau status, riwayat transaksi |
+| 🧾 **Kasir** | Konfirmasi pembayaran & laporan harian |
+| 🍳 **Dapur** | Terima & proses pesanan masuk |
+| 🛎️ **Pelayan** | Antar pesanan ke meja customer |
 
 ---
 
-# Struktur Role User
+## 🎯 Tujuan Sistem
 
-Sistem memiliki beberapa role user:
-
-* Admin
-* Customer
-* Kasir
-* Dapur
-* Pelayan
-
-Masing-masing role memiliki akses sesuai kebutuhan operasional cafe.
+- ✅ Mempermudah proses pemesanan secara digital
+- ✅ Mengurangi kesalahan pencatatan pesanan
+- ✅ Mempercepat alur pelayanan cafe
+- ✅ Membantu pengelolaan transaksi secara terpusat
+- ✅ Menyediakan laporan penjualan otomatis
+- ✅ Meningkatkan efisiensi operasional cafe secara keseluruhan
 
 ---
 
-# Tujuan Sistem
+## 👤 Author
 
-Tujuan dibuatnya aplikasi ini adalah:
-
-* Mempermudah proses pemesanan makanan dan minuman
-* Mengurangi kesalahan pencatatan pesanan
-* Mempercepat pelayanan restoran
-* Membantu pengelolaan transaksi secara digital
-* Menyediakan laporan penjualan secara otomatis
-* Meningkatkan efisiensi operasional cafe
+| | |
+|---|---|
+| **Nama** | Faradilla Zahara |
+| **NIM** | 3312301012 |
+| **Program Studi** | Teknik Informatika |
+| **Institusi** | Politeknik Negeri Batam |
 
 ---
 
-# Dokumentasi Sistem
+<p align="center">
+  <img src="https://img.shields.io/badge/Made%20with-❤️%20%26%20Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white"/>
+</p>
 
-Dokumentasi tampilan sistem meliputi:
-
-* Halaman Login
-* Dashboard Admin
-* Daftar Menu
-* Cart / Keranjang
-* Checkout
-* Dashboard Kasir
-* Dashboard Dapur
-* Dashboard Pelayan
-* Laporan Penjualan
-
----
-
-# Author
-
-**Nama:** Faradilla Zahara
-**NIM:** 3312301012
-**Program Studi:** Teknik Informatika
-**Universitas:** Politeknik Negeri Batam
-
----
-
-# License
-
-Project ini dibuat untuk kebutuhan akademik, pembelajaran, dan tugas akhir.
+<p align="center">
+  Project ini dibuat untuk kebutuhan akademik, pembelajaran, dan tugas akhir. <br/>
+  © 2026 Politeknik Negeri Batam — Teknik Informatika
+</p>
