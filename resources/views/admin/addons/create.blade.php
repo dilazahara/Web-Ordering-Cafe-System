@@ -82,6 +82,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     box-shadow: 0 4px 12px rgba(99,102,241,0.3);
 }
 .btn-modal-save:hover { transform: translateY(-1px); }
+.btn-modal-save:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 .card-footer {
     padding: 18px 24px; background: #f8fafc;
@@ -227,7 +228,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
         </div>
         <div class="modal-actions">
             <button type="button" class="btn-modal-cancel" onclick="tutupModal()">Batal</button>
-            <button type="button" class="btn-modal-save" onclick="simpanGroup()">Simpan Group</button>
+            <button type="button" class="btn-modal-save" id="btnSimpanGroup" onclick="simpanGroup()">Simpan Group</button>
         </div>
     </div>
 </div>
@@ -263,6 +264,9 @@ function tutupModal() {
     document.getElementById('inputNamaGroup').value = '';
     document.getElementById('inputMax').value       = '';
     document.getElementById('inputRequired').value  = '0';
+    var btn = document.getElementById('btnSimpanGroup');
+    btn.disabled    = false;
+    btn.textContent = 'Simpan Group';
 }
 
 // Tutup modal klik backdrop
@@ -280,15 +284,49 @@ function simpanGroup() {
         return;
     }
 
+    // Ambil CSRF token - coba dari meta tag dulu, fallback ke hidden input di form
+    var csrfToken = '';
+    var metaTag = document.querySelector('meta[name="csrf-token"]');
+    var inputToken = document.querySelector('input[name="_token"]');
+
+    if (metaTag) {
+        csrfToken = metaTag.getAttribute('content');
+    } else if (inputToken) {
+        csrfToken = inputToken.value;
+    }
+
+    if (!csrfToken) {
+        showToast('Token tidak ditemukan, silakan refresh halaman.', 'err');
+        return;
+    }
+
+    // Disable tombol supaya tidak dobel klik
+    var btn = document.getElementById('btnSimpanGroup');
+    btn.disabled    = true;
+    btn.textContent = 'Menyimpan...';
+
     fetch('/admin/addon-groups/store', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
         },
-        body: JSON.stringify({ name: nama, max_select: max, required: required })
+        body: JSON.stringify({
+            name: nama,
+            max_select: max,
+            required: required
+        })
     })
-    .then(function(res) { return res.json(); })
+    .then(function(res) {
+        if (!res.ok) {
+            return res.text().then(function(text) {
+                throw new Error('Server error ' + res.status + ': ' + text);
+            });
+        }
+        return res.json();
+    })
     .then(function(data) {
         if (data.success) {
             var select = document.getElementById('selectGroup');
@@ -301,10 +339,15 @@ function simpanGroup() {
             showToast('Group "' + nama + '" berhasil dibuat!', 'ok');
         } else {
             showToast(data.message || 'Gagal membuat group.', 'err');
+            btn.disabled    = false;
+            btn.textContent = 'Simpan Group';
         }
     })
-    .catch(function() {
+    .catch(function(err) {
+        console.error('Error simpan group:', err);
         showToast('Terjadi kesalahan, coba lagi.', 'err');
+        btn.disabled    = false;
+        btn.textContent = 'Simpan Group';
     });
 }
 
@@ -320,7 +363,7 @@ function showToast(msg, type) {
     });
     setTimeout(function() {
         box.classList.remove('show');
-        setTimeout(function() { box.remove(); }, 400);
+        setTimeout(function() { if (box.parentElement) box.remove(); }, 400);
     }, 3500);
 }
 </script>

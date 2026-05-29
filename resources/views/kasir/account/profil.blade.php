@@ -84,7 +84,6 @@ body{
     border-bottom:1px solid rgba(226,232,240,0.7);
 }
 
-/* AVATAR STYLE */
 .avatar-container {
     display: flex;
     flex-direction: column;
@@ -233,6 +232,64 @@ body{
     color:#6b7280;
 }
 
+/* ── PASSWORD ── */
+.section-divider {
+    position: relative;
+    margin: 10px 0 28px;
+    border: none;
+    border-top: 1px solid rgba(226,232,240,0.8);
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 20px;
+}
+
+.section-note {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 22px;
+    margin-top: -10px;
+}
+
+.input-eye-wrap {
+    position: relative;
+}
+
+.input-eye-wrap input {
+    padding-right: 50px !important;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    transition: color .2s;
+}
+
+.btn-eye:hover { color: #2563eb; }
+
+.strength-wrap { margin-top: 8px; display: none; }
+.strength-bar { display: flex; gap: 4px; margin-bottom: 5px; }
+.seg {
+    height: 4px; flex: 1; border-radius: 99px;
+    background: #e5e7eb; transition: background .3s;
+}
+.strength-text { font-size: 11px; font-weight: 700; color: #9ca3af; }
+.confirm-note { font-size: 12px; font-weight: 600; margin-top: 6px; display: none; }
+
 .button-group{
     display:flex;
     gap:16px;
@@ -302,9 +359,11 @@ body{
     <div class="card">
 
         @if(session('success'))
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
+        <div class="alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert-error">{{ session('error') }}</div>
         @endif
 
         @if($errors->any())
@@ -315,16 +374,11 @@ body{
         </div>
         @endif
 
-        <form
-            action="{{ route('kasir.account.update') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
+        <form action="{{ route('kasir.account.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="profile-top">
-
                 <div class="avatar-container">
                     <div class="big-avatar" onclick="document.getElementById('profileInput').click()">
                         @if(auth()->user()->avatar)
@@ -343,34 +397,75 @@ body{
                     <p>{{ auth()->user()->email }}</p>
                     <div class="online">Online Sekarang</div>
                 </div>
-
             </div>
 
+            {{-- DATA DIRI --}}
             <div class="grid">
                 <div class="form-group">
                     <label>Nama Lengkap</label>
-                    <input type="text" name="name" value="{{ auth()->user()->name }}">
+                    <input type="text" name="name" value="{{ old('name', auth()->user()->name) }}" required>
                 </div>
-
                 <div class="form-group">
                     <label>Username</label>
-                    <input type="text" name="username" value="{{ auth()->user()->username }}">
+                    <input type="text" name="username" value="{{ old('username', auth()->user()->username) }}">
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Email</label>
-                <input type="email" name="email" value="{{ auth()->user()->email }}">
+                <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required>
             </div>
 
-            <div class="form-group">
-                <label>No Telepon</label>
-                <input type="text" name="phone" value="{{ auth()->user()->phone }}">
-            </div>
 
             <div class="form-group">
                 <label>Role</label>
                 <input type="text" value="{{ ucfirst(auth()->user()->role) }}" readonly>
+            </div>
+
+            {{-- GANTI PASSWORD --}}
+            <hr class="section-divider">
+            <p class="section-label">Ganti Password</p>
+            <p class="section-note">Kosongkan jika tidak ingin mengganti password.</p>
+
+            <div class="form-group">
+                <label>Password Saat Ini</label>
+                <div class="input-eye-wrap">
+                    <input type="password" name="current_password" id="ksCurrentPwd" placeholder="Masukkan password saat ini" autocomplete="current-password">
+                    <button type="button" class="btn-eye" onclick="toggleEye('ksCurrentPwd','ksEye0')">
+                        <span id="ksEye0">👁</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid">
+                <div class="form-group">
+                    <label>Password Baru</label>
+                    <div class="input-eye-wrap">
+                        <input type="password" name="new_password" id="ksNewPwd" placeholder="Min. 8 karakter" autocomplete="new-password" oninput="ksCheckStrength(this.value)">
+                        <button type="button" class="btn-eye" onclick="toggleEye('ksNewPwd','ksEye1')">
+                            <span id="ksEye1">👁</span>
+                        </button>
+                    </div>
+                    <div class="strength-wrap" id="ksStrengthWrap">
+                        <div class="strength-bar">
+                            <div class="seg" id="ksSeg1"></div>
+                            <div class="seg" id="ksSeg2"></div>
+                            <div class="seg" id="ksSeg3"></div>
+                            <div class="seg" id="ksSeg4"></div>
+                        </div>
+                        <span class="strength-text" id="ksStrengthText"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Konfirmasi Password Baru</label>
+                    <div class="input-eye-wrap">
+                        <input type="password" name="new_password_confirmation" id="ksConfirmPwd" placeholder="Ulangi password baru" autocomplete="new-password" oninput="ksCheckConfirm()">
+                        <button type="button" class="btn-eye" onclick="toggleEye('ksConfirmPwd','ksEye2')">
+                            <span id="ksEye2">👁</span>
+                        </button>
+                    </div>
+                    <div class="confirm-note" id="ksConfirmNote"></div>
+                </div>
             </div>
 
             <div class="button-group">
@@ -391,7 +486,7 @@ body{
     /* ── TOAST ── */
     function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
 
-    // Preview Gambar sebelum di-upload
+    // Preview foto
     const profileInput = document.getElementById('profileInput');
     const avatarPreview = document.getElementById('avatarPreview');
     const avatarInitials = document.getElementById('avatarInitials');
@@ -410,7 +505,6 @@ body{
         }
     });
 
-    /* feedback submit form profil */
     var profilForm = document.querySelector('form');
     if (profilForm) {
         profilForm.addEventListener('submit', function() {
@@ -418,13 +512,60 @@ body{
         });
     }
 
-    /* toast dari session flash */
     @if(session('success'))
     ksToast('✅ {{ session("success") }}', 'success', 3500);
     @endif
     @if(session('error'))
     ksToast('❌ {{ session("error") }}', 'error', 3500);
     @endif
+
+    // Toggle show/hide password
+    function toggleEye(inputId, spanId) {
+        const input = document.getElementById(inputId);
+        const span  = document.getElementById(spanId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            span.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            span.textContent = '👁';
+        }
+    }
+
+    // Strength meter
+    function ksCheckStrength(val) {
+        const wrap = document.getElementById('ksStrengthWrap');
+        const text = document.getElementById('ksStrengthText');
+        const segs = ['ksSeg1','ksSeg2','ksSeg3','ksSeg4'].map(id => document.getElementById(id));
+        if (!val) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+        let score = 0;
+        if (val.length >= 8)           score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
+        if (/[^A-Za-z0-9]/.test(val))  score++;
+        const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+        const labels = ['Sangat Lemah','Lemah','Sedang','Kuat'];
+        segs.forEach((s,i) => s.style.background = i < score ? colors[score-1] : '#e5e7eb');
+        text.textContent = labels[score-1] || '';
+        text.style.color = colors[score-1] || '#9ca3af';
+        ksCheckConfirm();
+    }
+
+    function ksCheckConfirm() {
+        const newVal  = document.getElementById('ksNewPwd').value;
+        const confVal = document.getElementById('ksConfirmPwd').value;
+        const note    = document.getElementById('ksConfirmNote');
+        if (!confVal) { note.style.display = 'none'; return; }
+        note.style.display = 'block';
+        if (newVal === confVal) {
+            note.textContent = '✓ Password cocok';
+            note.style.color = '#16a34a';
+        } else {
+            note.textContent = '✗ Password tidak cocok';
+            note.style.color = '#dc2626';
+        }
+    }
 </script>
 
 </body>

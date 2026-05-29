@@ -104,17 +104,4 @@ class MejaController extends Controller
         return redirect('/admin/meja')->with('success', 'Meja berhasil dihapus.');
     }
 
-    // =========================================
-    // MONITOR
-    // =========================================
-    public function monitor()
-    {
-        $mejas = Meja::with([
-            'orders' => function ($query) {
-                $query->latest();
-            }
-        ])->latest()->get();
-
-        return view('admin.meja.monitor', compact('mejas'));
-    }
-}
+   }

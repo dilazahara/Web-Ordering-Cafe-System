@@ -3,24 +3,24 @@
 @section('title', 'Profil Saya')
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <style>
 *{ box-sizing:border-box; margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; }
 body{ background:#F8F9FC; }
 
 /* ── MAIN ── */
-
 .main { padding: 60px 60px 60px; max-width: 700px; margin: 0 auto; }
-
-/* ── PAGE HEADER ── */
-.page-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
-.page-header h1{ font-size:28px; font-weight:700; color:#111827; }
-.page-header p{ font-size:14px; color:#6B7280; margin-top:4px; }
 
 /* ── CARD ── */
 .card{ background:white; border-radius:18px; border:1px solid #F0F0F0; box-shadow:0 2px 12px rgba(0,0,0,0.04); overflow:hidden; margin-bottom:16px; }
 .card-section{ padding:24px; border-bottom:1px solid #F8F9FC; }
 .card-section:last-child{ border-bottom:none; }
 .card-section-title{ font-size:12px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:20px; }
+
+/* ── CARD PAGE HEADER (inside card) ── */
+.card-page-header{ padding:24px 24px 20px; border-bottom:1px solid #F0F0F0; background: linear-gradient(135deg, #fff7ed 0%, #fff 60%); }
+.card-page-header h1{ font-size:22px; font-weight:700; color:#111827; margin-bottom:4px; }
+.card-page-header p{ font-size:13px; color:#6B7280; }
 
 /* ── AVATAR UPLOAD ── */
 .avatar-row{ display:flex; align-items:center; gap:24px; }
@@ -45,6 +45,26 @@ body{ background:#F8F9FC; }
 .form-input:focus{ border-color:#F97316; box-shadow:0 0 0 3px rgba(249,115,22,0.1); }
 .form-input[readonly]{ background:#F9FAFB; color:#9CA3AF; cursor: not-allowed; }
 
+/* ── PASSWORD TOGGLE ── */
+.input-password-wrap { position: relative; }
+.input-password-wrap .form-input { padding-right: 44px; }
+.btn-eye {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: #9CA3AF;
+    display: flex; align-items: center; padding: 0;
+    transition: color .2s;
+}
+.btn-eye:hover { color: #F97316; }
+
+/* ── PASSWORD STRENGTH ── */
+.password-strength { margin-top: 6px; }
+.strength-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+.strength-segment {
+    height: 4px; flex: 1; border-radius: 99px; background: #E5E7EB;
+    transition: background .3s;
+}
+.strength-label { font-size: 11px; font-weight: 600; color: #9CA3AF; }
+
 /* ── BADGE ── */
 .info-badge{ display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; background:#EFF6FF; color:#2563EB; }
 
@@ -57,6 +77,12 @@ body{ background:#F8F9FC; }
 
 /* ── ALERT ── */
 .alert-success{ display:flex; align-items:center; gap:10px; padding:14px 18px; border-radius:10px; background:#F0FDF4; border:1px solid #BBF7D0; color:#15803D; font-size:14px; font-weight:600; margin-bottom:20px; }
+.alert-error{ display:flex; align-items:center; gap:10px; padding:14px 18px; border-radius:10px; background:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-size:14px; font-weight:600; margin-bottom:20px; }
+
+/* ── PASSWORD SECTION NOTE ── */
+.password-note {
+    font-size: 12px; color: #9CA3AF; margin-top: 4px;
+}
 
 @media(max-width:580px){
     .form-grid-2{ grid-template-columns:1fr; }
@@ -68,17 +94,29 @@ body{ background:#F8F9FC; }
 @endpush
 
 @section('content')
-<div class="page-header">
-        <div>
-            <h1>Profil Saya</h1>
-            <p>Kelola informasi akun dan foto profil Anda</p>
-        </div>
-    </div>
 
     @if(session('success'))
     <div class="alert-success">
         <i data-lucide="check-circle" style="width:18px;height:18px;"></i>
         {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert-error">
+        <i data-lucide="x-circle" style="width:18px;height:18px;"></i>
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div class="alert-error">
+        <i data-lucide="x-circle" style="width:18px;height:18px;flex-shrink:0;"></i>
+        <div>
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
     </div>
     @endif
 
@@ -90,6 +128,13 @@ body{ background:#F8F9FC; }
         <input type="hidden" name="avatar_cropped" id="avatarCroppedInput">
 
         <div class="card">
+
+            {{-- PAGE HEADER inside card --}}
+            <div class="card-page-header">
+                <h1>Profil Saya</h1>
+                <p>Kelola informasi akun dan foto profil Anda</p>
+            </div>
+
             <div class="card-section">
                 <p class="card-section-title">Identitas Akun</p>
                 <div class="avatar-row">
@@ -169,6 +214,61 @@ body{ background:#F8F9FC; }
                 </div>
             </div>
 
+            {{-- ── GANTI PASSWORD ── --}}
+            <div class="card-section">
+                <p class="card-section-title">Ganti Password</p>
+                <p class="password-note" style="margin-bottom:20px;">Kosongkan jika tidak ingin mengganti password.</p>
+                <div style="display:grid; gap:20px;">
+                    <div class="form-group">
+                        <label class="form-label">Password Saat Ini</label>
+                        <div class="input-password-wrap">
+                            <input type="password" name="current_password" id="currentPassword"
+                                class="form-input" placeholder="Masukkan password saat ini"
+                                autocomplete="current-password">
+                            <button type="button" class="btn-eye" onclick="togglePassword('currentPassword', 'eyeCurrent')">
+                                <i data-lucide="eye" id="eyeCurrent" style="width:18px;height:18px;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Password Baru</label>
+                            <div class="input-password-wrap">
+                                <input type="password" name="new_password" id="newPassword"
+                                    class="form-input" placeholder="Min. 8 karakter"
+                                    autocomplete="new-password"
+                                    oninput="checkStrength(this.value)">
+                                <button type="button" class="btn-eye" onclick="togglePassword('newPassword', 'eyeNew')">
+                                    <i data-lucide="eye" id="eyeNew" style="width:18px;height:18px;"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength" id="strengthWrap" style="display:none;">
+                                <div class="strength-bar">
+                                    <div class="strength-segment" id="seg1"></div>
+                                    <div class="strength-segment" id="seg2"></div>
+                                    <div class="strength-segment" id="seg3"></div>
+                                    <div class="strength-segment" id="seg4"></div>
+                                </div>
+                                <span class="strength-label" id="strengthLabel"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Konfirmasi Password Baru</label>
+                            <div class="input-password-wrap">
+                                <input type="password" name="new_password_confirmation" id="confirmPassword"
+                                    class="form-input" placeholder="Ulangi password baru"
+                                    autocomplete="new-password"
+                                    oninput="checkConfirm()">
+                                <button type="button" class="btn-eye" onclick="togglePassword('confirmPassword', 'eyeConfirm')">
+                                    <i data-lucide="eye" id="eyeConfirm" style="width:18px;height:18px;"></i>
+                                </button>
+                            </div>
+                            <span class="password-note" id="confirmNote" style="display:none;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card-footer">
                 <a href="/admin/dashboard" class="btn-cancel">Batal</a>
                 <button type="submit" class="btn-save">
@@ -201,13 +301,13 @@ body{ background:#F8F9FC; }
 <script>
     lucide.createIcons();
 
+    /* ── CROPPER ── */
     let cropper;
-    const avatarInput       = document.getElementById('avatarInput');
-    const cropperModal      = document.getElementById('cropperModal');
-    const cropperImage      = document.getElementById('cropperImage');
+    const avatarInput        = document.getElementById('avatarInput');
+    const cropperModal       = document.getElementById('cropperModal');
+    const cropperImage       = document.getElementById('cropperImage');
     const avatarCroppedInput = document.getElementById('avatarCroppedInput');
 
-    // Listener ketika user memilih gambar
     avatarInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -216,63 +316,101 @@ body{ background:#F8F9FC; }
                 this.value = '';
                 return;
             }
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 cropperImage.src = e.target.result;
                 cropperModal.style.display = 'flex';
-                
-                if (cropper) {
-                    cropper.destroy();
-                }
-                
+                if (cropper) { cropper.destroy(); }
                 cropper = new Cropper(cropperImage, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    background: false,
-                    autoCropArea: 1,
-                    responsive: true,
-                    zoomable: true
+                    aspectRatio: 1, viewMode: 1,
+                    background: false, autoCropArea: 1,
+                    responsive: true, zoomable: true
                 });
             }
             reader.readAsDataURL(file);
         }
     });
 
-    // Tombol Batal
     document.getElementById('btnCancelCrop').addEventListener('click', function() {
         cropperModal.style.display = 'none';
         if (cropper) { cropper.destroy(); }
         avatarInput.value = '';
-        avatarCroppedInput.value = ''; // hapus data sebelumnya jika batal
+        avatarCroppedInput.value = '';
     });
 
-    // Tombol Terapkan
     document.getElementById('btnApplyCrop').addEventListener('click', function() {
         if (cropper) {
-            const canvas = cropper.getCroppedCanvas({
-                width: 300,
-                height: 300
-            });
-            
+            const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
             const base64 = canvas.toDataURL('image/jpeg', 0.85);
-
-            // Simpan base64 ke hidden input agar dikirim ke server saat form submit
             avatarCroppedInput.value = base64;
-
-            // Update tampilan preview
             const preview = document.getElementById('avatarPreview');
             const initial = document.getElementById('avatarInitial');
-            
             preview.style.backgroundImage = `url('${base64}')`;
             preview.style.backgroundColor = 'transparent';
-            if(initial) {
-                initial.style.display = 'none';
-            }
-            
+            if(initial) { initial.style.display = 'none'; }
             cropperModal.style.display = 'none';
             cropper.destroy();
         }
     });
+
+    /* ── TOGGLE PASSWORD VISIBILITY ── */
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon  = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            icon.setAttribute('data-lucide', 'eye');
+        }
+        lucide.createIcons();
+    }
+
+    /* ── PASSWORD STRENGTH ── */
+    function checkStrength(val) {
+        const wrap = document.getElementById('strengthWrap');
+        const label = document.getElementById('strengthLabel');
+        const segs  = [document.getElementById('seg1'), document.getElementById('seg2'),
+                       document.getElementById('seg3'), document.getElementById('seg4')];
+
+        if (!val) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+
+        let score = 0;
+        if (val.length >= 8)            score++;
+        if (/[A-Z]/.test(val))          score++;
+        if (/[0-9]/.test(val))          score++;
+        if (/[^A-Za-z0-9]/.test(val))   score++;
+
+        const colors = ['#EF4444','#F97316','#EAB308','#22C55E'];
+        const labels = ['Sangat Lemah','Lemah','Sedang','Kuat'];
+
+        segs.forEach((s, i) => {
+            s.style.background = i < score ? colors[score - 1] : '#E5E7EB';
+        });
+        label.textContent  = labels[score - 1] ?? '';
+        label.style.color  = colors[score - 1] ?? '#9CA3AF';
+
+        checkConfirm();
+    }
+
+    /* ── CONFIRM PASSWORD MATCH ── */
+    function checkConfirm() {
+        const newVal     = document.getElementById('newPassword').value;
+        const confirmVal = document.getElementById('confirmPassword').value;
+        const note       = document.getElementById('confirmNote');
+
+        if (!confirmVal) { note.style.display = 'none'; return; }
+        note.style.display = 'block';
+
+        if (newVal === confirmVal) {
+            note.textContent  = '✓ Password cocok';
+            note.style.color  = '#16A34A';
+        } else {
+            note.textContent  = '✗ Password tidak cocok';
+            note.style.color  = '#DC2626';
+        }
+    }
 </script>
 @endpush

@@ -10,10 +10,6 @@ use Illuminate\Support\Facades\Storage;
 
 class AccountKasirController extends Controller
 {
-    // ════════════════════════════════════════
-    // PROFIL
-    // ════════════════════════════════════════
-
     public function profil()
     {
         return view('kasir.account.profil');
@@ -21,47 +17,49 @@ class AccountKasirController extends Controller
 
     public function updateProfil(Request $request)
     {
-        $request->validate([
-            'name'   => 'required|string|max:100',
-            'email'  => 'required|email|unique:users,email,' . Auth::id(),
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $user->name  = $request->name;
-        $user->email = $request->email;
+        $request->validate([
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'username' => 'nullable|string|max:100',
+            'avatar'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        ]);
 
-        if ($request->filled('username')) {
-            $user->username = $request->username;
+        $user->name     = $request->name;
+        $user->email    = $request->email;
+        $user->username = $request->username;
+
+        // Ganti password jika diisi
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()
+                    ->withErrors(['current_password' => 'Password saat ini yang kamu masukkan salah!'])
+                    ->withInput();
+            }
+
+            $request->validate([
+                'new_password' => 'required|min:8|confirmed',
+            ]);
+
+            $user->password = Hash::make($request->new_password);
         }
 
-        if ($request->filled('phone')) {
-            $user->phone = $request->phone;
-        }
-
+        // Upload avatar
         if ($request->hasFile('avatar')) {
             if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $user->avatar = $path;
+            $user->avatar = $request->file('avatar')->store('avatars', 'public');
         }
 
         $user->save();
 
-        return redirect('/kasir/dashboard')
-            ->with(
-                'success',
-                'Profil berhasil diperbarui!'
-            );
+        return redirect()->route('kasir.account.profil')
+            ->with('success', 'Profil berhasil diperbarui!');
     }
-
-    // ════════════════════════════════════════
-    // GANTI PASSWORD
-    // ════════════════════════════════════════
 
     public function gantiSandi()
     {
@@ -78,25 +76,16 @@ class AccountKasirController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        if (!Hash::check(
-            $request->current_password,
-            $user->password
-        )) {
+        if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors([
                 'current_password' => 'Password lama yang kamu masukkan salah!'
             ]);
         }
 
-        $user->update([
-            'password' => Hash::make(
-                $request->new_password
-            )
-        ]);
+        $user->password = Hash::make($request->new_password);
+        $user->save();
 
-        return redirect('/kasir/dashboard')
-            ->with(
-                'success',
-                'Password berhasil diubah!'
-            );
+        return redirect()->route('kasir.account.profil')
+            ->with('success', 'Password berhasil diubah!');
     }
 }

@@ -78,7 +78,17 @@ return [
 
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
-        'store' => env('APP_MAINTENANCE_STORE', 'database'),
+        'store'  => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Biaya Layanan
+    |--------------------------------------------------------------------------
+    | Service charge yang ditambahkan ke setiap pesanan.
+    | Ubah nilai BIAYA_LAYANAN di file .env tanpa perlu menyentuh kode.
+    */
+
+    'biaya_layanan' => env('BIAYA_LAYANAN', 2000),
 
 ];

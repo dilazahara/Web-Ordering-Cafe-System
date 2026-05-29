@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->string('nomor_meja');
             $table->integer('kapasitas')->default(2);
-            $table->enum('status', ['kosong','terisi'])->default('kosong');
+            $table->enum('status', ['kosong','terisi','reserved'])->default('kosong');
             $table->timestamps();
         });
     }

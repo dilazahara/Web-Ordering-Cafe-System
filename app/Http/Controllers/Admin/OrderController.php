@@ -68,7 +68,7 @@ class OrderController extends Controller
             $menu      = Menu::find($item['id']);
             $subtotal += $menu->price * (int) $item['quantity'];
         }
-        $total = $subtotal + 2000;
+        $total = $subtotal + (int) config('app.biaya_layanan', 2000);
 
         $status = $request->payment_method === 'qris' ? 'lunas' : 'pending';
 

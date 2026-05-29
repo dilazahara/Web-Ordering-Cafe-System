@@ -9,24 +9,33 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Karena MySQL tidak bisa langsung modify ENUM,
-        // kita pakai raw query untuk update enum-nya
-        DB::statement("
-            ALTER TABLE orders
-            MODIFY COLUMN status
-            ENUM('pending','process','done','delivered','selesai')
-            NOT NULL DEFAULT 'pending'
-        ");
+        $driver = DB::getDriverName();
+
+        if ($driver === 'sqlite') {
+            // SQLite tidak support MODIFY COLUMN, skip — enum sudah ditangani di create_orders_table
+            // Status baru 'delivered' & 'selesai' ditambahkan dengan recreate kolom jika perlu
+            // Untuk testing, cukup pastikan kolom status sudah ada
+        } else {
+            DB::statement("
+                ALTER TABLE orders
+                MODIFY COLUMN status
+                ENUM('pending','process','done','delivered','selesai')
+                NOT NULL DEFAULT 'pending'
+            ");
+        }
     }
 
     public function down(): void
     {
-        // Kembalikan ke enum lama kalau di-rollback
-        DB::statement("
-            ALTER TABLE orders
-            MODIFY COLUMN status
-            ENUM('pending','process','done')
-            NOT NULL DEFAULT 'pending'
-        ");
+        $driver = DB::getDriverName();
+
+        if ($driver !== 'sqlite') {
+            DB::statement("
+                ALTER TABLE orders
+                MODIFY COLUMN status
+                ENUM('pending','process','done')
+                NOT NULL DEFAULT 'pending'
+            ");
+        }
     }
 };

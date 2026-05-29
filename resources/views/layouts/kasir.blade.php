@@ -332,16 +332,6 @@ tr:hover td { background: var(--surface-2); }
             Profil Saya
           </a>
 
-          <a href="/kasir/account/ganti-sandi" class="dropdown-item">
-            <div class="item-icon">
-              <svg viewBox="0 0 24 24">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-            </div>
-            Ganti Password
-          </a>
-
           <div class="dropdown-divider"></div>
 
           <form method="POST" action="{{ route('logout') }}">

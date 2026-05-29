@@ -649,6 +649,68 @@
     </style>
 
     @stack('styles')
+
+{{-- ── LOGIN SUCCESS TOAST ── --}}
+<style>
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(120px) scale(0.92); }
+    to   { opacity: 1; transform: translateX(0)      scale(1); }
+}
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0)      scale(1); }
+    to   { opacity: 0; transform: translateX(120px) scale(0.92); }
+}
+.login-toast-wrap {
+    position: fixed;
+    top: 80px; right: 24px;
+    z-index: 99999;
+    display: flex; flex-direction: column; gap: 10px;
+    pointer-events: none;
+}
+.login-toast {
+    pointer-events: auto;
+    display: flex; align-items: flex-start; gap: 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-left: 4px solid #059669;
+    border-radius: 14px;
+    padding: 16px 18px;
+    min-width: 300px; max-width: 360px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.login-toast.hide { animation: toastOut 0.35s ease forwards; }
+.toast-icon {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 10px;
+    background: #ecfdf5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+.toast-body { flex: 1; }
+.toast-title {
+    font-size: 13px; font-weight: 700;
+    color: #0f172a; margin-bottom: 3px;
+}
+.toast-msg {
+    font-size: 12px; color: #64748b; line-height: 1.5;
+}
+.toast-close {
+    background: none; border: none; cursor: pointer;
+    color: #94a3b8; font-size: 16px; padding: 0;
+    line-height: 1; flex-shrink: 0;
+    transition: color .2s;
+}
+.toast-close:hover { color: #475569; }
+.toast-progress {
+    position: absolute; bottom: 0; left: 0;
+    height: 3px; background: #059669;
+    border-radius: 0 0 0 10px;
+    animation: progress 4s linear forwards;
+}
+.login-toast { position: relative; overflow: hidden; }
+@keyframes progress { from { width: 100%; } to { width: 0%; } }
+</style>
 </head>
 <body>
 
@@ -708,10 +770,7 @@
                         <div class="dp-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
                         Profil Saya
                     </a>
-                    <a href="/admin/account/ganti-sandi" class="dp-item" role="menuitem">
-                        <div class="dp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-                        Ganti Password
-                    </a>
+                    
                     <div class="dp-divider" role="separator"></div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
@@ -822,5 +881,35 @@ lucide.createIcons();
 </script>
 
 @stack('scripts')
+
+{{-- ── LOGIN SUCCESS TOAST (muncul sekali setelah login) ── --}}
+@if(session('login_success'))
+<div class="login-toast-wrap" id="loginToastWrap">
+    <div class="login-toast" id="loginToast">
+        <div class="toast-icon">🎉</div>
+        <div class="toast-body">
+            <p class="toast-title">Berhasil Masuk!</p>
+            <p class="toast-msg">Selamat datang kembali, <strong>{{ auth()->user()->name }}</strong>.<br>Anda masuk sebagai <strong>{{ ucfirst(auth()->user()->role) }}</strong>.</p>
+        </div>
+        <button class="toast-close" onclick="dismissToast()" title="Tutup">✕</button>
+        <div class="toast-progress"></div>
+    </div>
+</div>
+<script>
+    function dismissToast() {
+        const t = document.getElementById('loginToast');
+        if (t) {
+            t.classList.add('hide');
+            setTimeout(() => {
+                const w = document.getElementById('loginToastWrap');
+                if (w) w.remove();
+            }, 380);
+        }
+    }
+    // Auto-dismiss setelah 4.5 detik
+    setTimeout(dismissToast, 4500);
+</script>
+@endif
+
 </body>
 </html>

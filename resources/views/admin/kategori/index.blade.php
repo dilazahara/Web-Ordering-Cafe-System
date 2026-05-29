@@ -175,30 +175,83 @@ tbody tr:hover { background: #f8fafc; }
 ======================= */
 .empty-state { text-align: center; padding: 56px 20px; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
+
+/* =======================
+   MODAL — ✅ display:none by default, NO animation on load
+======================= */
+.modal-backdrop {
+    display: none;
+    position: fixed; inset: 0; z-index: 2000;
+    background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
+    align-items: center; justify-content: center; padding: 20px;
+}
+.modal-backdrop.open { display: flex; }
+.modal-hapus {
+    background: white; border-radius: 24px; width: 100%; max-width: 400px;
+    padding: 32px 28px 28px; text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+    /* ✅ Animasi HANYA aktif saat .open ditambahkan, bukan saat halaman load */
+    animation: none;
+}
+.modal-backdrop.open .modal-hapus {
+    animation: mhIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes mhIn {
+    from { opacity: 0; transform: scale(0.88) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.mh-icon-wrap {
+    width: 64px; height: 64px; border-radius: 18px;
+    background: #fef2f2; display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 16px;
+}
+.mh-icon-wrap svg { width: 28px; height: 28px; color: #dc2626; }
+.mh-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+.mh-sub   { font-size: 14px; color: #64748b; margin-bottom: 4px; }
+.mh-name  { font-weight: 700; color: #dc2626; font-size: 15px; margin-bottom: 8px; }
+.mh-warn  { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+.mh-footer { display: flex; gap: 12px; justify-content: center; }
+.mh-btn-batal {
+    padding: 10px 22px; border-radius: 11px; border: 1.5px solid #e2e8f0;
+    background: #f1f5f9; color: #475569; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+}
+.mh-btn-batal:hover { background: #e2e8f0; }
+.mh-btn-hapus {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 22px; border-radius: 11px; border: none;
+    background: #dc2626; color: white; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+}
+.mh-btn-hapus:hover { background: #b91c1c; }
 </style>
 @endpush
 
 @section('content')
+
+{{-- PAGE HEADER --}}
 <div class="page-header">
-        <div>
-            <h1>Kategori Menu</h1>
-            <p>Kelola semua kategori menu cafe</p>
-        </div>
-        <a href="/admin/kategori/create" class="btn-add">
-            <i data-lucide="plus" style="width:15px;height:15px;"></i>
-            Tambah Kategori
-        </a>
+    <div>
+        <h1>Kategori Menu</h1>
+        <p>Kelola semua kategori menu cafe</p>
     </div>
+    <a href="{{ route('admin.kategori.create') }}" class="btn-add">
+        <i data-lucide="plus" style="width:15px;height:15px;"></i>
+        Tambah Kategori
+    </a>
+</div>
 
-    @if(session('success'))
-    <div class="alert-success" id="alertSuccess">
-        <i data-lucide="check-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
-        {{ session('success') }}
-    </div>
-    @endif
+{{-- ALERT --}}
+@if(session('success'))
+<div class="alert-success" id="alertSuccess">
+    <i data-lucide="check-circle" style="width:17px;height:17px;flex-shrink:0;"></i>
+    {{ session('success') }}
+</div>
+@endif
 
-    <div class="card">
-        <div class="tbl-wrap">
+{{-- TABLE CARD --}}
+<div class="card">
+    <div class="tbl-wrap">
         <table>
             <thead>
                 <tr>
@@ -208,25 +261,23 @@ tbody tr:hover { background: #f8fafc; }
                 </tr>
             </thead>
             <tbody>
-                @foreach($kategori as $index => $item)
+                @forelse($kategori as $index => $item)
                 <tr>
                     <td style="color:#9ca3af; font-size:13px;">{{ $index + 1 }}</td>
                     <td style="font-weight:600; color:#111827;">{{ $item->name }}</td>
                     <td>
                         <div class="action-wrap" style="justify-content:center;">
-                            <a href="/admin/kategori/edit/{{ $item->id }}" class="act-btn act-edit" title="Edit">
+                            <a href="{{ route('admin.kategori.edit', $item->id) }}" class="act-btn act-edit" title="Edit">
                                 <i data-lucide="pencil-line" style="width:15px;height:15px;"></i>
                             </a>
                             <button type="button" class="act-btn act-delete" title="Hapus"
-                                    onclick="openDeleteKat({{ $item->id }}, '{{ addslashes($item->name) }}')">
+                                onclick="openDeleteKat({{ $item->id }}, '{{ addslashes($item->name) }}')">
                                 <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
-                @endforeach
-
-                @if($kategori->count() == 0)
+                @empty
                 <tr>
                     <td colspan="3">
                         <div class="empty-state">
@@ -235,14 +286,13 @@ tbody tr:hover { background: #f8fafc; }
                         </div>
                     </td>
                 </tr>
-                @endif
+                @endforelse
             </tbody>
         </table>
-        </div>
     </div>
-@endsection
+</div>
 
-{{-- ════ MODAL HAPUS KATEGORI ════ --}}
+{{-- ════ MODAL HAPUS KATEGORI — ✅ DIPINDAH KE DALAM @section('content') ════ --}}
 <div class="modal-backdrop" id="modalHapusKat">
     <div class="modal-hapus">
         <div class="mh-icon-wrap">
@@ -257,6 +307,7 @@ tbody tr:hover { background: #f8fafc; }
         <h3 class="mh-title">Hapus Kategori?</h3>
         <p class="mh-sub">Kamu akan menghapus kategori:</p>
         <p class="mh-name" id="deleteKatNama"></p>
+        <p class="mh-warn">Tindakan ini tidak dapat dibatalkan.</p>
         <div class="mh-footer">
             <button type="button" class="mh-btn-batal" onclick="closeDeleteKat()">Batal</button>
             <form id="deleteKatForm" action="" method="POST" style="margin:0;">
@@ -278,25 +329,7 @@ tbody tr:hover { background: #f8fafc; }
     </div>
 </div>
 
-@push('styles')
-<style>
-.modal-backdrop { display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.45); backdrop-filter:blur(3px); align-items:center; justify-content:center; padding:20px; }
-.modal-backdrop.open { display:flex; }
-.modal-hapus { background:white; border-radius:24px; width:100%; max-width:400px; padding:32px 28px 28px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,0.2); animation:mhIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
-@keyframes mhIn { from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);} }
-.mh-icon-wrap { width:64px;height:64px;border-radius:18px;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px; }
-.mh-icon-wrap svg { width:28px;height:28px;color:#dc2626; }
-.mh-title { font-size:18px;font-weight:700;color:#0f172a;margin-bottom:8px; }
-.mh-sub { font-size:14px;color:#64748b;margin-bottom:4px; }
-.mh-name { font-weight:700;color:#dc2626;font-size:15px;margin-bottom:8px; }
-.mh-warn { font-size:13px;color:#94a3b8;margin-bottom:24px; }
-.mh-footer { display:flex;gap:12px;justify-content:center; }
-.mh-btn-batal { padding:10px 22px;border-radius:11px;border:1.5px solid #e2e8f0;background:#f1f5f9;color:#475569;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s; }
-.mh-btn-batal:hover { background:#e2e8f0; }
-.mh-btn-hapus { display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:11px;border:none;background:#dc2626;color:white;font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s; }
-.mh-btn-hapus:hover { background:#b91c1c; }
-</style>
-@endpush
+@endsection
 
 @push('scripts')
 <script>

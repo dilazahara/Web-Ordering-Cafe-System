@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
@@ -12,6 +14,11 @@ class LoginController extends Controller
     // =========================================
     public function index()
     {
+        // Jika sudah login, redirect sesuai role
+        if (Auth::check()) {
+            return $this->redirectByRole(Auth::user()->role);
+        }
+
         return view('login');
     }
 
@@ -20,44 +27,86 @@ class LoginController extends Controller
     // =========================================
     public function login(Request $request)
     {
-        // VALIDASI
+        // VALIDASI INPUT
         $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required|string',
+            'email'    => 'required|email|max:255',
+            'password' => 'required|string|min:6',
         ], [
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
+            'email.max'         => 'Email terlalu panjang.',
             'password.required' => 'Password wajib diisi.',
+            'password.min'      => 'Password minimal 6 karakter.',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'))) {
+        // RATE LIMITING — maks 5 percobaan per menit per IP+email
+        $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
 
-            // REGENERATE SESSION
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return back()
+                ->withErrors(['email' => "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik."])
+                ->withInput($request->only('email'));
+        }
+
+        // ATTEMPT LOGIN
+        if (Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
+
+            // Reset rate limiter setelah berhasil login
+            RateLimiter::clear($throttleKey);
+
+            // Regenerate session token
             $request->session()->regenerate();
 
             $user = Auth::user();
 
-            // REDIRECT SESUAI ROLE
-            $redirectMap = [
-                'admin'  => '/admin/dashboard',
-                'kasir'  => '/kasir/dashboard',
-                'pelayan'=> '/pelayan/antar',
-                'dapur'  => '/dapur/proses',
-            ];
-
-            if (array_key_exists($user->role, $redirectMap)) {
-                return redirect($redirectMap[$user->role]);
+            // Cek apakah user aktif (jika kolom is_active ada)
+            if (property_exists($user, 'is_active') && !$user->is_active) {
+                Auth::logout();
+                return back()
+                    ->withErrors(['email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.'])
+                    ->withInput($request->only('email'));
             }
 
-            // ✅ FIX: Role tidak dikenali → logout paksa
-            Auth::logout();
-            return back()->with('error', 'Akun Anda tidak memiliki hak akses yang valid.');
+            return $this->redirectByRole($user->role);
         }
 
-        // ✅ FIX: Kembalikan email ke form agar tidak hilang
+        // LOGIN GAGAL — tambah hitungan rate limiter
+        RateLimiter::hit($throttleKey, 60);
+
+        $remaining = 5 - RateLimiter::attempts($throttleKey);
+
+        $message = 'Email atau password yang kamu masukkan salah.';
+        if ($remaining <= 2 && $remaining > 0) {
+            $message .= " Sisa {$remaining} percobaan sebelum akun dikunci sementara.";
+        }
+
         return back()
-            ->with('error', 'Email atau password salah.')
+            ->withErrors(['email' => $message])
             ->withInput($request->only('email'));
+    }
+
+    // =========================================
+    // REDIRECT BERDASARKAN ROLE
+    // =========================================
+    private function redirectByRole(string $role)
+    {
+        $redirectMap = [
+            'admin'   => '/admin/dashboard',
+            'kasir'   => '/kasir/dashboard',
+            'pelayan' => '/pelayan/antar',
+            'dapur'   => '/dapur/proses',
+        ];
+
+        if (array_key_exists($role, $redirectMap)) {
+            return redirect($redirectMap[$role])
+                ->with('login_success', true);
+        }
+
+        // Role tidak dikenali → logout
+        Auth::logout();
+        return redirect('/login')
+            ->withErrors(['email' => 'Akun Anda tidak memiliki hak akses yang valid.']);
     }
 
     // =========================================
@@ -66,11 +115,9 @@ class LoginController extends Controller
     public function logout(Request $request)
     {
         Auth::logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/login');
+        return redirect('/login')->with('success', 'Berhasil keluar. Sampai jumpa!');
     }
 }

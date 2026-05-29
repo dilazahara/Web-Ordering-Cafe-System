@@ -27,6 +27,7 @@ use App\Http\Controllers\KonfirmasiPesananController;
 
 // ── DAPUR ─────────────────────────────────────────────
 use App\Http\Controllers\Dapur\DapurController;
+use App\Http\Controllers\Dapur\AccountDapurController;
 
 // ── PELAYAN ───────────────────────────────────────────
 use App\Http\Controllers\Pelayan\PelayanController;
@@ -113,7 +114,7 @@ Route::middleware('auth')
 });
 
 // ══════════════════════════════════════════════════════
-// MIDTRANS WEBHOOK — ✅ TAMBAHAN BARU, tanpa CSRF
+// MIDTRANS WEBHOOK — tanpa CSRF
 // ══════════════════════════════════════════════════════
 
 Route::post(
@@ -224,6 +225,13 @@ Route::middleware(['auth', 'role:admin'])
         [MenuController::class, 'create']
     )->name('menu.create');
 
+    // RESTful: POST /admin/menu (dipakai test)
+    Route::post(
+        '/menu',
+        [MenuController::class, 'store']
+    )->name('menu.store.rest');
+
+    // Legacy: POST /admin/menu/store (dipakai blade lama)
     Route::post(
         '/menu/store',
         [MenuController::class, 'store']
@@ -234,11 +242,25 @@ Route::middleware(['auth', 'role:admin'])
         [MenuController::class, 'edit']
     )->name('menu.edit');
 
+    // RESTful: PUT /admin/menu/{id} (dipakai test)
+    Route::put(
+        '/menu/{id}',
+        [MenuController::class, 'update']
+    )->name('menu.update.rest');
+
+    // Legacy: PUT /admin/menu/update/{id}
     Route::put(
         '/menu/update/{id}',
         [MenuController::class, 'update']
     )->name('menu.update');
 
+    // RESTful: DELETE /admin/menu/{id} (dipakai test)
+    Route::delete(
+        '/menu/{id}',
+        [MenuController::class, 'destroy']
+    )->name('menu.destroy.rest');
+
+    // Legacy: POST /admin/menu/delete/{id} (blade tanpa @method spoofing)
     Route::post(
         '/menu/delete/{id}',
         [MenuController::class, 'destroy']
@@ -348,11 +370,6 @@ Route::middleware(['auth', 'role:admin'])
         [MejaController::class, 'destroy']
     )->name('meja.delete');
 
-    Route::get(
-        '/meja/monitor',
-        [MejaController::class, 'monitor']
-    )->name('meja.monitor');
-
     // =====================================
     // PEMBAYARAN
     // =====================================
@@ -414,7 +431,7 @@ Route::middleware(['auth', 'role:admin'])
         [UserController::class, 'update']
     )->name('user.update');
 
-    Route::get(
+    Route::delete(
         '/user/delete/{id}',
         [UserController::class, 'delete']
     )->name('user.delete');
@@ -457,7 +474,6 @@ Route::middleware(['auth', 'role:admin'])
 
 });
 
-
 // ══════════════════════════════════════════════════════
 // KASIR
 // ══════════════════════════════════════════════════════
@@ -481,7 +497,6 @@ Route::middleware(['auth', 'role:kasir'])
     // =====================================
     // LAPORAN
     // =====================================
-
     Route::get(
         '/laporan',
         [KasirController::class, 'laporan']
@@ -496,7 +511,6 @@ Route::middleware(['auth', 'role:kasir'])
     // =====================================
     // DETAIL PESANAN
     // =====================================
-
     Route::get(
         '/detail/{id}',
         [KasirController::class, 'detail']
@@ -505,7 +519,6 @@ Route::middleware(['auth', 'role:kasir'])
     // =====================================
     // KONFIRMASI PESANAN
     // =====================================
-
     Route::patch(
         '/pesanan/{id}/konfirmasi',
         [KasirController::class, 'konfirmasi']
@@ -519,7 +532,6 @@ Route::middleware(['auth', 'role:kasir'])
     // =====================================
     // ACCOUNT
     // =====================================
-
     Route::get(
         '/account/profil',
         [AccountKasirController::class, 'profil']
@@ -569,22 +581,22 @@ Route::middleware(['auth', 'role:dapur'])
     // ACCOUNT
     Route::get(
         '/account/profil',
-        [DapurController::class, 'profil']
+        [AccountDapurController::class, 'profil']
     )->name('account.profil');
 
     Route::put(
         '/account/update',
-        [DapurController::class, 'updateProfil']
+        [AccountDapurController::class, 'updateProfil']
     )->name('account.update');
 
     Route::get(
         '/account/ganti-sandi',
-        [DapurController::class, 'gantiSandi']
+        [AccountDapurController::class, 'gantiSandi']
     )->name('account.ganti-sandi');
 
     Route::put(
         '/account/update-password',
-        [DapurController::class, 'updatePassword']
+        [AccountDapurController::class, 'updatePassword']
     )->name('account.update-password');
 
 });

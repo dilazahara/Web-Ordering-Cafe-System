@@ -5,183 +5,156 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Kategori;
-use App\Models\AddonGroup;
-use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 
 class MenuController extends Controller
 {
-    // =========================================
+    // ─────────────────────────────────────────
     // INDEX
-    // =========================================
-    public function index(Request $request)
+    // ─────────────────────────────────────────
+    public function index(Request $request): View
     {
         $query = Menu::with('kategori');
 
-        if ($request->search) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('description', 'like', '%' . $request->search . '%')
-                ->orWhereHas('kategori', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%');
-                });
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
         }
 
-        $menus = $query->latest()->paginate(5)->withQueryString();
+        $menus = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.menu.index', compact('menus'));
     }
 
-    // =========================================
+    // ─────────────────────────────────────────
     // CREATE
-    // =========================================
-    public function create()
+    // ─────────────────────────────────────────
+    public function create(): View
     {
-        $kategoris = Kategori::all();
-        $groups    = AddonGroup::with('addons')->get();
-
-        return view('admin.menu.create', compact('kategoris', 'groups'));
+        $kategoris = Kategori::orderBy('name')->get();
+        return view('admin.menu.create', compact('kategoris'));
     }
 
-    // =========================================
+    // ─────────────────────────────────────────
     // STORE
-    // =========================================
-    public function store(Request $request)
+    // ─────────────────────────────────────────
+    public function store(Request $request): RedirectResponse
     {
-        // ✅ FIX: Tambah min:0 pada price, max length pada name & description,
-        //         tambah webp pada mimes, dan pesan error yang jelas
         $request->validate([
-            'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:1000',
+            'name'        => 'required|string|max:255|unique:menus,name',
             'kategori_id' => 'required|exists:kategoris,id',
+            'price'       => 'required|numeric|min:0|max:99999999',
+            'description' => 'nullable|string|max:500',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'status'      => 'nullable|in:0,1',
+            'status'      => 'required|in:0,1',
         ], [
             'name.required'        => 'Nama menu wajib diisi.',
-            'name.max'             => 'Nama menu maksimal 150 karakter.',
+            'name.max'             => 'Nama menu maksimal 255 karakter.',
+            'name.unique'          => 'Nama menu sudah terdaftar, gunakan nama lain.',
+            'kategori_id.required' => 'Kategori wajib dipilih.',
+            'kategori_id.exists'   => 'Kategori yang dipilih tidak valid.',
             'price.required'       => 'Harga wajib diisi.',
             'price.numeric'        => 'Harga harus berupa angka.',
             'price.min'            => 'Harga tidak boleh negatif.',
-            'kategori_id.required' => 'Kategori wajib dipilih.',
-            'kategori_id.exists'   => 'Kategori yang dipilih tidak ditemukan.',
+            'price.max'            => 'Harga terlalu besar.',
+            'description.max'      => 'Deskripsi maksimal 500 karakter.',
             'image.image'          => 'File harus berupa gambar.',
             'image.mimes'          => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'            => 'Ukuran gambar maksimal 2MB.',
+            'status.required'      => 'Status wajib dipilih.',
+            'status.in'            => 'Status tidak valid.',
         ]);
 
-        $imagePath = null;
+        $data = $request->only(['name', 'kategori_id', 'price', 'description', 'status']);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('menu', 'public');
+            $data['image'] = $request->file('image')->store('menus', 'public');
         }
 
-        $menu = Menu::create([
-            'name'        => $request->name,
-            'description' => $request->description,
-            'kategori_id' => $request->kategori_id,
-            'price'       => $request->price,
-            'status'      => $request->status ?? 1,
-            'image'       => $imagePath,
-        ]);
+        Menu::create($data);
 
-        if ($request->addon_groups) {
-            $menu->addonGroups()->sync($request->addon_groups);
-        }
-
-        return redirect('/admin/menu')->with('success', 'Menu berhasil ditambahkan.');
+        return redirect('/admin/menu')
+                         ->with('success', 'Menu "' . $data['name'] . '" berhasil ditambahkan!');
     }
 
-    // =========================================
+    // ─────────────────────────────────────────
     // EDIT
-    // =========================================
-    public function edit($id)
+    // ─────────────────────────────────────────
+    public function edit(int $id): View
     {
-        $menu      = Menu::with('addonGroups')->findOrFail($id);
-        $kategoris = Kategori::all();
-        $groups    = AddonGroup::with('addons')->get();
-
-        return view('admin.menu.edit', compact('menu', 'kategoris', 'groups'));
+        $menu      = Menu::findOrFail($id);
+        $kategoris = Kategori::orderBy('name')->get();
+        return view('admin.menu.edit', compact('menu', 'kategoris'));
     }
 
-    // =========================================
+    // ─────────────────────────────────────────
     // UPDATE
-    // =========================================
-    public function update(Request $request, $id)
+    // ─────────────────────────────────────────
+    public function update(Request $request, int $id): RedirectResponse
     {
         $menu = Menu::findOrFail($id);
 
-        // ✅ FIX: Validasi sama seperti store() — konsisten
         $request->validate([
-            'name'        => 'required|string|max:150',
-            'price'       => 'required|numeric|min:0',
-            'description' => 'nullable|string|max:1000',
+            'name'        => 'required|string|max:255|unique:menus,name,' . $id,
             'kategori_id' => 'required|exists:kategoris,id',
+            'price'       => 'required|numeric|min:0|max:99999999',
+            'description' => 'nullable|string|max:500',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'status'      => 'nullable|in:0,1',
+            'status'      => 'required|in:0,1',
         ], [
             'name.required'        => 'Nama menu wajib diisi.',
-            'name.max'             => 'Nama menu maksimal 150 karakter.',
+            'name.max'             => 'Nama menu maksimal 255 karakter.',
+            'name.unique'          => 'Nama menu sudah digunakan menu lain.',
+            'kategori_id.required' => 'Kategori wajib dipilih.',
+            'kategori_id.exists'   => 'Kategori yang dipilih tidak valid.',
             'price.required'       => 'Harga wajib diisi.',
             'price.numeric'        => 'Harga harus berupa angka.',
             'price.min'            => 'Harga tidak boleh negatif.',
-            'kategori_id.required' => 'Kategori wajib dipilih.',
-            'kategori_id.exists'   => 'Kategori yang dipilih tidak ditemukan.',
+            'price.max'            => 'Harga terlalu besar.',
+            'description.max'      => 'Deskripsi maksimal 500 karakter.',
             'image.image'          => 'File harus berupa gambar.',
             'image.mimes'          => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'            => 'Ukuran gambar maksimal 2MB.',
+            'status.required'      => 'Status wajib dipilih.',
+            'status.in'            => 'Status tidak valid.',
         ]);
 
-        $imagePath = $menu->image;
+        $data = $request->only(['name', 'kategori_id', 'price', 'description', 'status']);
 
         if ($request->hasFile('image')) {
-            // Hapus gambar lama sebelum simpan yang baru
-            if ($menu->image) {
+            if ($menu->image && Storage::disk('public')->exists($menu->image)) {
                 Storage::disk('public')->delete($menu->image);
             }
-            $imagePath = $request->file('image')->store('menu', 'public');
+            $data['image'] = $request->file('image')->store('menus', 'public');
         }
 
-        $menu->update([
-            'name'        => $request->name,
-            'description' => $request->description,
-            'kategori_id' => $request->kategori_id,
-            'price'       => $request->price,
-            'status'      => $request->status ?? 1,
-            'image'       => $imagePath,
-        ]);
+        $menu->update($data);
 
-        $menu->addonGroups()->sync($request->addon_groups ?? []);
-
-        return redirect('/admin/menu')->with('success', 'Menu berhasil diupdate.');
+        return redirect('/admin/menu')
+                         ->with('success', 'Menu "' . $menu->name . '" berhasil diperbarui!');
     }
 
-    // =========================================
+    // ─────────────────────────────────────────
     // DESTROY
-    // =========================================
-    public function destroy($id)
+    // ─────────────────────────────────────────
+    public function destroy(int $id): RedirectResponse
     {
-        $menu = Menu::findOrFail($id);
+        $menu     = Menu::findOrFail($id);
+        $namaMenu = $menu->name;
 
-        // ✅ FIX: Cegah hapus menu yang masih ada di order aktif
-        // Tanpa ini, OrderItem akan jadi orphan (referensi ke menu yang sudah tidak ada)
-        $activeOrderCount = OrderItem::where('menu_id', $id)
-            ->whereHas('order', function ($q) {
-                $q->whereIn('status', ['pending', 'process', 'done', 'paid', 'lunas']);
-            })
-            ->count();
-
-        if ($activeOrderCount > 0) {
-            return redirect('/admin/menu')
-                ->with('error', "Menu '{$menu->name}' tidak dapat dihapus karena masih ada di {$activeOrderCount} pesanan aktif.");
-        }
-
-        if ($menu->image) {
+        if ($menu->image && Storage::disk('public')->exists($menu->image)) {
             Storage::disk('public')->delete($menu->image);
         }
 
         $menu->delete();
 
-        return redirect('/admin/menu')->with('success', 'Menu berhasil dihapus.');
+        return redirect('/admin/menu')
+                         ->with('success', 'Menu "' . $namaMenu . '" berhasil dihapus!');
     }
 }

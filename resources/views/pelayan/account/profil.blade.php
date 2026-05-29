@@ -58,7 +58,6 @@ body{
     margin-bottom:30px;
 }
 
-/* AVATAR — support foto & inisial */
 .avatar-wrap {
     display: flex;
     flex-direction: column;
@@ -157,6 +156,8 @@ input{
     border:1px solid #d1d5db;
     background:#f9fafb;
     font-size:14px;
+    color:#111827;
+    transition:.2s;
 }
 
 input:focus{
@@ -165,6 +166,69 @@ input:focus{
     background:white;
     box-shadow:0 0 0 4px rgba(16,185,129,0.1);
 }
+
+input[readonly]{
+    background:#f3f4f6;
+    color:#9ca3af;
+    cursor:not-allowed;
+}
+
+/* ── PASSWORD ── */
+.section-divider {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin: 10px 0 24px;
+}
+
+.section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #9ca3af;
+    margin-bottom: 16px;
+}
+
+.section-note {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-bottom: 20px;
+    margin-top: -8px;
+}
+
+.input-eye-wrap {
+    position: relative;
+}
+
+.input-eye-wrap input {
+    padding-right: 46px;
+}
+
+.btn-eye {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1;
+    padding: 0;
+    color: #9ca3af;
+    transition: color .2s;
+}
+
+.btn-eye:hover { color: #10b981; }
+
+.strength-wrap { margin-top: 7px; display: none; }
+.strength-bar { display: flex; gap: 4px; margin-bottom: 4px; }
+.seg {
+    height: 4px; flex: 1; border-radius: 99px;
+    background: #e5e7eb; transition: background .3s;
+}
+.strength-text { font-size: 11px; font-weight: 700; color: #9ca3af; }
+.confirm-note { font-size: 12px; font-weight: 600; margin-top: 5px; display: none; }
 
 .button-group{
     display:flex;
@@ -198,6 +262,9 @@ input:focus{
     background:white;
     border:1px solid #d1d5db;
     color:#111827;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 .btn-back:hover{
@@ -218,6 +285,15 @@ input:focus{
     color:#166534;
 }
 
+.alert-error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+@media(max-width:600px){
+    .profile-top{ flex-direction:column; text-align:center; }
+    .button-group{ flex-direction:column; }
+}
 </style>
 </head>
 <body>
@@ -225,8 +301,18 @@ input:focus{
 <div class="container">
 
     @if(session('success'))
-        <div class="alert alert-success">
-            ✅ {{ session('success') }}
+        <div class="alert alert-success">✅ {{ session('success') }}</div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-error">❌ {{ session('error') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-error">
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
         </div>
     @endif
 
@@ -237,27 +323,15 @@ input:focus{
             <p>Kelola informasi akun pelayan Anda</p>
         </div>
 
-        {{-- Form pakai enctype multipart agar bisa upload file --}}
-        <form
-            action="{{ route('pelayan.account.update') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
-
+        <form action="{{ route('pelayan.account.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="profile-top">
-
-                {{-- AVATAR: klik untuk ganti foto --}}
                 <div class="avatar-wrap">
                     <div class="avatar" onclick="document.getElementById('avatarInput').click()">
                         @if(Auth::user()->avatar)
-                            <img
-                                id="avatarPreview"
-                                src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                alt="Foto Profil"
-                            >
+                            <img id="avatarPreview" src="{{ asset('storage/' . Auth::user()->avatar) }}" alt="Foto Profil">
                         @else
                             <span id="avatarInitials">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</span>
                             <img id="avatarPreview" src="" alt="" style="display:none;">
@@ -267,103 +341,79 @@ input:focus{
                     <span class="avatar-hint">Klik untuk ubah</span>
                 </div>
 
-                {{-- Input file tersembunyi --}}
-                <input
-                    type="file"
-                    id="avatarInput"
-                    name="avatar"
-                    accept="image/jpeg,image/png,image/jpg,image/webp"
-                    style="display:none;"
-                >
+                <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/jpg,image/webp" style="display:none;">
 
                 <div class="profile-info">
-
-                    <h2>
-                        {{ Auth::user()->name }}
-                    </h2>
-
-                    <p>
-                        {{ Auth::user()->email }}
-                    </p>
-
-                    <div class="badge">
-                        {{ ucfirst(Auth::user()->role) }}
-                    </div>
-
+                    <h2>{{ Auth::user()->name }}</h2>
+                    <p>{{ Auth::user()->email }}</p>
+                    <div class="badge">{{ ucfirst(Auth::user()->role) }}</div>
                 </div>
-
             </div>
 
+            {{-- DATA DIRI --}}
             <div class="form-group">
-
                 <label>Nama Lengkap</label>
-
-                <input
-                    type="text"
-                    name="name"
-                    value="{{ Auth::user()->name }}"
-                    required
-                >
-
+                <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}" required>
             </div>
 
             <div class="form-group">
-
                 <label>Email</label>
-
-                <input
-                    type="email"
-                    name="email"
-                    value="{{ Auth::user()->email }}"
-                    required
-                >
-
+                <input type="email" name="email" value="{{ old('email', Auth::user()->email) }}" required>
             </div>
 
             <div class="form-group">
-
                 <label>Username</label>
+                <input type="text" name="username" value="{{ old('username', Auth::user()->username) }}">
+            </div>
 
-                <input
-                    type="text"
-                    name="username"
-                    value="{{ Auth::user()->username }}"
-                >
+            {{-- GANTI PASSWORD --}}
+            <hr class="section-divider">
+            <p class="section-label">Ganti Password</p>
+            <p class="section-note">Kosongkan jika tidak ingin mengganti password.</p>
 
+            <div class="form-group">
+                <label>Password Saat Ini</label>
+                <div class="input-eye-wrap">
+                    <input type="password" name="current_password" id="plCurrentPwd" placeholder="Masukkan password saat ini" autocomplete="current-password">
+                    <button type="button" class="btn-eye" onclick="toggleEye('plCurrentPwd','plEye0')">
+                        <span id="plEye0">👁</span>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
+                <label>Password Baru</label>
+                <div class="input-eye-wrap">
+                    <input type="password" name="new_password" id="plNewPwd" placeholder="Min. 8 karakter" autocomplete="new-password" oninput="plCheckStrength(this.value)">
+                    <button type="button" class="btn-eye" onclick="toggleEye('plNewPwd','plEye1')">
+                        <span id="plEye1">👁</span>
+                    </button>
+                </div>
+                <div class="strength-wrap" id="plStrengthWrap">
+                    <div class="strength-bar">
+                        <div class="seg" id="plSeg1"></div>
+                        <div class="seg" id="plSeg2"></div>
+                        <div class="seg" id="plSeg3"></div>
+                        <div class="seg" id="plSeg4"></div>
+                    </div>
+                    <span class="strength-text" id="plStrengthText"></span>
+                </div>
+            </div>
 
-                <label>No Telepon</label>
-
-                <input
-                    type="text"
-                    name="phone"
-                    value="{{ Auth::user()->phone }}"
-                >
-
+            <div class="form-group">
+                <label>Konfirmasi Password Baru</label>
+                <div class="input-eye-wrap">
+                    <input type="password" name="new_password_confirmation" id="plConfirmPwd" placeholder="Ulangi password baru" autocomplete="new-password" oninput="plCheckConfirm()">
+                    <button type="button" class="btn-eye" onclick="toggleEye('plConfirmPwd','plEye2')">
+                        <span id="plEye2">👁</span>
+                    </button>
+                </div>
+                <div class="confirm-note" id="plConfirmNote"></div>
             </div>
 
             <div class="button-group">
-
-                <button
-                    type="submit"
-                    class="btn btn-save"
-                >
-
-                    Simpan Perubahan
-
-                </button>
-
-                <a
-                    href="/pelayan/antar"
-                    class="btn btn-back"
-                >
-
-                    Kembali
-
-                </a>
-
+                <button type="submit" class="btn btn-save">Simpan Perubahan</button>
+                <a href="/pelayan/antar" class="btn btn-back">Kembali</a>
             </div>
 
         </form>
@@ -373,23 +423,70 @@ input:focus{
 </div>
 
 <script>
-    // Preview foto sebelum di-upload
+    // Preview foto
     const avatarInput    = document.getElementById('avatarInput');
     const avatarPreview  = document.getElementById('avatarPreview');
     const avatarInitials = document.getElementById('avatarInitials');
 
-    avatarInput.addEventListener('change', function (e) {
+    avatarInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
-        reader.onload = function (event) {
-            avatarPreview.src          = event.target.result;
+        reader.onload = function(event) {
+            avatarPreview.src = event.target.result;
             avatarPreview.style.display = 'block';
             if (avatarInitials) avatarInitials.style.display = 'none';
         };
         reader.readAsDataURL(file);
     });
+
+    // Toggle show/hide password
+    function toggleEye(inputId, spanId) {
+        const input = document.getElementById(inputId);
+        const span  = document.getElementById(spanId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            span.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            span.textContent = '👁';
+        }
+    }
+
+    // Strength meter
+    function plCheckStrength(val) {
+        const wrap = document.getElementById('plStrengthWrap');
+        const text = document.getElementById('plStrengthText');
+        const segs = ['plSeg1','plSeg2','plSeg3','plSeg4'].map(id => document.getElementById(id));
+        if (!val) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'block';
+        let score = 0;
+        if (val.length >= 8)           score++;
+        if (/[A-Z]/.test(val))         score++;
+        if (/[0-9]/.test(val))         score++;
+        if (/[^A-Za-z0-9]/.test(val))  score++;
+        const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+        const labels = ['Sangat Lemah','Lemah','Sedang','Kuat'];
+        segs.forEach((s,i) => s.style.background = i < score ? colors[score-1] : '#e5e7eb');
+        text.textContent = labels[score-1] || '';
+        text.style.color = colors[score-1] || '#9ca3af';
+        plCheckConfirm();
+    }
+
+    function plCheckConfirm() {
+        const newVal  = document.getElementById('plNewPwd').value;
+        const confVal = document.getElementById('plConfirmPwd').value;
+        const note    = document.getElementById('plConfirmNote');
+        if (!confVal) { note.style.display = 'none'; return; }
+        note.style.display = 'block';
+        if (newVal === confVal) {
+            note.textContent = '✓ Password cocok';
+            note.style.color = '#16a34a';
+        } else {
+            note.textContent = '✗ Password tidak cocok';
+            note.style.color = '#dc2626';
+        }
+    }
 </script>
 
 </body>

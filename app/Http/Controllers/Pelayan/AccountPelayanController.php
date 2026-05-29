@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class AccountPelayanController extends Controller
 {
-    // ═══════════════════════════════
+    // =====================================
     // PROFIL
-    // ═══════════════════════════════
+    // =====================================
 
     public function profil()
     {
@@ -22,110 +22,88 @@ class AccountPelayanController extends Controller
     public function updateProfil(Request $request)
     {
         $request->validate([
-            'name'   => 'required|string|max:100',
-            'email'  => 'required|email|unique:users,email,' . Auth::id(),
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'name'  => 'required|string|max:100',
+            'email' => 'required|email|unique:users,email,' . Auth::id(),
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // ── UPDATE DATA ───────────────────────────
         $user->name  = $request->name;
         $user->email = $request->email;
 
-        // USERNAME
         if ($request->filled('username')) {
             $user->username = $request->username;
         }
 
-        // PHONE
         if ($request->filled('phone')) {
             $user->phone = $request->phone;
         }
 
-        // ── UPLOAD AVATAR ─────────────────────────
-        if ($request->hasFile('avatar')) {
+        // Ganti password jika diisi
+        if ($request->filled('current_password') && $request->filled('new_password')) {
+            if (!Hash::check($request->current_password, $user->password)) {
+                return back()->withErrors([
+                    'current_password' => 'Password saat ini yang kamu masukkan salah!'
+                ])->withInput();
+            }
 
-            // Hapus avatar lama jika ada
-            if (
-                $user->avatar &&
-                Storage::disk('public')->exists($user->avatar)
-            ) {
+            $request->validate([
+                'new_password' => 'required|min:8|confirmed',
+            ]);
+
+            $user->password = Hash::make($request->new_password);
+        }
+
+        // Upload avatar
+        if ($request->hasFile('avatar')) {
+            $request->validate([
+                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            ]);
+
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
                 Storage::disk('public')->delete($user->avatar);
             }
 
-            // Simpan avatar baru
-            $path = $request
-                ->file('avatar')
-                ->store('avatars', 'public');
-
+            $path = $request->file('avatar')->store('avatars', 'public');
             $user->avatar = $path;
         }
 
-        // ── SAVE ──────────────────────────────────
         $user->save();
 
-        return redirect('/pelayan/antar')
-            ->with(
-                'success',
-                'Profil berhasil diperbarui!'
-            );
+        return redirect()->route('pelayan.account.profil')
+            ->with('success', 'Profil berhasil diperbarui!');
     }
 
-
-    // ═══════════════════════════════
-    // GANTI PASSWORD
-    // ═══════════════════════════════
+    // =====================================
+    // GANTI PASSWORD (halaman terpisah)
+    // =====================================
 
     public function gantiSandi()
     {
-        return view(
-            'pelayan.account.ganti-sandi'
-        );
+        return view('pelayan.account.ganti-sandi');
     }
 
     public function updatePassword(Request $request)
     {
         $request->validate([
-
             'current_password' => 'required',
-
-            'new_password' =>
-                'required|min:8|confirmed',
-
+            'new_password'     => 'required|min:8|confirmed',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // ── CEK PASSWORD LAMA ─────────────────────
-        if (
-            !Hash::check(
-                $request->current_password,
-                $user->password
-            )
-        ) {
-
+        if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors([
-
-                'current_password' =>
-                    'Password lama yang kamu masukkan salah!'
-
+                'current_password' => 'Password lama yang kamu masukkan salah!'
             ]);
         }
 
-        // ── UPDATE PASSWORD ───────────────────────
-        $user->password = Hash::make(
-            $request->new_password
-        );
-
+        $user->password = Hash::make($request->new_password);
         $user->save();
 
-        return redirect('/pelayan/antar')
-            ->with(
-                'success',
-                'Password berhasil diubah!'
-            );
+        return redirect()->route('pelayan.account.profil')
+            ->with('success', 'Password berhasil diubah!');
     }
 }

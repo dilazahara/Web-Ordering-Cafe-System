@@ -299,9 +299,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <a href="/pelayan/account/profil" class="dd-item">
             <div class="dd-icon"><i class="ti ti-user"></i></div>Profil Saya
           </a>
-          <a href="/pelayan/account/ganti-sandi" class="dd-item">
-            <div class="dd-icon"><i class="ti ti-lock"></i></div>Ganti Password
-          </a>
+    
           <div class="dd-divider"></div>
           <form method="POST" action="{{ route('logout') }}">
             @csrf

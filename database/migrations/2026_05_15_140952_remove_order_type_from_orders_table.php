@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('order_type');
-        });
+        if (Schema::hasColumn('orders', 'order_type')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->dropColumn('order_type');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->enum('order_type', ['dine_in'])->default('dine_in');
-        });
+        if (!Schema::hasColumn('orders', 'order_type')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->enum('order_type', ['dine_in'])->default('dine_in');
+            });
+        }
     }
 };
