@@ -24,7 +24,7 @@
 
 Pesanan yang masuk diproses oleh dapur, dikonfirmasi kasir, lalu diantarkan pelayan ke meja pelanggan — semua terintegrasi dalam satu sistem.
 
-> 🎓 Project ini dibuat sebagai **Tugas Akhir** Program Studi Teknik Informatika, Politeknik Negeri Batam.
+
 
 ---
 
@@ -229,7 +229,7 @@ https://xxxx-xxxx.ngrok-free.app
 </p>
 
 <p align="center">
-  Project ini dibuat untuk kebutuhan akademik, pembelajaran, dan tugas akhir. <br/>
+  
   © 2026 Politeknik Negeri Batam — Teknik Informatika
 </p>
 
