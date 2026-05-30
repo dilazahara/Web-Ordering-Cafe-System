@@ -31,12 +31,15 @@ class LoginController extends Controller
         $request->validate([
             'email'    => 'required|email|max:255',
             'password' => 'required|string|min:6',
+            'role'     => 'required|string|in:Admin,Kasir,Dapur,Pelayan',
         ], [
             'email.required'    => 'Email wajib diisi.',
             'email.email'       => 'Format email tidak valid.',
             'email.max'         => 'Email terlalu panjang.',
             'password.required' => 'Password wajib diisi.',
             'password.min'      => 'Password minimal 6 karakter.',
+            'role.required'     => 'Silakan pilih role terlebih dahulu.',
+            'role.in'           => 'Role yang dipilih tidak valid.',
         ]);
 
         // RATE LIMITING — maks 5 percobaan per menit per IP+email
@@ -46,7 +49,7 @@ class LoginController extends Controller
             $seconds = RateLimiter::availableIn($throttleKey);
             return back()
                 ->withErrors(['email' => "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik."])
-                ->withInput($request->only('email'));
+                ->withInput($request->only('email', 'role'));
         }
 
         // ATTEMPT LOGIN
@@ -65,7 +68,29 @@ class LoginController extends Controller
                 Auth::logout();
                 return back()
                     ->withErrors(['email' => 'Akun Anda telah dinonaktifkan. Hubungi administrator.'])
-                    ->withInput($request->only('email'));
+                    ->withInput($request->only('email', 'role'));
+            }
+
+            // =========================================
+            // VALIDASI ROLE — Akun harus sesuai role yang dipilih
+            // =========================================
+            $selectedRole = Str::lower($request->input('role')); // "kasir", "admin", dll
+            $userRole     = Str::lower($user->role);             // role di database
+
+            if ($selectedRole !== $userRole) {
+                Auth::logout();
+                $roleLabels = [
+                    'admin'   => 'Admin',
+                    'kasir'   => 'Kasir',
+                    'dapur'   => 'Dapur',
+                    'pelayan' => 'Pelayan',
+                ];
+                $selectedLabel = $roleLabels[$selectedRole] ?? ucfirst($selectedRole);
+                return back()
+                    ->withErrors([
+                        'role_mismatch' => "Akun ini bukan akun {$selectedLabel}. Silakan pilih role yang sesuai dengan akun Anda."
+                    ])
+                    ->withInput($request->only('email', 'role'));
             }
 
             return $this->redirectByRole($user->role);
@@ -83,7 +108,7 @@ class LoginController extends Controller
 
         return back()
             ->withErrors(['email' => $message])
-            ->withInput($request->only('email'));
+            ->withInput($request->only('email', 'role'));
     }
 
     // =========================================

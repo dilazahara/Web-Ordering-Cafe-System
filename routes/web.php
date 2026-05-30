@@ -161,6 +161,11 @@ Route::prefix('customer')
     )->name('order.store');
 
     Route::get(
+        '/order/bill/{id}',
+        [CustomerOrderController::class, 'cashBill']
+    )->name('order.bill');
+
+    Route::get(
         '/order/qris/{id}',
         [CustomerOrderController::class, 'qrisPayment']
     )->name('order.qris');
@@ -169,6 +174,11 @@ Route::prefix('customer')
         '/order/qris/{id}/confirm',
         [CustomerOrderController::class, 'qrisConfirm']
     )->name('order.qris.confirm');
+
+    Route::get(
+        '/order/qris/{id}/receipt',
+        [CustomerOrderController::class, 'qrisReceipt']
+    )->name('order.qris.receipt');
 
     Route::get(
         '/order/success/{id}',

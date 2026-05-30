@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->text('notes')->nullable()->after('price');
-        });
+        if (!Schema::hasColumn('order_items', 'notes')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->text('notes')->nullable()->after('price');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropColumn('notes');
-        });
+        if (Schema::hasColumn('order_items', 'notes')) {
+            Schema::table('order_items', function (Blueprint $table) {
+                $table->dropColumn('notes');
+            });
+        }
     }
 };

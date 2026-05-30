@@ -772,11 +772,18 @@
                     </a>
                     
                     <div class="dp-divider" role="separator"></div>
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                         @csrf
-                        <button type="submit" class="dp-item danger" role="menuitem">
-                            <div class="dp-ico"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-                            Logout
+                        <button type="submit" class="dp-item danger" role="menuitem" id="logoutBtn" onclick="handleLogout(this)">
+                            <div class="dp-ico" id="logoutIcon">
+                                <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            </div>
+                            <span id="logoutText">Logout</span>
+                            <svg id="logoutSpinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                style="display:none; width:15px; height:15px; margin-left:4px; animation: spinLogout 0.7s linear infinite; flex-shrink:0;">
+                                <circle cx="12" cy="12" r="10" stroke-opacity="0.2"/>
+                                <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+                            </svg>
                         </button>
                     </form>
                 </div>
@@ -881,6 +888,23 @@ lucide.createIcons();
 </script>
 
 @stack('scripts')
+
+{{-- ── LOGOUT LOADING ── --}}
+<style>
+@keyframes spinLogout { to { transform: rotate(360deg); } }
+</style>
+<script>
+function handleLogout(btn) {
+    btn.style.opacity = '0.7';
+    btn.style.cursor = 'not-allowed';
+    btn.style.pointerEvents = 'none';
+    document.getElementById('logoutText').textContent = 'Keluar...';
+    document.getElementById('logoutSpinner').style.display = 'inline-block';
+    setTimeout(function() {
+        document.getElementById('logoutForm').submit();
+    }, 600);
+}
+</script>
 
 {{-- ── LOGIN SUCCESS TOAST (muncul sekali setelah login) ── --}}
 @if(session('login_success'))

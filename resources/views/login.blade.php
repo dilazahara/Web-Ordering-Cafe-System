@@ -26,7 +26,99 @@
             --success: #16A34A;
             --success-light: #F0FDF4;
             --success-border: #BBF7D0;
+
+            /* Role theme vars — default neutral */
+            --role-accent: #6B7280;
+            --role-accent-dark: #4B5563;
+            --role-accent-light: rgba(107, 114, 128, 0.08);
+            --role-bg: #F9FAFB;
+            --role-border: #E5E7EB;
+            --role-gradient: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
         }
+
+        /* ── TEMA PER ROLE ───────────────────── */
+        body.role-admin {
+            --role-accent: #4F46E5;
+            --role-accent-dark: #3730A3;
+            --role-accent-light: rgba(79, 70, 229, 0.08);
+            --role-bg: #F5F3FF;
+            --role-border: #C4B5FD;
+            --role-gradient: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        }
+        body.role-kasir {
+            --role-accent: #10B981;
+            --role-accent-dark: #059669;
+            --role-accent-light: rgba(16, 185, 129, 0.08);
+            --role-bg: #F0FDF4;
+            --role-border: #6EE7B7;
+            --role-gradient: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+        }
+        body.role-dapur {
+            --role-accent: #F97316;
+            --role-accent-dark: #EA580C;
+            --role-accent-light: rgba(249, 115, 22, 0.08);
+            --role-bg: #FFF7ED;
+            --role-border: #FED7AA;
+            --role-gradient: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+        }
+        body.role-pelayan {
+            --role-accent: #CA8A04;
+            --role-accent-dark: #A16207;
+            --role-accent-light: rgba(202, 138, 4, 0.08);
+            --role-bg: #FEFCE8;
+            --role-border: #FDE047;
+            --role-gradient: linear-gradient(135deg, #FEFCE8 0%, #FEF9C3 100%);
+        }
+
+        /* ── Login wrap tema role — hanya aksen, tanpa bg ── */
+        .login-wrap.themed {
+            border-top: 3px solid var(--role-accent);
+        }
+        .login-wrap.themed .btn-login {
+            background: var(--role-accent);
+            box-shadow: 0 10px 20px var(--role-accent-light);
+        }
+        .login-wrap.themed .btn-login:hover:not(:disabled) {
+            background: var(--role-accent-dark);
+            box-shadow: 0 15px 30px var(--role-accent-light);
+        }
+        .login-wrap.themed .form-group input:focus {
+            border-color: var(--role-accent);
+            box-shadow: 0 0 0 4px var(--role-accent-light);
+        }
+        .login-wrap.themed .remember input {
+            accent-color: var(--role-accent);
+        }
+        .login-wrap.themed .role-tag {
+            background: var(--role-bg);
+            border-color: var(--role-border);
+            color: var(--role-accent-dark);
+        }
+        .login-wrap.themed .role-tag i { color: var(--role-accent); }
+        .login-wrap.themed .btn-ganti-role { color: var(--role-accent-dark); }
+
+        /* Role card accent saat selected */
+        .role-item[data-role="admin"].selected { border-color: #4F46E5; box-shadow: 0 0 0 4px rgba(79,70,229,0.10); }
+        .role-item[data-role="kasir"].selected { border-color: #10B981; box-shadow: 0 0 0 4px rgba(16,185,129,0.10); }
+        .role-item[data-role="dapur"].selected { border-color: #F97316; box-shadow: 0 0 0 4px rgba(249,115,22,0.10); }
+        .role-item[data-role="pelayan"].selected { border-color: #CA8A04; box-shadow: 0 0 0 4px rgba(202,138,4,0.10); }
+
+        /* ── ALERT ROLE MISMATCH ──────────────── */
+        .alert-role-mismatch {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 22px;
+            line-height: 1.5;
+            background: #FFF7ED;
+            border: 1.5px solid #FED7AA;
+            color: #C2410C;
+        }
+        .alert-role-mismatch i { font-size: 20px; flex-shrink: 0; color: #F97316; margin-top: 1px; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -44,6 +136,22 @@
             background-attachment: fixed;
             padding: 20px;
             color: var(--text-main);
+        }
+
+        /* ── LOGO FLOATING (saat di kredensial) ─── */
+        .logo-standalone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0 16px;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            transform: translateY(0);
+        }
+        .logo-standalone img {
+            width: 68px;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.12));
         }
 
         /* ── WRAPPER ─────────────────────────────── */
@@ -92,7 +200,7 @@
         /* ── HEADER ──────────────────────────────── */
         .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 22px;
             position: relative; z-index: 1;
         }
 
@@ -440,27 +548,48 @@
             to   { opacity: 1; transform: translateY(0); }
         }
         .role-card-wrap { animation: fadeUp 0.5s ease-out both; }
-        .login-wrap { animation: fadeUp 0.5s ease-out both; }
 
-        /* ── SHOW/HIDE CREDENTIAL SECTION ───────── */
-        .step-connector,
-        .login-wrap {
-            display: none;
-            opacity: 0;
-            transform: translateY(16px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
-        }
-        .step-connector.visible,
-        .login-wrap.visible {
+        /* ── MODAL OVERLAY ───────────────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             display: flex;
-            opacity: 1;
-            transform: translateY(0);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
         }
-        .login-wrap.visible { display: block; }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: 28px;
+            padding: 36px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.18);
+            transform: translateY(24px) scale(0.97);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            opacity: 0;
+            border-top: 3px solid var(--role-accent);
+        }
+        .modal-overlay.open .modal-box {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
 
         @media (max-width: 480px) {
             .card { padding: 30px 20px; }
             .role-grid { gap: 10px; }
+            .modal-box { padding: 28px 20px; }
         }
 
         /* ── PASSWORD STRENGTH ─────────────────── */
@@ -510,7 +639,7 @@
         @endif
 
         <div class="role-grid">
-            <div class="role-item" onclick="selectRole(this, 'Admin', 'ti-shield-check')">
+            <div class="role-item" data-role="admin" onclick="selectRole(this, 'Admin', 'ti-shield-check')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
                 <div class="ri-icon icon-admin"><i class="ti ti-shield-check"></i></div>
                 <div class="ri-text">
@@ -519,7 +648,7 @@
                 </div>
             </div>
 
-            <div class="role-item" onclick="selectRole(this, 'Kasir', 'ti-receipt')">
+            <div class="role-item" data-role="kasir" onclick="selectRole(this, 'Kasir', 'ti-receipt')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
                 <div class="ri-icon icon-kasir"><i class="ti ti-receipt"></i></div>
                 <div class="ri-text">
@@ -528,7 +657,7 @@
                 </div>
             </div>
 
-            <div class="role-item" onclick="selectRole(this, 'Dapur', 'ti-flame')">
+            <div class="role-item" data-role="dapur" onclick="selectRole(this, 'Dapur', 'ti-flame')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
                 <div class="ri-icon icon-dapur"><i class="ti ti-flame"></i></div>
                 <div class="ri-text">
@@ -537,7 +666,7 @@
                 </div>
             </div>
 
-            <div class="role-item" onclick="selectRole(this, 'Pelayan', 'ti-user-star')">
+            <div class="role-item" data-role="pelayan" onclick="selectRole(this, 'Pelayan', 'ti-user-star')">
                 <div class="ri-check"><i class="ti ti-check"></i></div>
                 <div class="ri-icon icon-pelayan"><i class="ti ti-user-star"></i></div>
                 <div class="ri-text">
@@ -547,21 +676,25 @@
             </div>
         </div>
 
-        <button class="btn-lanjutkan" id="btn-lanjutkan" style="display:none;" onclick="showCredential()">
-            Lanjutkan <i class="ti ti-arrow-right"></i>
-        </button>
     </div>
 
-    {{-- ── KONEKTOR STEP ── --}}
-    <div class="step-connector" id="step-connector">
-        <div class="step-connector-line"></div>
-        <div class="step-connector-dot"><i class="ti ti-lock"></i></div>
-        <div class="step-connector-line"></div>
-    </div>
+</div>{{-- end wrapper --}}
 
-    {{-- ── KARTU LOGIN ── --}}
-    <div class="card login-wrap" id="login-wrap">
+{{-- ── MODAL KREDENSIAL LOGIN ── --}}
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal-box login-wrap" id="login-wrap">
         <p class="section-title">Kredensial Login</p>
+
+        {{-- Alert error role mismatch --}}
+        @if($errors->has('role_mismatch'))
+        <div class="alert-role-mismatch" id="role-mismatch-alert">
+            <i class="ti ti-shield-x"></i>
+            <div>
+                <strong>Akun tidak sesuai role!</strong><br>
+                {{ $errors->first('role_mismatch') }}
+            </div>
+        </div>
+        @endif
 
         {{-- Alert error global dari session / errors --}}
         @if($errors->has('email') && !request()->old('email'))
@@ -668,8 +801,8 @@
         <div class="register">
             Belum punya akun? <a href="#">Hubungi Admin</a>
         </div>
-    </div>
-</div>
+    </div>{{-- end modal-box --}}
+</div>{{-- end modal-overlay --}}
 
 <script>
     /* ── MAP ROLE ──────────────────────────── */
@@ -679,54 +812,74 @@
         'Dapur':   'ti-flame',
         'Pelayan': 'ti-user-star',
     };
+    const roleClassMap = {
+        'Admin':   'role-admin',
+        'Kasir':   'role-kasir',
+        'Dapur':   'role-dapur',
+        'Pelayan': 'role-pelayan',
+    };
 
     let selectedRoleName = null;
     let selectedRoleIcon = null;
 
-    /* ── Pilih role ─────────────────────────── */
+    /* ── Terapkan tema role ke body & modal ── */
+    function applyRoleTheme(name) {
+        document.body.classList.remove('role-admin','role-kasir','role-dapur','role-pelayan');
+        if (name && roleClassMap[name]) {
+            document.body.classList.add(roleClassMap[name]);
+        }
+        const loginWrap = document.getElementById('login-wrap');
+        if (loginWrap) {
+            if (name) loginWrap.classList.add('themed');
+            else loginWrap.classList.remove('themed');
+        }
+    }
+
+    /* ── Pilih role → langsung buka modal ──── */
     function selectRole(el, name, icon) {
         document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
         el.classList.add('selected');
         selectedRoleName = name;
         selectedRoleIcon = icon;
 
-        const btnLanjutkan = document.getElementById('btn-lanjutkan');
-        btnLanjutkan.style.display = 'flex';
-        btnLanjutkan.style.animation = 'none';
-        void btnLanjutkan.offsetWidth;
-        btnLanjutkan.style.animation = 'fadeUp 0.3s ease-out both';
-    }
+        // Isi data modal
+        document.getElementById('role-input').value = name;
+        document.getElementById('tag-label').textContent = name;
+        document.getElementById('tag-icon').className = 'ti ' + (roleIconMap[name] || icon);
 
-    /* ── Tampilkan form kredensial ──────────── */
-    function showCredential() {
-        if (!selectedRoleName) return;
+        // Terapkan tema
+        applyRoleTheme(name);
 
-        document.getElementById('btn-lanjutkan').style.display = 'none';
-        document.getElementById('role-input').value = selectedRoleName;
-        document.getElementById('tag-label').textContent = selectedRoleName;
+        // Buka modal
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
 
-        const tagIcon = document.getElementById('tag-icon');
-        tagIcon.className = 'ti ' + (roleIconMap[selectedRoleName] || selectedRoleIcon);
-
-        const connector = document.getElementById('step-connector');
-        connector.classList.add('visible');
-
+        // Fokus ke email input setelah animasi
         setTimeout(() => {
-            const loginWrap = document.getElementById('login-wrap');
-            loginWrap.classList.add('visible');
-            loginWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 100);
+            const emailInput = document.getElementById('email-input');
+            if (emailInput) emailInput.focus();
+        }, 350);
     }
 
-    /* ── Ganti role ─────────────────────────── */
+    /* ── Tutup modal (klik overlay di luar box) */
+    function handleOverlayClick(e) {
+        if (e.target === document.getElementById('modal-overlay')) {
+            gantiRole();
+        }
+    }
+
+    /* ── Ganti role → tutup modal ───────────── */
     function gantiRole() {
-        document.getElementById('step-connector').classList.remove('visible');
-        document.getElementById('login-wrap').classList.remove('visible');
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+
+        // Reset pilihan role di card
         document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
-        document.getElementById('btn-lanjutkan').style.display = 'none';
         selectedRoleName = null;
         selectedRoleIcon = null;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        applyRoleTheme(null);
     }
 
     /* ── Toggle show/hide password ──────────── */
@@ -843,7 +996,7 @@
         });
     });
 
-    /* ── Auto-buka form kredensial jika ada error dari server ── */
+    /* ── Auto-buka modal jika ada error dari server ── */
     @if($errors->any() || old('email'))
     window.addEventListener('DOMContentLoaded', function () {
         @php
@@ -855,27 +1008,30 @@
         selectedRoleName = '{{ $oldRole }}' || 'Admin';
         selectedRoleIcon = '{{ $roleIcon }}';
 
-        // Tandai role yang sebelumnya dipilih
+        // Tandai role yang sebelumnya dipilih di card
         document.querySelectorAll('.role-item').forEach(function(el) {
             const name = el.querySelector('.ri-name')?.textContent?.trim();
             if (name === selectedRoleName) el.classList.add('selected');
         });
 
-        document.getElementById('role-input').value       = selectedRoleName;
-        document.getElementById('tag-label').textContent  = selectedRoleName;
-        document.getElementById('tag-icon').className     = 'ti ' + selectedRoleIcon;
+        document.getElementById('role-input').value      = selectedRoleName;
+        document.getElementById('tag-label').textContent = selectedRoleName;
+        document.getElementById('tag-icon').className    = 'ti ' + selectedRoleIcon;
 
-        // Tampilkan langsung tanpa animasi
-        const connector = document.getElementById('step-connector');
+        // Terapkan tema role
+        applyRoleTheme(selectedRoleName);
+
+        // Buka modal langsung tanpa transisi masuk
+        const overlay = document.getElementById('modal-overlay');
         const loginWrap = document.getElementById('login-wrap');
-        connector.style.transition = 'none';
+        overlay.style.transition = 'none';
         loginWrap.style.transition = 'none';
-        connector.classList.add('visible');
-        loginWrap.classList.add('visible');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
 
         // Shake form jika ada error
         @if($errors->any())
-        setTimeout(() => shake(loginWrap), 200);
+        setTimeout(() => shake(loginWrap), 150);
         @endif
     });
     @endif

@@ -270,7 +270,7 @@ body{ background:#F8F9FC; }
             </div>
 
             <div class="card-footer">
-                <a href="/admin/dashboard" class="btn-cancel">Batal</a>
+                <a href="/admin/dashboard" class="btn-cancel">Kembali</a>
                 <button type="submit" class="btn-save">
                     <i data-lucide="save" style="width:16px;height:16px;"></i> Simpan Perubahan
                 </button>

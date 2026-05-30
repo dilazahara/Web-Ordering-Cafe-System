@@ -98,6 +98,10 @@ class CustomerOrderController extends Controller
             return redirect()->route('customer.order.qris', $order->id);
         }
 
+        if ($request->payment_method === 'cash') {
+            return redirect()->route('customer.order.bill', $order->id);
+        }
+
         return redirect()->route('customer.order.success', $order->id);
     }
 
@@ -151,7 +155,7 @@ class CustomerOrderController extends Controller
 
     return response()->json([
         'status' => 'ok',
-        'redirect' => route('customer.order.success', $order->id),
+        'redirect' => route('customer.order.qris.receipt', $order->id),
     ]);
 }
     public function webhook(Request $request)
@@ -159,6 +163,28 @@ class CustomerOrderController extends Controller
         return response()->json([
             'message' => 'OK'
         ]);
+    }
+
+    public function cashBill(int $id)
+    {
+        $order = Order::with('items.menu')->findOrFail($id);
+
+        if ($order->payment_method !== 'cash') {
+            return redirect()->route('customer.order.success', $order->id);
+        }
+
+        return view('customer.cash-bill', compact('order'));
+    }
+
+    public function qrisReceipt(int $id)
+    {
+        $order = Order::with('items.menu')->findOrFail($id);
+
+        if ($order->payment_method !== 'qris') {
+            return redirect()->route('customer.order.success', $order->id);
+        }
+
+        return view('customer.qris-receipt', compact('order'));
     }
 
     public function success(int $id)
