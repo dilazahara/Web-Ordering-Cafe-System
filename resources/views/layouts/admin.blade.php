@@ -774,7 +774,7 @@
                     <div class="dp-divider" role="separator"></div>
                     <form method="POST" action="{{ route('logout') }}" id="logoutForm">
                         @csrf
-                        <button type="submit" class="dp-item danger" role="menuitem" id="logoutBtn" onclick="handleLogout(this)">
+                        <button type="button" class="dp-item danger" role="menuitem" id="logoutBtn" onclick="handleLogout()">
                             <div class="dp-ico" id="logoutIcon">
                                 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                             </div>
@@ -894,7 +894,8 @@ lucide.createIcons();
 @keyframes spinLogout { to { transform: rotate(360deg); } }
 </style>
 <script>
-function handleLogout(btn) {
+function handleLogout() {
+    var btn = document.getElementById('logoutBtn');
     btn.style.opacity = '0.7';
     btn.style.cursor = 'not-allowed';
     btn.style.pointerEvents = 'none';

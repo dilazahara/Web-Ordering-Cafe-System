@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -61,6 +62,7 @@ class LoginController extends Controller
             // Regenerate session token
             $request->session()->regenerate();
 
+            /** @var User $user */
             $user = Auth::user();
 
             // Cek apakah user aktif (jika kolom is_active ada)
@@ -92,6 +94,12 @@ class LoginController extends Controller
                     ])
                     ->withInput($request->only('email', 'role'));
             }
+
+            // ✅ TAMBAHAN: Catat waktu login & set status aktif
+            $user->update([
+                'last_login_at' => now(),
+                'is_online'     => true,
+            ]);
 
             return $this->redirectByRole($user->role);
         }
@@ -139,6 +147,13 @@ class LoginController extends Controller
     // =========================================
     public function logout(Request $request)
     {
+        // ✅ TAMBAHAN: Set status offline sebelum logout
+        /** @var User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            $user->update(['is_online' => false]);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

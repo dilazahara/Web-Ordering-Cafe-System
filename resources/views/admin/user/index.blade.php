@@ -148,6 +148,30 @@ tbody tr:hover { background: #f8fafc; }
 .empty-state { text-align: center; padding: 56px 20px; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 
+.last-login-wrap { display: flex; align-items: center; gap: 6px; }
+.last-login-wrap svg { flex-shrink: 0; color: #94a3b8; }
+.last-login-text { font-size: 13px; color: #475569; }
+.last-login-never { font-size: 13px; color: #cbd5e1; font-style: italic; }
+
+.pwd-wrap { display: flex; align-items: center; gap: 6px; }
+.pwd-text  { font-size: 13px; color: #334155; font-family: monospace; letter-spacing: 2px; }
+.pwd-toggle {
+    background: none; border: none; cursor: pointer; padding: 2px;
+    color: #94a3b8; display: flex; align-items: center; transition: color 0.15s;
+}
+.pwd-toggle:hover { color: #475569; }
+
+.status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+}
+.status-aktif    { background: #dcfce7; color: #15803d; }
+.status-nonaktif { background: #f1f5f9; color: #94a3b8; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-aktif   { background: #22c55e; }
+.dot-nonaktif { background: #cbd5e1; }
+
 .modal-backdrop {
     display: none; position: fixed; inset: 0; z-index: 2000;
     background: rgba(0,0,0,0.45); backdrop-filter: blur(3px);
@@ -217,6 +241,9 @@ tbody tr:hover { background: #f8fafc; }
                 <th>Nama</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Password</th>
+                <th>Terakhir Login</th>
+                <th>Status</th>
                 <th style="text-align:center;">Aksi</th>
             </tr>
         </thead>
@@ -230,6 +257,58 @@ tbody tr:hover { background: #f8fafc; }
                     <span class="role {{ $item->role }}">
                         {{ ucfirst($item->role) }}
                     </span>
+                </td>
+                <td>
+                    <div class="pwd-wrap">
+                        <span class="pwd-text" id="pwd-{{ $item->id }}">••••••••</span>
+                        <button type="button" class="pwd-toggle"
+                            onclick="togglePassword({{ $item->id }}, '{{ addslashes($item->password) }}')"
+                            id="pwd-btn-{{ $item->id }}" title="Lihat / Sembunyikan">
+                            <svg id="pwd-eye-{{ $item->id }}" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg id="pwd-eyeoff-{{ $item->id }}" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+                <td>
+                    @if($item->last_login_at)
+                    <div class="last-login-wrap">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <span class="last-login-text" title="{{ $item->last_login_at->format('d M Y, H:i:s') }}">
+                            {{ $item->last_login_at->diffForHumans() }}
+                        </span>
+                    </div>
+                    @else
+                    <span class="last-login-never">Belum pernah login</span>
+                    @endif
+                </td>
+                <td>
+                    @if($item->is_online)
+                    <span class="status-badge status-aktif">
+                        <span class="status-dot dot-aktif"></span>
+                        Aktif
+                    </span>
+                    @else
+                    <span class="status-badge status-nonaktif">
+                        <span class="status-dot dot-nonaktif"></span>
+                        Tidak Aktif
+                    </span>
+                    @endif
                 </td>
                 <td>
                     <div class="action" style="justify-content:center;">
@@ -247,7 +326,7 @@ tbody tr:hover { background: #f8fafc; }
 
             @if(count($users) == 0)
             <tr>
-                <td colspan="5">
+                <td colspan="8">
                     <div class="empty-state">
                         <i data-lucide="users" style="width:40px;height:40px;color:#e5e7eb;"></i>
                         <p>Belum ada user yang ditambahkan</p>
@@ -321,6 +400,28 @@ if (alertEl) {
         alertEl.style.opacity = '0';
         setTimeout(function() { alertEl.remove(); }, 400);
     }, 4000);
+}
+
+// ✅ Toggle tampil/sembunyikan hash password
+var pwdVisible = {};
+function togglePassword(id, hash) {
+    var el    = document.getElementById('pwd-' + id);
+    var eye   = document.getElementById('pwd-eye-' + id);
+    var eyeOff= document.getElementById('pwd-eyeoff-' + id);
+
+    if (pwdVisible[id]) {
+        el.textContent = '••••••••';
+        eye.style.display    = '';
+        eyeOff.style.display = 'none';
+        pwdVisible[id] = false;
+    } else {
+        el.textContent = hash;
+        el.style.letterSpacing = '0';
+        el.style.fontSize = '11px';
+        eye.style.display    = 'none';
+        eyeOff.style.display = '';
+        pwdVisible[id] = true;
+    }
 }
 </script>
 @endpush

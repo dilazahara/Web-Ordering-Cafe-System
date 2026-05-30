@@ -77,6 +77,13 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', function (Illuminate\Http\Request $request) {
 
+        // ✅ TAMBAHAN: Set status offline sebelum logout
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            $user->update(['is_online' => false]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();

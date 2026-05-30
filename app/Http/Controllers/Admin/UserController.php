@@ -23,10 +23,10 @@ class UserController extends Controller
     public function store(Request $request)
     {
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => bcrypt($request->password),
-            'role' => $request->role
+            'role'     => $request->role
         ]);
 
         return redirect('/admin/user')
@@ -56,10 +56,24 @@ class UserController extends Controller
 
         $user->role = $request->role;
 
+        // ✅ TAMBAHAN: Ganti password jika diisi
+        if ($request->filled('password')) {
+            $request->validate([
+                'password'              => 'min:6',
+                'password_confirmation' => 'required|same:password',
+            ], [
+                'password.min'                      => 'Password minimal 6 karakter.',
+                'password_confirmation.required'    => 'Konfirmasi password wajib diisi.',
+                'password_confirmation.same'        => 'Konfirmasi password tidak cocok.',
+            ]);
+
+            $user->password = bcrypt($request->password);
+        }
+
         $user->save();
 
         return redirect('/admin/user')
-            ->with('success', 'Role berhasil diupdate!');
+            ->with('success', 'Data user berhasil diupdate!');
     }
 
     public function delete(int $id)

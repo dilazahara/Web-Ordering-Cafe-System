@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,7 +39,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $role = Auth::user()->role;
+            // ✅ TAMBAHAN: Simpan waktu login & set status aktif
+            /** @var User $user */
+            $user = Auth::user();
+            $user->update([
+                'last_login_at' => now(),
+                'is_online'     => true,
+            ]);
+
+            $role = $user->role;
 
             // ✅ FIX: Gunakan map agar lebih bersih & mudah dikembangkan
             $redirectMap = [
@@ -68,6 +77,13 @@ class AuthController extends Controller
     // =========================================
     public function logout(Request $request)
     {
+        // ✅ TAMBAHAN: Set status offline sebelum logout
+        /** @var User|null $user */
+        $user = Auth::user();
+        if ($user) {
+            $user->update(['is_online' => false]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
