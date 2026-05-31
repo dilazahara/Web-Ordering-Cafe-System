@@ -163,6 +163,27 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 }
 
 /* =======================
+   TOOLBAR INSIDE CARD (per-page + search label)
+======================= */
+.card-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 10px;
+}
+.card-toolbar-left  { display: flex; align-items: center; gap: 10px; }
+.card-toolbar-right { display: flex; align-items: center; gap: 8px; }
+.toolbar-label { font-size: 13px; color: #64748b; font-weight: 500; }
+.per-page-select {
+    padding: 7px 32px 7px 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 9px; font-size: 13px; font-family: 'Inter', sans-serif;
+    outline: none; color: #1e293b; cursor: pointer; background: white;
+    transition: border-color 0.2s; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+}
+.per-page-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+
+/* =======================
    PAGINATION INFO BAR
 ======================= */
 .pagination-info-bar {
@@ -253,6 +274,7 @@ tbody tr:hover { background: #f8fafc; }
     .search-input { width: 150px; }
     .main { padding: 100px 16px 24px; }
     .pagination-info-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .card-toolbar { flex-direction: column; align-items: flex-start; }
 }
 
 .m-card {
@@ -293,12 +315,14 @@ tbody tr:hover { background: #f8fafc; }
         {{-- Toolbar hanya muncul jika ada data --}}
         @if($menus->isNotEmpty())
         <div class="toolbar">
-            <form method="GET" action="/admin/menu">
+            <form method="GET" action="/admin/menu" id="searchForm">
+                {{-- Pertahankan per_page saat search --}}
+                <input type="hidden" name="per_page" id="hiddenPerPage" value="{{ request('per_page', 10) }}">
                 <div class="search-wrap">
-                    <input type="text" name="search" class="search-input"
+                    <input type="text" name="search" id="searchInput" class="search-input"
                         placeholder="Cari menu..."
                         value="{{ request('search') }}"
-                        oninput="this.form.submit()">
+                        autocomplete="off">
                 </div>
             </form>
             <a href="/admin/menu/create" class="btn-add">
@@ -327,6 +351,26 @@ tbody tr:hover { background: #f8fafc; }
 
     <!-- CARD -->
     <div class="card">
+
+        {{-- CARD TOOLBAR: Tampilkan X data --}}
+        @if($menus->isNotEmpty())
+        <div class="card-toolbar">
+            <div class="card-toolbar-left">
+                <span class="toolbar-label">Tampilkan</span>
+                <select class="per-page-select" id="perPageSelect" onchange="onPerPageChange()">
+                    @foreach([5, 10, 15, 25, 50, 100] as $n)
+                    <option value="{{ $n }}" {{ request('per_page', 10) == $n ? 'selected' : '' }}>{{ $n }}</option>
+                    @endforeach
+                </select>
+                <span class="toolbar-label">data </span>
+            </div>
+            <div class="card-toolbar-right">
+                <span class="toolbar-label">
+                    Total: <strong style="color:#1e293b;">{{ $menus->total() }} menu</strong>
+                </span>
+            </div>
+        </div>
+        @endif
 
         {{-- INFO BAR: hanya muncul jika ada data --}}
         @if($menus->isNotEmpty())
@@ -471,7 +515,7 @@ tbody tr:hover { background: #f8fafc; }
         {{-- PAGINATION hanya muncul jika ada data --}}
         @if($menus->isNotEmpty())
         <div class="pagination-wrap">
-            {{ $menus->links() }}
+            {{ $menus->appends(request()->query())->links() }}
         </div>
         @endif
 
@@ -562,6 +606,9 @@ tbody tr:hover { background: #f8fafc; }
 
 @push('scripts')
 <script>
+// ─────────────────────────────────────────────
+//  Modal helpers (existing)
+// ─────────────────────────────────────────────
 function openDeleteMenu(id, nama) {
     document.getElementById('deleteMenuNama').textContent = nama;
     document.getElementById('deleteMenuForm').action = '/admin/menu/delete/' + id;
@@ -584,6 +631,66 @@ if (alertEl) {
         alertEl.style.opacity = '0';
         setTimeout(function() { alertEl.remove(); }, 400);
     }, 4000);
+}
+
+// ─────────────────────────────────────────────
+//  Search: debounce auto-submit (500ms)
+// ─────────────────────────────────────────────
+(function () {
+    var searchEl = document.getElementById('searchInput');
+    var formEl   = document.getElementById('searchForm');
+    if (!searchEl || !formEl) return;
+
+    var debounceTimer = null;
+
+    searchEl.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+            // reset ke halaman 1 saat search berubah
+            formEl.submit();
+        }, 500);
+    });
+
+    // Submit saat Enter juga
+    searchEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            clearTimeout(debounceTimer);
+            formEl.submit();
+        }
+    });
+})();
+
+// ─────────────────────────────────────────────
+//  Per-page: ubah jumlah data per halaman
+// ─────────────────────────────────────────────
+function onPerPageChange() {
+    var val      = document.getElementById('perPageSelect').value;
+    var hidden   = document.getElementById('hiddenPerPage');
+    var searchEl = document.getElementById('searchInput');
+    var formEl   = document.getElementById('searchForm');
+
+    if (!formEl) {
+        // Jika form tidak ada (empty state), redirect manual
+        var url = new URL(window.location.href);
+        url.searchParams.set('per_page', val);
+        url.searchParams.set('page', 1);
+        window.location.href = url.toString();
+        return;
+    }
+
+    if (hidden) hidden.value = val;
+
+    // Tambah hidden page=1 agar kembali ke halaman pertama
+    var pageInput = formEl.querySelector('input[name="page"]');
+    if (!pageInput) {
+        pageInput = document.createElement('input');
+        pageInput.type  = 'hidden';
+        pageInput.name  = 'page';
+        formEl.appendChild(pageInput);
+    }
+    pageInput.value = 1;
+
+    formEl.submit();
 }
 </script>
 @endpush

@@ -211,6 +211,64 @@ tbody tr:hover { background: #f8fafc; }
     cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
 }
 .mh-btn-hapus:hover { background: #b91c1c; }
+
+/* ============ RESPONSIVE MAIN ============ */
+
+/* Tablet (≤ 1024px) */
+@media (max-width: 1024px) {
+    .main { padding: 100px 20px 24px; }
+
+    .page-header h1 { font-size: 26px; }
+
+    th, td { padding: 13px 12px; }
+
+    /* Sembunyikan kolom Password di tablet */
+    th:nth-child(5),
+    td:nth-child(5) { display: none; }
+}
+
+/* Mobile (≤ 768px) */
+@media (max-width: 768px) {
+    .main { padding: 96px 14px 20px; }
+
+    .page-header { gap: 10px; }
+    .page-header h1 { font-size: 22px; }
+    .page-header p  { font-size: 13px; }
+
+    .btn-add { padding: 9px 14px; font-size: 12px; }
+
+    .table-box { border-radius: 14px; overflow-x: auto; }
+
+    table { min-width: 580px; }
+
+    th { font-size: 11px; padding: 12px 10px; }
+    td { font-size: 13px; padding: 12px 10px; }
+
+    /* Sembunyikan kolom Password & Terakhir Login di mobile */
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6) { display: none; }
+
+    .role { font-size: 11px; padding: 4px 9px; }
+
+    .act-btn { width: 30px; height: 30px; border-radius: 8px; }
+}
+
+/* Small Mobile (≤ 480px) */
+@media (max-width: 480px) {
+    .main { padding: 92px 10px 16px; }
+
+    .page-header h1 { font-size: 19px; }
+
+    .table-box { border-radius: 12px; }
+
+    table { min-width: 420px; }
+
+    /* Sembunyikan kolom Email, Password, Terakhir Login & Status di small mobile */
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(5), td:nth-child(5),
+    th:nth-child(6), td:nth-child(6),
+    th:nth-child(7), td:nth-child(7) { display: none; }
+}
 </style>
 @endpush
 
@@ -301,12 +359,12 @@ tbody tr:hover { background: #f8fafc; }
                     @if($item->is_online)
                     <span class="status-badge status-aktif">
                         <span class="status-dot dot-aktif"></span>
-                        Aktif
+                        Online
                     </span>
                     @else
                     <span class="status-badge status-nonaktif">
                         <span class="status-dot dot-nonaktif"></span>
-                        Tidak Aktif
+                        Offline
                     </span>
                     @endif
                 </td>

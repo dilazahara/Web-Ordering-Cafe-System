@@ -374,3 +374,190 @@ $totalOrder = $orders->count();
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+// ─────────────────────────────────────────────
+//  Filter form helpers (existing)
+// ─────────────────────────────────────────────
+function onFilterChange() {
+    var val = document.getElementById('filterPeriode').value;
+    if (val) document.getElementById('filterTanggal').value = '';
+}
+function onTanggalChange() {
+    var val = document.getElementById('filterTanggal').value;
+    if (val) document.getElementById('filterPeriode').value = '';
+}
+
+// ─────────────────────────────────────────────
+//  TABLE: Search + Per-page + Pagination
+// ─────────────────────────────────────────────
+(function () {
+    // ── state ──
+    var perPage     = 15;
+    var currentPage = 1;
+    var keyword     = '';
+
+    // ── element refs ──
+    var tbody      = document.getElementById('laporanTableBody');
+    var totalRow   = document.getElementById('totalRow');
+    var infoEl     = document.getElementById('paginationInfo');
+    var btnsEl     = document.getElementById('paginationBtns');
+    var searchEl   = document.getElementById('searchInput');
+    var perPageEl  = document.getElementById('perPageSelect');
+
+    if (!tbody) return; // no table (empty state from server)
+
+    // collect all data rows (exclude total-row)
+    var allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+
+    // ── helpers ──
+    function getFiltered() {
+        if (!keyword) return allRows;
+        return allRows.filter(function (r) {
+            return r.getAttribute('data-search').indexOf(keyword) !== -1;
+        });
+    }
+
+    function render() {
+        var filtered  = getFiltered();
+        var total     = filtered.length;
+        var totalPages = Math.max(1, Math.ceil(total / perPage));
+
+        // clamp currentPage
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var start = (currentPage - 1) * perPage; // 0-based
+        var end   = start + perPage;
+
+        // hide / show rows & renumber
+        var visibleNo = 1;
+        allRows.forEach(function (row) {
+            row.style.display = 'none';
+        });
+        filtered.forEach(function (row, idx) {
+            if (idx >= start && idx < end) {
+                row.style.display = '';
+                var noCell = row.querySelector('.row-no');
+                if (noCell) noCell.textContent = start + visibleNo;
+                visibleNo++;
+            }
+        });
+
+        // total row — always last, always visible when there's data
+        if (totalRow) {
+            totalRow.style.display = total > 0 ? '' : 'none';
+        }
+
+        // no-results row — insert/remove dynamically
+        var noResultsRow = tbody.querySelector('.no-results-row');
+        if (total === 0) {
+            if (!noResultsRow) {
+                var tr = document.createElement('tr');
+                tr.className = 'no-results-row';
+                tr.innerHTML = '<td colspan="8" style="text-align:center;padding:50px;color:#94a3b8;font-size:14px;">Tidak ada data yang sesuai pencarian "<strong>' + escapeHtml(keyword) + '</strong>"</td>';
+                tbody.insertBefore(tr, totalRow || null);
+            } else {
+                noResultsRow.querySelector('td').innerHTML = 'Tidak ada data yang sesuai pencarian "<strong>' + escapeHtml(keyword) + '</strong>"';
+            }
+        } else {
+            if (noResultsRow) noResultsRow.remove();
+        }
+
+        // pagination info
+        if (infoEl) {
+            if (total === 0) {
+                infoEl.innerHTML = 'Menampilkan <span>0</span> dari <span>' + total + '</span> data';
+            } else {
+                var from = start + 1;
+                var to   = Math.min(end, total);
+                infoEl.innerHTML = 'Menampilkan <span>' + from + '–' + to + '</span> dari <span>' + total + '</span> data';
+            }
+        }
+
+        // pagination buttons
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        if (!btnsEl) return;
+        btnsEl.innerHTML = '';
+
+        // prev
+        var prev = makeBtn('‹', currentPage === 1, false, function () {
+            currentPage--;
+            render();
+        });
+        btnsEl.appendChild(prev);
+
+        // page numbers — show max 5 around current
+        var pages = buildPageRange(currentPage, totalPages);
+        var lastPrinted = 0;
+        pages.forEach(function (p) {
+            if (p === '...') {
+                var dots = document.createElement('span');
+                dots.textContent = '…';
+                dots.style.cssText = 'padding:0 6px;color:#94a3b8;font-size:13px;align-self:center;';
+                btnsEl.appendChild(dots);
+            } else {
+                var btn = makeBtn(p, false, p === currentPage, function (pg) {
+                    return function () { currentPage = pg; render(); };
+                }(p));
+                btnsEl.appendChild(btn);
+            }
+        });
+
+        // next
+        var next = makeBtn('›', currentPage === totalPages, false, function () {
+            currentPage++;
+            render();
+        });
+        btnsEl.appendChild(next);
+    }
+
+    function buildPageRange(cur, total) {
+        if (total <= 7) {
+            return Array.from({ length: total }, function (_, i) { return i + 1; });
+        }
+        var pages = [];
+        pages.push(1);
+        if (cur > 3) pages.push('...');
+        for (var i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) {
+            pages.push(i);
+        }
+        if (cur < total - 2) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+
+    function makeBtn(label, disabled, active, onClick) {
+        var btn = document.createElement('button');
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.disabled = disabled;
+        btn.addEventListener('click', onClick);
+        return btn;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── event handlers exposed to HTML ──
+    window.onSearch = function () {
+        keyword     = (searchEl ? searchEl.value.trim().toLowerCase() : '');
+        currentPage = 1;
+        render();
+    };
+
+    window.onPerPageChange = function () {
+        perPage     = parseInt(perPageEl ? perPageEl.value : 15, 10);
+        currentPage = 1;
+        render();
+    };
+
+    // ── init ──
+    render();
+})();
+</script>
+@endpush

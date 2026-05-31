@@ -139,6 +139,35 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 }
 
 /* =======================
+   TOOLBAR
+======================= */
+.table-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; flex-wrap: wrap; gap: 12px;
+    border-bottom: 1px solid #f1f5f9; background: #fafbfc;
+}
+.toolbar-left  { display: flex; align-items: center; gap: 10px; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+.toolbar-label { font-size: 13px; color: #64748b; font-weight: 500; }
+.per-page-select {
+    padding: 7px 32px 7px 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 9px; font-size: 13px; font-family: 'Inter', sans-serif;
+    outline: none; color: #1e293b; cursor: pointer; background: white;
+    transition: border-color 0.2s; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+}
+.per-page-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.search-wrap { position: relative; display: flex; align-items: center; }
+.search-wrap svg { position: absolute; left: 11px; width: 15px; height: 15px; color: #94a3b8; pointer-events: none; }
+.search-input {
+    padding: 9px 14px 9px 34px; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; font-size: 13px; font-family: 'Inter', sans-serif;
+    outline: none; width: 230px; color: #1e293b; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+
+/* =======================
    TABLE
 ======================= */
 .tbl-wrap { overflow-x: auto; }
@@ -196,6 +225,29 @@ tbody tr:hover { background: #f8fafc; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 
 /* =======================
+   PAGINATION
+======================= */
+.pagination-wrap {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-top: 1px solid #f1f5f9;
+    flex-wrap: wrap; gap: 12px;
+}
+.pagination-info { font-size: 13px; color: #64748b; }
+.pagination-info span { font-weight: 700; color: #0f172a; }
+.pagination-btns { display: flex; align-items: center; gap: 6px; }
+.page-btn {
+    min-width: 38px; height: 38px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.5px solid #e2e8f0; background: white;
+    font-size: 13px; font-weight: 600; color: #475569;
+    cursor: pointer; transition: all 0.2s; padding: 0 12px;
+    font-family: 'Inter', sans-serif;
+}
+.page-btn:hover:not(:disabled):not(.active) { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+.page-btn.active { background: #6366f1; border-color: #6366f1; color: white; box-shadow: 0 3px 8px rgba(99,102,241,0.3); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* =======================
    MODAL — ✅ display:none by default, NO animation on load
 ======================= */
 .modal-backdrop {
@@ -209,7 +261,6 @@ tbody tr:hover { background: #f8fafc; }
     background: white; border-radius: 24px; width: 100%; max-width: 400px;
     padding: 32px 28px 28px; text-align: center;
     box-shadow: 0 24px 60px rgba(0,0,0,0.2);
-    /* ✅ Animasi HANYA aktif saat .open ditambahkan, bukan saat halaman load */
     animation: none;
 }
 .modal-backdrop.open .modal-hapus {
@@ -270,6 +321,33 @@ tbody tr:hover { background: #f8fafc; }
 
 {{-- TABLE CARD --}}
 <div class="card">
+
+    {{-- TOOLBAR --}}
+    <div class="table-toolbar">
+        <div class="toolbar-left">
+            <span class="toolbar-label">Tampilkan</span>
+            <select class="per-page-select" id="perPageSelect" onchange="onPerPageChange()">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span class="toolbar-label">data</span>
+        </div>
+        <div class="toolbar-right">
+            <span class="toolbar-label">Cari:</span>
+            <div class="search-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" class="search-input" id="searchInput"
+                    placeholder="Cari nama, group, status..." oninput="onSearch()">
+            </div>
+        </div>
+    </div>
+
     <div class="tbl-wrap">
         <table>
             <thead>
@@ -283,10 +361,10 @@ tbody tr:hover { background: #f8fafc; }
                     <th style="text-align:center;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="addonTableBody">
                 @forelse($addons as $i => $addon)
-                <tr>
-                    <td style="color:#9ca3af; font-size:13px;">{{ $i + 1 }}</td>
+                <tr data-search="{{ strtolower($addon->name . ' ' . $addon->description . ' ' . $addon->group->name . ' ' . ($addon->status ? 'aktif' : 'nonaktif')) }}">
+                    <td class="row-no" style="color:#9ca3af; font-size:13px;">{{ $i + 1 }}</td>
                     <td style="font-weight:600; color:#111827;">{{ $addon->name }}</td>
                     <td style="color:#6b7280;">{{ $addon->description }}</td>
                     <td><span class="group-badge">{{ $addon->group->name }}</span></td>
@@ -315,7 +393,7 @@ tbody tr:hover { background: #f8fafc; }
                     </td>
                 </tr>
                 @empty
-                <tr>
+                <tr id="emptyServerRow">
                     <td colspan="7">
                         <div class="empty-state">
                             <i data-lucide="plus-circle" style="width:40px;height:40px;color:#e5e7eb;"></i>
@@ -327,9 +405,16 @@ tbody tr:hover { background: #f8fafc; }
             </tbody>
         </table>
     </div>
+
+    {{-- PAGINATION --}}
+    <div class="pagination-wrap" id="paginationWrap">
+        <div class="pagination-info" id="paginationInfo"></div>
+        <div class="pagination-btns" id="paginationBtns"></div>
+    </div>
+
 </div>
 
-{{-- ════ MODAL HAPUS ADDON — ✅ DIPINDAH KE DALAM @section('content') ════ --}}
+{{-- MODAL HAPUS ADDON --}}
 <div class="modal-backdrop" id="modalHapusAddon">
     <div class="modal-hapus">
         <div class="mh-icon-wrap">
@@ -369,6 +454,9 @@ tbody tr:hover { background: #f8fafc; }
 
 @push('scripts')
 <script>
+// ─────────────────────────────────────────────
+//  Modal helpers (existing)
+// ─────────────────────────────────────────────
 function openDeleteAddon(id, nama) {
     document.getElementById('deleteAddonNama').textContent = nama;
     document.getElementById('deleteAddonForm').action = '/admin/addons/delete/' + id;
@@ -392,5 +480,145 @@ if (alertEl) {
         setTimeout(function() { alertEl.remove(); }, 400);
     }, 4000);
 }
+
+// ─────────────────────────────────────────────
+//  TABLE: Search + Per-page + Pagination
+// ─────────────────────────────────────────────
+(function () {
+    var perPage     = 10;
+    var currentPage = 1;
+    var keyword     = '';
+
+    var tbody     = document.getElementById('addonTableBody');
+    var infoEl    = document.getElementById('paginationInfo');
+    var btnsEl    = document.getElementById('paginationBtns');
+    var searchEl  = document.getElementById('searchInput');
+    var perPageEl = document.getElementById('perPageSelect');
+
+    if (!tbody) return;
+
+    var allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+    if (allRows.length === 0) return; // server-side empty state, nothing to paginate
+
+    function getFiltered() {
+        if (!keyword) return allRows;
+        return allRows.filter(function (r) {
+            return r.getAttribute('data-search').indexOf(keyword) !== -1;
+        });
+    }
+
+    function render() {
+        var filtered   = getFiltered();
+        var total      = filtered.length;
+        var totalPages = Math.max(1, Math.ceil(total / perPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var start = (currentPage - 1) * perPage;
+        var end   = start + perPage;
+
+        // hide all, then show slice
+        allRows.forEach(function (r) { r.style.display = 'none'; });
+        var visNo = 1;
+        filtered.forEach(function (r, idx) {
+            if (idx >= start && idx < end) {
+                r.style.display = '';
+                var noCell = r.querySelector('.row-no');
+                if (noCell) noCell.textContent = start + visNo;
+                visNo++;
+            }
+        });
+
+        // no-results row
+        var noRow = tbody.querySelector('.no-results-row');
+        if (total === 0) {
+            if (!noRow) {
+                var tr = document.createElement('tr');
+                tr.className = 'no-results-row';
+                tr.innerHTML = '<td colspan="7" style="text-align:center;padding:48px;color:#94a3b8;font-size:14px;">Tidak ada data yang cocok dengan pencarian "<strong>' + escapeHtml(keyword) + '</strong>"</td>';
+                tbody.appendChild(tr);
+            } else {
+                noRow.querySelector('td').innerHTML = 'Tidak ada data yang cocok dengan pencarian "<strong>' + escapeHtml(keyword) + '</strong>"';
+            }
+        } else {
+            if (noRow) noRow.remove();
+        }
+
+        // info
+        if (infoEl) {
+            if (total === 0) {
+                infoEl.innerHTML = 'Menampilkan <span>0</span> dari <span>0</span> data';
+            } else {
+                var from = start + 1;
+                var to   = Math.min(end, total);
+                infoEl.innerHTML = 'Menampilkan <span>' + from + '–' + to + '</span> dari <span>' + total + '</span> data';
+            }
+        }
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        if (!btnsEl) return;
+        btnsEl.innerHTML = '';
+
+        btnsEl.appendChild(makeBtn('‹', currentPage === 1, false, function () {
+            currentPage--; render();
+        }));
+
+        buildPageRange(currentPage, totalPages).forEach(function (p) {
+            if (p === '...') {
+                var dots = document.createElement('span');
+                dots.textContent = '…';
+                dots.style.cssText = 'padding:0 6px;color:#94a3b8;font-size:13px;align-self:center;';
+                btnsEl.appendChild(dots);
+            } else {
+                btnsEl.appendChild(makeBtn(p, false, p === currentPage, (function (pg) {
+                    return function () { currentPage = pg; render(); };
+                })(p)));
+            }
+        });
+
+        btnsEl.appendChild(makeBtn('›', currentPage === totalPages, false, function () {
+            currentPage++; render();
+        }));
+    }
+
+    function buildPageRange(cur, total) {
+        if (total <= 7) return Array.from({ length: total }, function (_, i) { return i + 1; });
+        var pages = [1];
+        if (cur > 3) pages.push('...');
+        for (var i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+        if (cur < total - 2) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+
+    function makeBtn(label, disabled, active, onClick) {
+        var btn = document.createElement('button');
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.disabled = disabled;
+        btn.addEventListener('click', onClick);
+        return btn;
+    }
+
+    function escapeHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    window.onSearch = function () {
+        keyword     = searchEl ? searchEl.value.trim().toLowerCase() : '';
+        currentPage = 1;
+        render();
+    };
+
+    window.onPerPageChange = function () {
+        perPage     = parseInt(perPageEl ? perPageEl.value : 10, 10);
+        currentPage = 1;
+        render();
+    };
+
+    render();
+})();
 </script>
 @endpush
