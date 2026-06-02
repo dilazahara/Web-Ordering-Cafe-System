@@ -772,9 +772,7 @@
                     </a>
                     
                     <div class="dp-divider" role="separator"></div>
-                    <form method="POST" action="{{ route('logout') }}" id="logoutForm">
-                        @csrf
-                        <button type="button" class="dp-item danger" role="menuitem" id="logoutBtn" onclick="handleLogout()">
+                    <button type="button" class="dp-item danger" role="menuitem" id="logoutBtn" onclick="openLogoutModal()">
                             <div class="dp-ico" id="logoutIcon">
                                 <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                             </div>
@@ -894,17 +892,6 @@ lucide.createIcons();
 @keyframes spinLogout { to { transform: rotate(360deg); } }
 </style>
 <script>
-function handleLogout() {
-    var btn = document.getElementById('logoutBtn');
-    btn.style.opacity = '0.7';
-    btn.style.cursor = 'not-allowed';
-    btn.style.pointerEvents = 'none';
-    document.getElementById('logoutText').textContent = 'Keluar...';
-    document.getElementById('logoutSpinner').style.display = 'inline-block';
-    setTimeout(function() {
-        document.getElementById('logoutForm').submit();
-    }, 600);
-}
 </script>
 
 {{-- ── LOGIN SUCCESS TOAST (muncul sekali setelah login) ── --}}
@@ -935,6 +922,96 @@ function handleLogout() {
     setTimeout(dismissToast, 4500);
 </script>
 @endif
+
+
+{{-- ══════════════════════════════════════
+     LOGOUT CONFIRM MODAL (shared all roles)
+══════════════════════════════════════ --}}
+<div id="logoutModal" style="
+  display:none;
+  position:fixed;inset:0;z-index:99999;
+  background:rgba(15,23,42,.55);
+  backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+">
+  <div style="
+    background:#fff;border-radius:20px;padding:36px 32px 28px;
+    width:340px;max-width:90vw;text-align:center;
+    box-shadow:0 24px 64px rgba(0,0,0,.18);
+    transform:scale(.92);opacity:0;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;
+  " id="logoutModalBox">
+    <div style="width:64px;height:64px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px;">🚪</div>
+    <div style="font-size:18px;font-weight:800;color:#0f172a;margin-bottom:8px;">Keluar dari Aplikasi?</div>
+    <div style="font-size:13.5px;color:#64748b;margin-bottom:28px;line-height:1.6;">Sesi kamu akan diakhiri.<br>Pastikan semua pekerjaan sudah tersimpan.</div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeLogoutModal()" style="
+        flex:1;padding:11px;border-radius:12px;border:1.5px solid #e2e8f0;
+        background:#f8fafc;color:#475569;font-size:14px;font-weight:600;cursor:pointer;
+        transition:background .15s;
+      " onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+        Batal
+      </button>
+      <button onclick="confirmLogout()" id="logoutConfirmBtn" style="
+        flex:1;padding:11px;border-radius:12px;border:none;
+        background:#ef4444;color:#fff;font-size:14px;font-weight:700;cursor:pointer;
+        display:flex;align-items:center;justify-content:center;gap:8px;
+        transition:background .15s;
+      " onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">
+        <span id="logoutConfirmText">Ya, Logout</span>
+        <svg id="logoutConfirmSpinner" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+          style="display:none;width:15px;height:15px;animation:spinLogoutModal .7s linear infinite;">
+          <circle cx="12" cy="12" r="10" stroke-opacity=".25"/>
+          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<form method="POST" action="{{ route('logout') }}" id="logoutFormGlobal" style="display:none;">
+  @csrf
+</form>
+
+<style>
+@keyframes spinLogoutModal { to { transform:rotate(360deg); } }
+</style>
+<script>
+function openLogoutModal() {
+  var modal = document.getElementById('logoutModal');
+  var box   = document.getElementById('logoutModalBox');
+  modal.style.display = 'flex';
+  requestAnimationFrame(function() {
+    box.style.transform = 'scale(1)';
+    box.style.opacity   = '1';
+  });
+}
+function closeLogoutModal() {
+  var modal = document.getElementById('logoutModal');
+  var box   = document.getElementById('logoutModalBox');
+  box.style.transform = 'scale(.92)';
+  box.style.opacity   = '0';
+  setTimeout(function() { modal.style.display = 'none'; }, 180);
+}
+function confirmLogout() {
+  var btn  = document.getElementById('logoutConfirmBtn');
+  var text = document.getElementById('logoutConfirmText');
+  var spin = document.getElementById('logoutConfirmSpinner');
+  btn.style.pointerEvents = 'none';
+  btn.style.background    = '#dc2626';
+  text.textContent = 'Keluar...';
+  spin.style.display = 'block';
+  setTimeout(function() {
+    document.getElementById('logoutFormGlobal').submit();
+  }, 700);
+}
+document.getElementById('logoutModal').addEventListener('click', function(e) {
+  if (e.target === this) closeLogoutModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeLogoutModal();
+});
+</script>
 
 </body>
 </html>

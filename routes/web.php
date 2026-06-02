@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Auth;
 
 // ── AUTH ──────────────────────────────────────────────
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
 
 // ── ADMIN ─────────────────────────────────────────────
 use App\Http\Controllers\Admin\AdminController;
@@ -33,18 +32,12 @@ use App\Http\Controllers\Dapur\AccountDapurController;
 use App\Http\Controllers\Pelayan\PelayanController;
 use App\Http\Controllers\Pelayan\AccountPelayanController;
 
-// ── NOTIFIKASI ────────────────────────────────────────
-use App\Http\Controllers\NotificationController;
-
 // ── CUSTOMER ──────────────────────────────────────────
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\AddonController;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\CustomerOrderController;
-
-// ── MODELS ────────────────────────────────────────────
-use App\Models\Order;
 
 // ══════════════════════════════════════════════════════
 // ROOT
@@ -77,7 +70,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', function (Illuminate\Http\Request $request) {
 
-        // ✅ TAMBAHAN: Set status offline sebelum logout
         /** @var \App\Models\User|null $user */
         $user = Auth::user();
         if ($user) {
@@ -92,31 +84,6 @@ Route::middleware('auth')->group(function () {
         return redirect('/login');
 
     })->name('logout');
-
-});
-
-// ══════════════════════════════════════════════════════
-// NOTIFIKASI REALTIME (semua role yang login)
-// ══════════════════════════════════════════════════════
-
-Route::middleware('auth')
-    ->prefix('notifications')
-    ->name('notifications.')
-    ->group(function () {
-
-    // SSE stream — client subscribe ke sini
-    Route::get('/stream', [NotificationController::class, 'stream'])
-        ->name('stream');
-
-    // REST endpoints
-    Route::get('/',               [NotificationController::class, 'index'])
-        ->name('index');
-    Route::get('/unread-count',   [NotificationController::class, 'unreadCount'])
-        ->name('unread');
-    Route::patch('/{id}/read',    [NotificationController::class, 'markRead'])
-        ->name('read');
-    Route::post('/read-all',      [NotificationController::class, 'markAllRead'])
-        ->name('read-all');
 
 });
 
@@ -519,7 +486,6 @@ Route::middleware(['auth', 'role:kasir'])
         [KasirController::class, 'laporan']
     )->name('laporan');
 
-    // DOWNLOAD PDF
     Route::get(
         '/laporan/pdf',
         [LaporanController::class, 'exportPdf']

@@ -148,6 +148,15 @@
           <div class="item-row">
             <div class="item-left">
               <div class="item-qty">{{ $item->qty }}x</div>
+              @if($item->menu && $item->menu->image)
+                <img
+                  src="{{ asset('storage/' . $item->menu->image) }}"
+                  alt="{{ $item->menu->name }}"
+                  style="width:52px;height:52px;object-fit:cover;border-radius:10px;flex-shrink:0;"
+                >
+              @else
+                <div style="width:52px;height:52px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🍽️</div>
+              @endif
               <div>
                 <div class="item-name">{{ $item->menu->name ?? ($item->menu->nama ?? 'Menu #'.$item->menu_id) }}</div>
               </div>
