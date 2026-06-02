@@ -61,24 +61,25 @@ class KategoriController extends Controller
     // UPDATE
     // =========================================
     public function update(Request $request, int $id)
-{
-    $kategori = Kategori::findOrFail($id);
+    {
+        $kategori = Kategori::findOrFail($id);
 
-    $request->validate([
-        'nama' => 'required|string|max:100|unique:kategoris,name,' . $id,
-    ], [
-        'nama.required' => 'Nama kategori wajib diisi.',
-        'nama.max'      => 'Nama kategori maksimal 100 karakter.',
-        'nama.unique'   => 'Nama kategori sudah digunakan.',
-    ]);
+        $request->validate([
+            'nama' => 'required|string|max:100|unique:kategoris,name,' . $id,
+        ], [
+            'nama.required' => 'Nama kategori wajib diisi.',
+            'nama.max'      => 'Nama kategori maksimal 100 karakter.',
+            'nama.unique'   => 'Nama kategori sudah digunakan.',
+        ]);
 
-    $kategori->update([
-        'name' => $request->nama,
-    ]);
+        $kategori->update([
+            'name' => $request->nama,
+        ]);
 
-    return redirect('/admin/kategori')
-        ->with('success', 'Kategori berhasil diupdate.');
-}
+        return redirect('/admin/kategori')
+            ->with('success', 'Kategori berhasil diupdate.');
+    }
+
     // =========================================
     // DESTROY
     // =========================================
@@ -88,17 +89,16 @@ class KategoriController extends Controller
 
         $menuCount = $kategori->menus()->count();
 
+        // Nullify kategori_id pada semua menu yang menggunakan kategori ini
+        // (aman karena kolom kategori_id sudah nullable di migration)
         if ($menuCount > 0) {
-            return redirect('/admin/kategori')
-                ->with(
-                    'error',
-                    "Kategori '{$kategori->name}' tidak dapat dihapus karena masih digunakan oleh {$menuCount} menu. Pindahkan atau hapus menu tersebut terlebih dahulu."
-                );
+            $kategori->menus()->update(['kategori_id' => null]);
         }
 
         $kategori->delete();
 
         return redirect('/admin/kategori')
-            ->with('success', 'Kategori berhasil dihapus.');
+            ->with('success', "Kategori '{$kategori->name}' berhasil dihapus." .
+                ($menuCount > 0 ? " {$menuCount} menu terkait kini tanpa kategori." : ''));
     }
 }

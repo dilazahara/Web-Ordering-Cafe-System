@@ -31,13 +31,12 @@ Pesanan yang masuk diproses oleh dapur, dikonfirmasi kasir, lalu diantarkan pela
 ## ✨ Fitur Utama
 
 ### 👤 Customer
-- Registrasi & Login akun
+- Scan QR Code dimeja
 - Melihat daftar & detail menu makanan/minuman
 - Menambahkan menu ke keranjang
 - Menambahkan topping / add-ons
 - Checkout & memilih metode pembayaran
-- Memantau status pesanan secara real-time
-- Melihat riwayat transaksi
+- Melihat Struk Digital
 
 ### 🛡️ Admin
 - Dashboard monitoring lengkap
@@ -70,9 +69,9 @@ Customer Memesan Menu
         ↓
   Pesanan Masuk ke Sistem
         ↓
-  Dapur Memproses Pesanan
-        ↓
   Kasir Mengonfirmasi Pembayaran
+        ↓
+  Dapur Memproses Pesanan 
         ↓
   Pelayan Mengantar Pesanan
         ↓
