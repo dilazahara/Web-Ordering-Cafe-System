@@ -120,6 +120,19 @@
         </div>
     </div>
 
+    {{-- ── NAMA PEMESAN ── --}}
+    <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
+        <h2 class="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
+            <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            Nama Pemesan
+        </h2>
+        <input type="text" id="customerNameInput" maxlength="100" required
+               class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm transition-all focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+               placeholder="Masukkan nama kamu">
+    </div>
+
     {{-- ── CATATAN ── --}}
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
@@ -205,6 +218,7 @@
         @csrf
         <input type="hidden" name="cart"           id="cartInput">
         <input type="hidden" name="note"           id="noteHidden">
+        <input type="hidden" name="customer_name"  id="customerNameHidden">
         <input type="hidden" name="payment_method" id="paymentMethodInput"
                value="{{ $paymentMethods->first()?->kode ?? 'cash' }}">
         <input type="hidden" name="table_number"   id="tableNumberInput"
@@ -397,6 +411,18 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         return;
     }
 
+    const nama = document.getElementById('customerNameInput').value;
+    if (!nama || nama.trim() === '') {
+        e.preventDefault();
+        document.getElementById('customerNameInput').focus();
+        document.getElementById('customerNameInput').style.borderColor = '#ef4444';
+        document.getElementById('customerNameInput').style.boxShadow = '0 0 0 3px rgba(239,68,68,0.15)';
+        showToast('⚠️ Nama pemesan wajib diisi!', 'error', 2800);
+        return;
+    }
+    document.getElementById('customerNameInput').style.borderColor = '';
+    document.getElementById('customerNameInput').style.boxShadow = '';
+
     const tn = document.getElementById('tableNumberInput').value;
     if (!tn || tn.trim() === '') {
         e.preventDefault();
@@ -406,6 +432,7 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
 
     document.getElementById('cartInput').value  = JSON.stringify(cart);
     document.getElementById('noteHidden').value = document.getElementById('noteInput').value;
+    document.getElementById('customerNameHidden').value = document.getElementById('customerNameInput').value;
     document.getElementById('paymentMethodInput').value = selectedKode;
 
     showToast('Pesanan sedang diproses... 🍽️', 'success', 2500);

@@ -616,7 +616,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     data-queue="{{ $queueNum }}"
     data-total="{{ $order->total }}"
     data-created="{{ $order->created_at->timestamp }}"
-    data-search="{{ strtolower(($order->table_number ?? '') . ' ' . $queueNum . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
+    data-search="{{ strtolower(($order->table_number ?? '') . ' ' . $queueNum . ' ' . ($order->customer_name ?? '') . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
     style="animation-delay: {{ $idx * 0.05 }}s"
   >
     {{-- COLORED STATUS STRIPE --}}
@@ -635,6 +635,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
             <span class="oc-time-inline">{{ $order->created_at->translatedFormat('H:i') }}</span>
             <span class="elapsed-badge {{ $elapsedClass }}">{{ $elapsedText }}</span>
           </div>
+          @if($order->customer_name)
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px;font-family:'Inter',sans-serif;">👤 {{ $order->customer_name }}</div>
+          @endif
           @if($order->note)
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;font-family:'Inter',sans-serif;">📝 {{ $order->note }}</div>
           @endif

@@ -292,6 +292,7 @@ $totalOrder = $orders->count();
                     <th>No</th>
                     <th>Waktu</th>
                     <th>ID Order</th>
+                    <th>Nama Pemesan</th>
                     <th>Meja</th>
                     <th>Detail Pesanan</th>
                     <th>Status</th>
@@ -304,6 +305,7 @@ $totalOrder = $orders->count();
                 @forelse($orders as $index => $order)
                 <tr data-search="{{ strtolower(
                     ($order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT))
+                    . ' ' . ($order->customer_name ?? '')
                     . ' ' . ($order->table_number ? 'meja '.$order->table_number : 'take away')
                     . ' ' . $order->status
                     . ' ' . $order->payment_method
@@ -317,6 +319,7 @@ $totalOrder = $orders->count();
                     <td style="font-weight:800;color:#7c3aed;">
                         {{ $order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT) }}
                     </td>
+                    <td style="font-weight:600;color:#1e293b;">{{ $order->customer_name ?: '—' }}</td>
                     <td>{{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}</td>
                     <td style="min-width:220px;">
                         @foreach($order->items->take(2) as $item)

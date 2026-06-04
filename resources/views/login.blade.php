@@ -871,16 +871,22 @@
 
     /* ── Ganti role → tutup modal ───────────── */
     function gantiRole() {
-        const overlay = document.getElementById('modal-overlay');
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
 
-        // Reset pilihan role di card
-        document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
-        selectedRoleName = null;
-        selectedRoleIcon = null;
-        applyRoleTheme(null);
-    }
+    // Reset pilihan role di card
+    document.querySelectorAll('.role-item').forEach(r => r.classList.remove('selected'));
+    selectedRoleName = null;
+    selectedRoleIcon = null;
+    applyRoleTheme(null);
+
+    // Hapus alert role mismatch & error global saat ganti role
+    const roleMismatchAlert = document.getElementById('role-mismatch-alert');
+    if (roleMismatchAlert) roleMismatchAlert.remove();
+    const globalErr = document.getElementById('global-error');
+    if (globalErr) globalErr.remove();
+}
 
     /* ── Toggle show/hide password ──────────── */
     function togglePw() {

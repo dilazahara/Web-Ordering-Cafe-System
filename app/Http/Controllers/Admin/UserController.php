@@ -21,17 +21,34 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-    {
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => bcrypt($request->password),
-            'role'     => $request->role
-        ]);
+{
+    $request->validate([
+        'name'     => 'required|string|max:255|unique:users,name',
+        'email'    => 'required|email|max:255|unique:users,email',
+        'password' => 'required|string|min:6',
+        'role'     => 'required|in:admin,kasir,dapur,pelayan',
+    ], [
+        'name.required'     => 'Nama lengkap wajib diisi.',
+        'name.unique'       => 'Nama ini sudah digunakan oleh akun lain.',
+        'email.required'    => 'Email wajib diisi.',
+        'email.email'       => 'Format email tidak valid.',
+        'email.unique'      => 'Email ini sudah terdaftar. Gunakan email lain.',
+        'password.required' => 'Password wajib diisi.',
+        'password.min'      => 'Password minimal 6 karakter.',
+        'role.required'     => 'Silakan pilih role terlebih dahulu.',
+        'role.in'           => 'Role yang dipilih tidak valid.',
+    ]);
 
-        return redirect('/admin/user')
-            ->with('success', 'User berhasil ditambahkan!');
-    }
+    User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => bcrypt($request->password),
+        'role'     => $request->role
+    ]);
+
+    return redirect('/admin/user')
+        ->with('success', 'User berhasil ditambahkan!');
+}
 
     public function edit(int $id)
     {

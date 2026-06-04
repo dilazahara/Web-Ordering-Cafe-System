@@ -349,6 +349,7 @@
             <div class="ch-info">
               <h3>🍽️ Meja ${o.table_number ?? '—'}</h3>
               <p>${o.queue_number} · ${o.items?.length || 0} item</p>
+              ${o.customer_name ? `<p style="font-size:12px;margin-top:3px;color:#64748b;">👤 ${o.customer_name}</p>` : ''}
             </div>
           </div>
           <div class="ch-right">

@@ -126,6 +126,9 @@
                 &nbsp;·&nbsp;
                 <span class="pill pill-blue">Diproses</span>
               </p>
+              @if($order->customer_name)
+                <p style="font-size:12px;margin-top:4px;color:#64748b;">👤 {{ $order->customer_name }}</p>
+              @endif
             </div>
           </div>
           <div class="oc-time time" data-time="{{ $order->process_at ?? $order->created_at }}">00:00</div>

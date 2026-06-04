@@ -237,6 +237,12 @@
                     <p class="font-black text-slate-800 text-base leading-none">{{ $order->table_number ?? '-' }}</p>
                 </div>
             </div>
+            @if($order->customer_name)
+            <div class="bg-blue-50 rounded-2xl p-3 mt-3 fade-up-2">
+                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-wider leading-none mb-1">Nama Pemesan</p>
+                <p class="font-black text-blue-800 text-base leading-none">{{ $order->customer_name }}</p>
+            </div>
+            @endif
 
             {{-- Status lunas --}}
             <div class="flex items-center justify-between mt-4 fade-up-2">

@@ -244,7 +244,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     font-weight: 600;
 }
 
-/* ══ BOX & TABLE STYLE (Sinkron Admin Index) ══ */
+/* ══ BOX & TABLE STYLE ══ */
 .table-wrap {
     background: white; border-radius: var(--radius-lg); border: 1px solid var(--border);
     box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow-x: auto; padding-bottom: 5px;
@@ -261,7 +261,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 /* Hide rows via search */
 .rtable tbody tr.ks-hidden { display: none; }
 
-/* Status Badges Sinkron Admin */
+/* Status Badges */
 .badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
 .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
 .badge.pending  { background: #fef3c7; color: #92400e; }
@@ -362,7 +362,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                     <input
                         type="text"
                         id="customSearch"
-                        placeholder="Cari ID order, meja, item, metode bayar..."
+                        placeholder="Cari ID order, nama, meja, item, metode bayar..."
                         autocomplete="off"
                     >
                     <button id="clearSearchBtn" title="Hapus pencarian">✕</button>
@@ -379,6 +379,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         <option value="-1">Semua</option>
                     </select>
                 </div>
+            </div>
 
             {{-- Search result info --}}
             <div id="searchResultInfo"></div>
@@ -389,15 +390,16 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         <th style="padding-left:22px; cursor:pointer;" data-col="0">
                             ID Order <span class="sort-icon" data-col="0">↕</span>
                         </th>
+                        <th>Nama Pemesan</th>
                         <th>Meja</th>
                         <th>Item</th>
-                        <th style="cursor:pointer;" data-col="3">
-                            Total <span class="sort-icon" data-col="3">↕</span>
+                        <th style="cursor:pointer;" data-col="4">
+                            Total <span class="sort-icon" data-col="4">↕</span>
                         </th>
                         <th>Metode Bayar</th>
                         <th>Status</th>
-                        <th style="cursor:pointer;" data-col="6">
-                            Waktu <span class="sort-icon" data-col="6">↕</span>
+                        <th style="cursor:pointer;" data-col="7">
+                            Waktu <span class="sort-icon" data-col="7">↕</span>
                         </th>
                         <th>Aksi</th>
                     </tr>
@@ -429,6 +431,16 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         <span style="font-weight:800; color:#2563eb; font-size:13px;">
                             {{ $order->queue_number ?: 'A-' . str_pad($order->id, 3, '0', STR_PAD_LEFT) }}
                         </span>
+                    </td>
+                    {{-- ═══ KOLOM NAMA PEMESAN ═══ --}}
+                    <td>
+                        @if(!empty($order->customer_name))
+                            <span style="font-size:13px; font-weight:600; color:#1e293b;">
+                                {{ $order->customer_name }}
+                            </span>
+                        @else
+                            <span style="font-size:12px; color:#94a3b8; font-style:italic;">—</span>
+                        @endif
                     </td>
                     <td>
                         <span style="background:#f1f5f9; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:#475569;">
@@ -484,7 +496,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                             '{{ $order->payment_method ?? 'cash' }}',
                             '{{ $order->created_at->format('d/m/Y H:i') }}',
                             {{ json_encode($itemsForStruk) }},
-                            {{ $order->uang_diterima ?? 0 }}
+                            {{ $order->uang_diterima ?? 0 }},
+                            '{{ addslashes($order->customer_name ?? '') }}'
                           )"
                           style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgb(79 70 229/.25);transition:all .18s;"
                           onmouseover="this.style.background='#4338ca';this.style.transform='translateY(-1px)'"
@@ -541,6 +554,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         </div>
         <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:4px;font-family:'Poppins',sans-serif;">
           <tr><td style="padding:3px 0;">No. Order</td><td style="text-align:right;font-weight:700;" id="sQueue">—</td></tr>
+          <tr><td style="padding:3px 0;">Nama</td><td style="text-align:right;" id="sNama">—</td></tr>
           <tr><td style="padding:3px 0;">Meja</td><td style="text-align:right;" id="sMeja">—</td></tr>
           <tr><td style="padding:3px 0;">Waktu</td><td style="text-align:right;font-size:11px;" id="sWaktu">—</td></tr>
           <tr><td style="padding:3px 0;">Metode</td><td style="text-align:right;" id="sMetode">—</td></tr>
@@ -681,7 +695,7 @@ function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document
             });
         });
 
-        // Sort on column header click
+        // Sort on column header click — sesuaikan index kolom (nama pemesan ada di col 1 sekarang)
         document.querySelectorAll('.rtable thead th[data-col]').forEach(function(th) {
             th.addEventListener('click', function() {
                 var col = parseInt(this.dataset.col);
@@ -730,14 +744,14 @@ function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document
             searched.sort(function(a, b) {
                 var cellA = a.cells[state.sortCol] ? a.cells[state.sortCol].textContent.trim() : '';
                 var cellB = b.cells[state.sortCol] ? b.cells[state.sortCol].textContent.trim() : '';
-                // Try numeric sort for Total column
-                if (state.sortCol === 3) {
+                // Numeric sort for Total column (index 4 setelah nama pemesan)
+                if (state.sortCol === 4) {
                     var numA = parseFloat(a.cells[state.sortCol].dataset.total || 0);
                     var numB = parseFloat(b.cells[state.sortCol].dataset.total || 0);
                     return state.sortDir === 'asc' ? numA - numB : numB - numA;
                 }
-                // Time sort
-                if (state.sortCol === 6) {
+                // Time sort (index 7)
+                if (state.sortCol === 7) {
                     return state.sortDir === 'asc'
                         ? cellA.localeCompare(cellB)
                         : cellB.localeCompare(cellA);
@@ -899,9 +913,10 @@ function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document
 /* ══════════════════════════════════════
    STRUK MODAL FUNCTIONS — Font Poppins
 ══════════════════════════════════════ */
-function openStrukModal(id, queueNum, meja, total, metode, waktu, items, uangDiterima) {
+function openStrukModal(id, queueNum, meja, total, metode, waktu, items, uangDiterima, customerName) {
     document.getElementById('strukSubtitle').textContent = 'Order ' + queueNum;
     document.getElementById('sQueue').textContent   = queueNum;
+    document.getElementById('sNama').textContent    = customerName || '—';
     document.getElementById('sMeja').textContent    = meja ? 'Meja ' + meja : 'Take Away';
     document.getElementById('sWaktu').textContent   = waktu;
     document.getElementById('sMetode').textContent  = metode === 'cash' ? '💵 Cash' : '📱 QRIS';

@@ -59,6 +59,26 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 }
 .form-input::placeholder { color: #9ca3af; }
 
+/* INPUT ERROR STATE */
+.form-input.is-error {
+    border-color: #ef4444 !important;
+    background: #fef2f2 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important;
+}
+
+/* FIELD ERROR MESSAGE */
+.field-error {
+    display: flex; align-items: center; gap: 5px;
+    margin-top: 6px; font-size: 12px; font-weight: 600; color: #dc2626;
+    animation: slideDown .2s ease-out;
+}
+.field-error i { width: 13px; height: 13px; flex-shrink: 0; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 .eye-btn {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer; color: #9ca3af;
@@ -115,12 +135,28 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 .role-check i { width: 10px; height: 10px; stroke: white; display: none; }
 .role-opt input:checked + .role-card .role-check i { display: block; }
 
-/* ALERT */
+/* ROLE ERROR STATE */
+.role-grid.is-error .role-card {
+    border-color: #fca5a5;
+}
+.role-error {
+    display: flex; align-items: center; gap: 5px;
+    margin-top: -20px; margin-bottom: 20px;
+    font-size: 12px; font-weight: 600; color: #dc2626;
+    animation: slideDown .2s ease-out;
+}
+.role-error i { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ALERT GLOBAL */
 .alert-error {
     background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-    border-radius: 12px; padding: 12px 16px; font-size: 13px;
+    border-radius: 12px; padding: 14px 16px; font-size: 13px;
     font-weight: 600; margin-bottom: 20px;
+    display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
 }
+.alert-error i { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.alert-error ul { margin: 4px 0 0 4px; padding-left: 16px; }
+.alert-error ul li { margin-bottom: 2px; }
 
 /* BUTTONS */
 .button-group { display: flex; gap: 12px; }
@@ -160,8 +196,19 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
             <p>Buat akun baru dan tentukan role-nya</p>
         </div>
 
+        {{-- ALERT GLOBAL — tampil jika ada error --}}
         @if($errors->any())
-        <div class="alert-error">{{ $errors->first() }}</div>
+        <div class="alert-error">
+            <i data-lucide="alert-circle"></i>
+            <div>
+                <strong>Gagal menyimpan! Periksa isian berikut:</strong>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
         @endif
 
         <form action="/admin/user/store" method="POST">
@@ -172,17 +219,29 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <!-- NAMA -->
         <div class="form-group">
             <label class="form-label">Nama Lengkap <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="name" class="form-input"
+            <input type="text" name="name"
+                class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
                 placeholder="Contoh: Budi Santoso"
-                value="{{ old('name') }}" required>
+                value="{{ old('name') }}">
+            @error('name')
+                <div class="field-error">
+                    <i data-lucide="alert-circle"></i> {{ $message }}
+                </div>
+            @enderror
         </div>
 
         <!-- EMAIL -->
         <div class="form-group">
             <label class="form-label">Email <span style="color:#ef4444;">*</span></label>
-            <input type="email" name="email" class="form-input"
+            <input type="email" name="email"
+                class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
                 placeholder="Contoh: budi@example.com"
-                value="{{ old('email') }}" required>
+                value="{{ old('email') }}">
+            @error('email')
+                <div class="field-error">
+                    <i data-lucide="alert-circle"></i> {{ $message }}
+                </div>
+            @enderror
         </div>
 
         <!-- PASSWORD -->
@@ -190,18 +249,24 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
             <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
             <div class="input-wrap">
                 <input type="password" name="password" id="pwInput"
-                    class="form-input" style="padding-right:42px;"
-                    placeholder="Minimal 8 karakter" required>
+                    class="form-input {{ $errors->has('password') ? 'is-error' : '' }}"
+                    style="padding-right:42px;"
+                    placeholder="Minimal 6 karakter">
                 <button type="button" class="eye-btn" onclick="togglePw()">
                     <i data-lucide="eye" id="eyeIcon"></i>
                 </button>
             </div>
+            @error('password')
+                <div class="field-error">
+                    <i data-lucide="alert-circle"></i> {{ $message }}
+                </div>
+            @enderror
         </div>
 
         <div class="divider"><span>Pilih Role</span></div>
 
         <!-- ROLE CARDS -->
-        <div class="role-grid">
+        <div class="role-grid {{ $errors->has('role') ? 'is-error' : '' }}">
 
             <label class="role-opt r-admin">
                 <input type="radio" name="role" value="admin" {{ old('role') == 'admin' ? 'checked' : '' }}>
@@ -252,6 +317,12 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
             </label>
 
         </div>
+
+        @error('role')
+            <div class="role-error">
+                <i data-lucide="alert-circle"></i> {{ $message }}
+            </div>
+        @enderror
 
         <div class="button-group">
             <button type="submit" class="btn btn-save">

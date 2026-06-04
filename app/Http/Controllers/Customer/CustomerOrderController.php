@@ -22,6 +22,7 @@ class CustomerOrderController extends Controller
             'payment_method' => ['required', 'string', 'in:' . implode(',', $activeKodes)],
             'table_number' => 'nullable|string|max:10',
             'note' => 'nullable|string|max:500',
+            'customer_name' => 'required|string|max:100',
         ]);
 
         $cart = json_decode($request->cart, true);
@@ -64,6 +65,7 @@ class CustomerOrderController extends Controller
             $order = Order::create([
                 'queue_number' => $queueNumber,
                 'table_number' => $tableNumber,
+                'customer_name' => $request->customer_name,
                 'note' => $request->note,
                 'payment_method' => $request->payment_method,
                 'status' => 'pending',

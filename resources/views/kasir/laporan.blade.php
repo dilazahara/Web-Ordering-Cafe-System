@@ -91,7 +91,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 /* Table & Datatable Styles */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; box-shadow: var(--shadow); }
-.rtable { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; min-width: 800px; }
+.rtable { width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif; min-width: 900px; }
 .rtable thead th { background: var(--surface-2); padding: 14px 16px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
 .rtable tbody tr { border-bottom: 1px solid var(--surface-2); transition: background .15s; background: var(--surface); }
 .rtable tbody tr:hover { background: #fafbff; }
@@ -109,23 +109,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .badge.diantar  { background: #f0fdf4; color: #15803d; }
 .badge.diantar .badge-dot  { background: #22c55e; }
 
-/* DataTables */
-.dataTables_wrapper { padding: 0 0 18px; }
-.dataTables_filter { padding: 18px 22px 0; float: right; }
-.dataTables_length { padding: 18px 22px 0; float: left; }
-.dataTables_filter input, .dataTables_length select { border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; font-size: 13px; outline: none; }
-.dataTables_filter input:focus, .dataTables_length select:focus { border-color: var(--accent); }
-.dataTables_info { font-size: 13px !important; color: var(--text-muted) !important; padding: 14px 22px 0 !important; font-weight: 500; font-family: 'Inter', sans-serif; }
-.dataTables_paginate { padding: 12px 22px 0 !important; display: flex !important; align-items: center; gap: 4px; font-family: 'Inter', sans-serif; }
-.paginate_button { border-radius: 10px !important; border: 1px solid var(--border) !important; padding: 6px 13px !important; margin: 0 2px !important; background: var(--surface) !important; color: var(--text-secondary) !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; transition: all .15s !important; }
-.paginate_button:hover:not(.current):not(.disabled) { background: var(--accent-bg) !important; color: var(--accent) !important; border-color: #bfdbfe !important; }
-.paginate_button.current, .paginate_button.current:hover { background: linear-gradient(135deg, var(--accent), #1d4ed8) !important; color: white !important; border-color: var(--accent) !important; box-shadow: 0 2px 8px rgba(37,99,235,0.3) !important; }
-.paginate_button.disabled, .paginate_button.disabled:hover { color: var(--border-strong) !important; cursor: default !important; }
-.dataTables_scrollBody::-webkit-scrollbar { height: 5px; }
-.dataTables_scrollBody::-webkit-scrollbar-track { background: transparent; border-radius: 99px; }
-.dataTables_scrollBody::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
-
-/* ── EMPTY STATE (DIUPGRADE) ── */
+/* ── EMPTY STATE ── */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -204,6 +188,162 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     fill: none;
 }
 
+/* ── TOOLBAR ── */
+.table-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.toolbar-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+.per-page-select {
+    padding: 7px 30px 7px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    background: white;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239198ae' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+.per-page-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.toolbar-cari-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+.search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.search-wrap svg {
+    position: absolute;
+    left: 11px;
+    width: 14px;
+    height: 14px;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    fill: none;
+    pointer-events: none;
+}
+.search-input {
+    padding: 8px 14px 8px 33px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 220px;
+    color: var(--text-primary);
+    transition: border-color 0.2s;
+    background: white;
+}
+.search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+}
+
+/* ── PAGINATION ── */
+.pagination-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-top: 2px solid var(--border);
+    background: var(--surface-2);
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+}
+.pagination-info {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+}
+.pagination-info span {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+.pagination-btns {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.page-btn {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.18s;
+    padding: 0 12px;
+    font-family: 'Inter', sans-serif;
+}
+.page-btn:hover:not(:disabled):not(.active) {
+    background: var(--accent-bg);
+    border-color: #bfdbfe;
+    color: var(--accent);
+}
+.page-btn.active {
+    background: linear-gradient(135deg, var(--accent), #1d4ed8);
+    border-color: var(--accent);
+    color: white;
+    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+}
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* grand total row */
+.grand-total-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 24px;
+    border-top: 2px solid var(--border);
+    background: var(--surface-2);
+}
+
 @media (max-width: 640px) {
   .main { padding: 24px 16px 48px; }
   .nav-link span { display: none; }
@@ -211,6 +351,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   .filter-bar { flex-direction: column; align-items: stretch; }
   .page-header { flex-direction: column; }
   .table-wrap { padding: 15px; }
+  .table-toolbar { flex-direction: column; align-items: flex-start; }
+  .search-input { width: 100%; }
+  .pagination-wrap { flex-direction: column; align-items: flex-start; }
 }
 </style>
 @endpush
@@ -234,7 +377,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           Filter Data
         </button>
       </form>
-      <a href="/kasir/laporan/pdf?tanggal={{ request('tanggal') }}" class="download-btn" style="margin-top:19px;">
+
+      {{-- ✅ PERBAIKAN: Gunakan route() agar selalu mengarah ke KasirController --}}
+      <a href="{{ route('kasir.laporan.pdf', ['tanggal' => request('tanggal')]) }}" class="download-btn" style="margin-top:19px;">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download PDF
       </a>
@@ -244,9 +389,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         @php $grandTotal = 0; @endphp
         @if($orders->isEmpty())
 
-            {{-- ── EMPTY STATE (DIUPGRADE) ── --}}
+            {{-- ── EMPTY STATE ── --}}
             <div class="empty-state">
-
                 <div class="empty-icon-ring">
                     <div class="empty-icon-inner">
                         <svg viewBox="0 0 24 24">
@@ -278,16 +422,46 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     {{ request('tanggal') ? \Carbon\Carbon::parse(request('tanggal'))->translatedFormat('d F Y') : \Carbon\Carbon::today()->translatedFormat('d F Y') }}
                 </div>
-
             </div>
 
         @else
+
+            {{-- ── TOOLBAR ── --}}
+            <div class="table-toolbar">
+                <div class="toolbar-left">
+                    <span class="toolbar-label">Tampilkan</span>
+                    <select class="per-page-select" id="perPageSelect" onchange="ksOnPerPageChange()">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="15" selected>15</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="toolbar-label">data</span>
+                </div>
+                <div class="toolbar-right">
+                    <span class="toolbar-cari-label">Cari:</span>
+                    <div class="search-wrap">
+                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="ksSearchInput"
+                            placeholder="Cari ID, nama, meja, status..."
+                            oninput="ksOnSearch()"
+                        >
+                    </div>
+                </div>
+            </div>
+
             <table class="rtable" id="laporanTable" style="width:100%;">
                 <thead>
                     <tr>
                         <th style="padding-left:22px;">No</th>
                         <th>Waktu Transaksi</th>
                         <th>ID Order</th>
+                        <th>Nama Pemesan</th>
                         <th>Meja</th>
                         <th>Detail Pesanan</th>
                         <th>Metode Bayar</th>
@@ -295,11 +469,18 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         <th style="text-align:right;">Total Harga</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="ksTableBody">
                 @foreach($orders as $i => $order)
                 @php $grandTotal += $order->total; @endphp
-                <tr>
-                    <td style="padding-left:22px;">{{ $i + 1 }}</td>
+                <tr data-search="{{ strtolower(
+                    ($order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT))
+                    . ' ' . ($order->customer_name ?? '')
+                    . ' ' . ($order->table_number ? 'meja '.$order->table_number : 'take away')
+                    . ' ' . $order->status
+                    . ' ' . $order->payment_method
+                    . ' ' . $order->created_at->format('d M Y')
+                ) }}">
+                    <td class="row-no" style="padding-left:22px;">{{ $i + 1 }}</td>
                     <td>
                         <span style="font-weight: 600; color: var(--text-primary); display: block;">{{ $order->created_at->format('d M Y') }}</span>
                         <span style="font-size: 12px; color: var(--text-muted);">{{ $order->created_at->format('H:i') }} WIB</span>
@@ -310,6 +491,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         </span>
                     </td>
                     <td>
+                        @if(!empty($order->customer_name))
+                            <span style="font-weight:600; color:var(--text-primary); font-size:13px;">
+                                {{ $order->customer_name }}
+                            </span>
+                        @else
+                            <span style="font-size:12px; color:var(--text-muted); font-style:italic;">—</span>
+                        @endif
+                    </td>
+                    <td>
                         <span style="background:var(--surface-2); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:var(--text-secondary); white-space:nowrap;">
                             {{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
                         </span>
@@ -318,7 +508,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         @if($order->items && $order->items->count() > 0)
                             @foreach($order->items->take(2) as $item)
                                 <span style="font-size:13px;">
-                                    {{ $item->qty ?: ($item->quantity ?? 1) }}x{{ $item->name ?: ($item->menu->name ?? $item->menu->nama ?? '-') }}{{ $item->name ?? $item->menu->name ?? $item->menu->nama ?? '-' }}
+                                    {{ $item->qty ?: ($item->quantity ?? 1) }}x {{ $item->name ?: ($item->menu->name ?? $item->menu->nama ?? '-') }}
                                     @if(!$loop->last)<br>@endif
                                 </span>
                             @endforeach
@@ -365,12 +555,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                 </tbody>
             </table>
 
-            <div style="display:flex; justify-content:flex-end; align-items:center; gap:16px; padding:18px 24px; border-top:2px solid var(--border); background:var(--surface-2);">
-                <span style="font-size:14px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; font-family:'Inter',sans-serif;">Total Pendapatan :</span>
-                <span style="font-size:20px; font-weight:800; color:var(--green); font-family:'Inter',sans-serif; white-space:nowrap;">
-                    Rp {{ number_format($grandTotal, 0, ',', '.') }}
-                </span>
+            {{-- Grand Total + Pagination --}}
+            <div class="pagination-wrap" id="ksPaginationWrap">
+                <div class="pagination-info" id="ksPaginationInfo"></div>
+                <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; font-family:'Inter',sans-serif;">Total Pendapatan:</span>
+                        <span id="ksGrandTotalDisplay" style="font-size:18px; font-weight:800; color:var(--green); font-family:'Inter',sans-serif; white-space:nowrap;">
+                            Rp {{ number_format($grandTotal, 0, ',', '.') }}
+                        </span>
+                    </div>
+                    <div class="pagination-btns" id="ksPaginationBtns"></div>
+                </div>
             </div>
+
         @endif
     </div>{{-- end table-wrap --}}
 @endsection
@@ -380,63 +578,162 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 function ksToast(msg,type,dur){type=type||'success';dur=dur||2400;var c=document.getElementById('ksToastContainer');if(!c)return;var colors={success:'background:linear-gradient(135deg,#059669,#047857);',info:'background:linear-gradient(135deg,#2563eb,#1d4ed8);',warning:'background:linear-gradient(135deg,#d97706,#b45309);',error:'background:linear-gradient(135deg,#dc2626,#b91c1c);'};var icons={success:'✅',info:'ℹ️',warning:'⚠️',error:'❌'};var t=document.createElement('div');t.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.18);font-size:13px;font-weight:600;font-family:"Plus Jakarta Sans",sans-serif;white-space:nowrap;color:white;opacity:0;transform:translateX(18px) scale(0.95);transition:all 0.25s cubic-bezier(.34,1.56,.64,1);max-width:340px;'+(colors[type]||colors.info);t.innerHTML='<span style="font-size:15px;">'+(icons[type]||'📢')+'</span><span>'+msg+'</span>';c.appendChild(t);requestAnimationFrame(function(){t.style.opacity='1';t.style.transform='translateX(0) scale(1)';});setTimeout(function(){t.style.opacity='0';t.style.transform='translateX(18px) scale(0.95)';setTimeout(function(){t.remove();},260);},dur);}
 
+// ─────────────────────────────────────────────
+//  TABLE: Search + Per-page + Pagination
+// ─────────────────────────────────────────────
+(function () {
+    var perPage     = 15;
+    var currentPage = 1;
+    var keyword     = '';
 
-// Setup DataTables
-$(document).ready(function () {
-    if (!$('#laporanTable').length) return;
+    var tbody     = document.getElementById('ksTableBody');
+    var infoEl    = document.getElementById('ksPaginationInfo');
+    var btnsEl    = document.getElementById('ksPaginationBtns');
+    var searchEl  = document.getElementById('ksSearchInput');
+    var perPageEl = document.getElementById('perPageSelect');
 
-    if ($.fn.DataTable.isDataTable('#laporanTable')) {
-        $('#laporanTable').DataTable().destroy();
+    if (!tbody) return;
+
+    var allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
+
+    function getFiltered() {
+        if (!keyword) return allRows;
+        return allRows.filter(function (r) {
+            return r.getAttribute('data-search').indexOf(keyword) !== -1;
+        });
     }
 
-    var dt = $('#laporanTable').DataTable({
-        destroy    : true,
-        autoWidth  : false,
-        pageLength : 15,
-        ordering   : false,
-        searching  : true,
-        paging     : true,
-        info       : true,
-        language: {
-            search      : "Cari Laporan:",
-            lengthMenu  : "Tampilkan _MENU_ data",
-            info        : "Menampilkan _START_ sampai _END_ dari _TOTAL_ laporan",
-            emptyTable  : "Belum ada laporan aktif pada periode ini",
-            zeroRecords : "Data tidak ditemukan",
-            paginate    : { previous: "Sebelumnya", next: "Selanjutnya" }
+    function render() {
+        var filtered   = getFiltered();
+        var total      = filtered.length;
+        var totalPages = Math.max(1, Math.ceil(total / perPage));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        var start = (currentPage - 1) * perPage;
+        var end   = start + perPage;
+
+        // hide all
+        allRows.forEach(function (r) { r.style.display = 'none'; });
+
+        // show slice & renumber
+        var visNo = 1;
+        filtered.forEach(function (row, idx) {
+            if (idx >= start && idx < end) {
+                row.style.display = '';
+                var noCell = row.querySelector('.row-no');
+                if (noCell) noCell.textContent = start + visNo;
+                visNo++;
+            }
+        });
+
+        // no-results row
+        var noRow = tbody.querySelector('.ks-no-results');
+        if (total === 0) {
+            if (!noRow) {
+                var tr = document.createElement('tr');
+                tr.className = 'ks-no-results';
+                tr.innerHTML = '<td colspan="9" style="text-align:center;padding:48px 16px;color:var(--text-muted);font-size:13.5px;font-family:\'Inter\',sans-serif;">Tidak ada data yang sesuai pencarian "<strong style=\'color:var(--text-primary);\'>' + escHtml(keyword) + '</strong>"</td>';
+                tbody.appendChild(tr);
+            } else {
+                noRow.querySelector('td').innerHTML = 'Tidak ada data yang sesuai pencarian "<strong style=\'color:var(--text-primary);\'>' + escHtml(keyword) + '</strong>"';
+            }
+        } else {
+            if (noRow) noRow.remove();
         }
-    });
 
-    /* feedback cari */
-    var st;
-    $('#laporanTable_filter input').on('input', function() {
-        clearTimeout(st);
-        var val = $(this).val().trim();
-        st = setTimeout(function() { if(val) ksToast('🔍 Mencari: "' + val + '"', 'info', 1400); }, 600);
-    });
-    /* feedback halaman */
-    dt.on('page.dt', function() {
-        var info = dt.page.info();
-        ksToast('Halaman ' + (info.page+1) + ' dari ' + info.pages, 'info', 1200);
-    });
-    /* feedback jumlah per halaman */
-    dt.on('length.dt', function(e, s, len) {
-        ksToast('Menampilkan ' + len + ' data per halaman', 'info', 1400);
-    });
+        // info
+        if (infoEl) {
+            if (total === 0) {
+                infoEl.innerHTML = 'Menampilkan <span>0</span> dari <span>' + total + '</span> data';
+            } else {
+                var from = start + 1;
+                var to   = Math.min(end, total);
+                infoEl.innerHTML = 'Menampilkan <span>' + from + '–' + to + '</span> dari <span>' + total + '</span> data';
+            }
+        }
 
-    ksToast('📊 Laporan dimuat — ' + dt.data().length + ' data', 'success', 2200);
+        renderPagination(totalPages);
+    }
 
-    /* feedback filter tanggal */
-    document.querySelector('.filter-btn') && document.querySelector('.filter-btn').addEventListener('click', function() {
-        var tgl = document.querySelector('input[name="tanggal"]');
-        if (tgl && tgl.value) ksToast('🗓️ Filter laporan: ' + tgl.value, 'info', 2000);
-    });
+    function renderPagination(totalPages) {
+        if (!btnsEl) return;
+        btnsEl.innerHTML = '';
 
-    /* feedback download PDF */
-    document.querySelector('.download-btn') && document.querySelector('.download-btn').addEventListener('click', function() {
-        ksToast('📄 Mengunduh laporan PDF...', 'success', 3000);
-    });
+        var prev = makeBtn('‹', currentPage === 1, false, function () { currentPage--; render(); });
+        btnsEl.appendChild(prev);
+
+        buildPageRange(currentPage, totalPages).forEach(function (p) {
+            if (p === '...') {
+                var dots = document.createElement('span');
+                dots.textContent = '…';
+                dots.style.cssText = 'padding:0 5px;color:var(--text-muted);font-size:13px;align-self:center;';
+                btnsEl.appendChild(dots);
+            } else {
+                btnsEl.appendChild(makeBtn(p, false, p === currentPage, (function (pg) {
+                    return function () { currentPage = pg; render(); };
+                })(p)));
+            }
+        });
+
+        var next = makeBtn('›', currentPage === totalPages, false, function () { currentPage++; render(); });
+        btnsEl.appendChild(next);
+    }
+
+    function buildPageRange(cur, total) {
+        if (total <= 7) return Array.from({ length: total }, function (_, i) { return i + 1; });
+        var pages = [1];
+        if (cur > 3) pages.push('...');
+        for (var i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
+        if (cur < total - 2) pages.push('...');
+        pages.push(total);
+        return pages;
+    }
+
+    function makeBtn(label, disabled, active, onClick) {
+        var btn = document.createElement('button');
+        btn.className = 'page-btn' + (active ? ' active' : '');
+        btn.textContent = label;
+        btn.disabled = disabled;
+        btn.addEventListener('click', onClick);
+        return btn;
+    }
+
+    function escHtml(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // expose to HTML onXxx attributes
+    window.ksOnSearch = function () {
+        keyword     = searchEl ? searchEl.value.trim().toLowerCase() : '';
+        currentPage = 1;
+        render();
+    };
+
+    window.ksOnPerPageChange = function () {
+        perPage     = parseInt(perPageEl ? perPageEl.value : 15, 10);
+        currentPage = 1;
+        render();
+        ksToast('Menampilkan ' + perPage + ' data per halaman', 'info', 1400);
+    };
+
+    // init
+    render();
+
+    // toast on load
+    ksToast('📊 Laporan dimuat — ' + allRows.length + ' data', 'success', 2200);
+
+})();
+
+// feedback filter tanggal
+document.querySelector('.filter-btn') && document.querySelector('.filter-btn').addEventListener('click', function() {
+    var tgl = document.querySelector('input[name="tanggal"]');
+    if (tgl && tgl.value) ksToast('🗓️ Filter laporan: ' + tgl.value, 'info', 2000);
 });
 
+// feedback download PDF
+document.querySelector('.download-btn') && document.querySelector('.download-btn').addEventListener('click', function() {
+    ksToast('📄 Mengunduh laporan PDF...', 'success', 3000);
+});
 </script>
 @endpush

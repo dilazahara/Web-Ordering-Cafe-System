@@ -218,6 +218,12 @@
                     </div>
                 </div>
             </div>
+            @if($order->customer_name)
+            <div class="bg-blue-50 rounded-2xl p-3 mt-3 fade-up-2">
+                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-wider leading-none mb-1">Nama Pemesan</p>
+                <p class="font-black text-blue-800 text-base leading-none">{{ $order->customer_name }}</p>
+            </div>
+            @endif
 
             {{-- Tanggal & waktu --}}
             <p class="text-center text-[11px] text-slate-400 mt-4 font-medium">{{ $now }}</p>

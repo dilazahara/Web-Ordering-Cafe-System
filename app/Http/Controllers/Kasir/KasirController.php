@@ -91,18 +91,14 @@ class KasirController extends Controller
             'Status pesanan tidak valid.'
         );
 
-        $updateData = [
-            'status' => 'process',
-        ];
+        $updateData = ['status' => 'process'];
 
         if (Schema::hasColumn('orders', 'uang_diterima')) {
             $updateData['uang_diterima'] = $request->input('uang_diterima', 0);
         }
-
         if (Schema::hasColumn('orders', 'confirmed_at')) {
             $updateData['confirmed_at'] = now();
         }
-
         if (Schema::hasColumn('orders', 'process_at')) {
             $updateData['process_at'] = now();
         }
@@ -118,15 +114,10 @@ class KasirController extends Controller
                     "Pesanan {$order->queue_number} sudah dikonfirmasi kasir. Segera dimasak!",
                     $order
                 );
-            } catch (\Throwable $e) {
-                // skip kalau notif belum aktif
-            }
+            } catch (\Throwable $e) {}
         }
 
-        return back()->with(
-            'success',
-            'Pesanan berhasil dikonfirmasi & diteruskan ke dapur 🔥'
-        );
+        return back()->with('success', 'Pesanan berhasil dikonfirmasi & diteruskan ke dapur 🔥');
     }
 
 
@@ -144,17 +135,11 @@ class KasirController extends Controller
             'Status tidak valid.'
         );
 
-        $order->update([
-            'status' => 'delivered'
-        ]);
+        $order->update(['status' => 'delivered']);
 
         if ($order->table_number) {
-            Meja::where(
-                'nomor_meja',
-                $order->table_number
-            )->update([
-                'status' => 'kosong'
-            ]);
+            Meja::where('nomor_meja', $order->table_number)
+                ->update(['status' => 'kosong']);
         }
 
         if (class_exists(Notification::class)) {
@@ -166,15 +151,10 @@ class KasirController extends Controller
                     "Pesanan {$order->queue_number} sudah diantar & selesai.",
                     $order
                 );
-            } catch (\Throwable $e) {
-                // skip kalau notif belum aktif
-            }
+            } catch (\Throwable $e) {}
         }
 
-        return back()->with(
-            'success',
-            "{$order->queue_number} selesai diantar 🍽️"
-        );
+        return back()->with('success', "{$order->queue_number} selesai diantar 🍽️");
     }
 
 
@@ -187,7 +167,7 @@ class KasirController extends Controller
         $query = Order::with('items.menu')
             ->whereIn('status', ['process', 'done', 'delivered']);
 
-        if ($request->tanggal) {
+        if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
         } else {
             $query->whereDate('created_at', today());
@@ -220,7 +200,7 @@ class KasirController extends Controller
         $query = Order::with('items.menu')
             ->whereIn('status', ['process', 'done', 'delivered']);
 
-        if ($request->tanggal) {
+        if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
         } else {
             $query->whereDate('created_at', today());
@@ -235,6 +215,7 @@ class KasirController extends Controller
 
     // ═══════════════════════════════
     // EXPORT PDF
+    // ✅ PERBAIKAN: nama file & judul PDF kini menyertakan tanggal laporan
     // ═══════════════════════════════
 
     public function laporanPdf(Request $request)
@@ -242,22 +223,25 @@ class KasirController extends Controller
         $query = Order::with('items.menu')
             ->whereIn('status', ['process', 'done', 'delivered']);
 
-        if ($request->tanggal) {
+        if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
+            $label = $request->tanggal;
         } else {
             $query->whereDate('created_at', today());
+            $label = today()->format('Y-m-d');
         }
 
-        $orders     = $query->latest()->get();
-        $totalOmset = $orders->sum('total');
+        $orders       = $query->latest()->get();
+        $totalOmset   = $orders->sum('total');
 
-        $pdf = Pdf::loadView(
-            'kasir.laporan_pdf',
-            compact('orders', 'totalOmset')
-        );
+        // Format tanggal untuk ditampilkan di dalam PDF, misal: "04 Juni 2026"
+        $tanggalLabel = \Carbon\Carbon::parse($label)->translatedFormat('d F Y');
 
-        return $pdf->download(
-            'laporan-kasir-' . now()->format('Y-m-d') . '.pdf'
-        );
+        // Nama file download, misal: "laporan-penjualan-2026-06-04.pdf"
+        $namaFile = 'laporan-penjualan-' . $label . '.pdf';
+
+        $pdf = Pdf::loadView('kasir.laporan_pdf', compact('orders', 'totalOmset', 'tanggalLabel'));
+
+        return $pdf->download($namaFile);
     }
 }
