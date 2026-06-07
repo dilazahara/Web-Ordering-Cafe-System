@@ -48,20 +48,22 @@ class KasirController extends Controller
 
     public function pesanan()
     {
+        $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+
         $orders = Order::with('items.menu')
             ->whereDate('created_at', today())
-            ->where(function ($q) {
+            ->where(function ($q) use ($midtransMethods) {
+                // Cash — tampil dari pending (belum bayar) hingga selesai
                 $q->where('payment_method', 'cash')
-                    ->orWhere(function ($q2) {
-                        $q2->where('payment_method', 'qris')
-                            ->whereIn('status', [
-                                'paid',
-                                'process',
-                                'done',
-                                'delivered',
-                            ]);
-                    });
+                  // QRIS manual — tampil dari pending (belum konfirmasi) hingga selesai
+                  ->orWhere('payment_method', 'qris')
+                  // Midtrans — tampil dari waiting_payment (belum bayar) hingga selesai
+                  ->orWhere(function ($q3) use ($midtransMethods) {
+                      $q3->whereIn('payment_method', $midtransMethods);
+                  });
             })
+            // Hanya tampilkan status yang relevan (tidak tampilkan yang cancelled)
+            ->whereIn('status', ['pending','waiting_payment','process','paid','done','delivered'])
             ->latest()
             ->get();
 
@@ -85,16 +87,29 @@ class KasirController extends Controller
             'Hanya untuk pembayaran cash.'
         );
 
+        // Boleh konfirmasi dari status 'pending' saja
         abort_if(
             $order->status !== 'pending',
             422,
-            'Status pesanan tidak valid.'
+            'Status pesanan tidak valid untuk dikonfirmasi.'
         );
 
+        $uangDiterima = (float) $request->input('uang_diterima', 0);
+
+        // Validasi uang tidak kurang dari total
+        if ($uangDiterima > 0 && $uangDiterima < $order->total) {
+            return back()->with(
+                'error',
+                'Uang yang diterima (Rp ' . number_format($uangDiterima, 0, ',', '.') .
+                ') kurang dari total pesanan (Rp ' . number_format($order->total, 0, ',', '.') . ').'
+            );
+        }
+
+        // Cash: setelah kasir konfirmasi & terima uang → langsung status 'process' (masuk dapur)
         $updateData = ['status' => 'process'];
 
         if (Schema::hasColumn('orders', 'uang_diterima')) {
-            $updateData['uang_diterima'] = $request->input('uang_diterima', 0);
+            $updateData['uang_diterima'] = $uangDiterima;
         }
         if (Schema::hasColumn('orders', 'confirmed_at')) {
             $updateData['confirmed_at'] = now();
@@ -110,14 +125,14 @@ class KasirController extends Controller
                 Notification::kirim(
                     'dapur',
                     'order_confirmed',
-                    '🔥 Pesanan Dikonfirmasi',
-                    "Pesanan {$order->queue_number} sudah dikonfirmasi kasir. Segera dimasak!",
+                    '🔥 Pesanan Cash Dikonfirmasi',
+                    "Pesanan {$order->queue_number} sudah dibayar cash & dikonfirmasi kasir. Segera dimasak!",
                     $order
                 );
             } catch (\Throwable $e) {}
         }
 
-        return back()->with('success', 'Pesanan berhasil dikonfirmasi & diteruskan ke dapur 🔥');
+        return back()->with('success', "Pesanan {$order->queue_number} berhasil dikonfirmasi & diteruskan ke dapur 🔥");
     }
 
 
@@ -129,10 +144,12 @@ class KasirController extends Controller
     {
         $order = Order::findOrFail($id);
 
+        // Kasir tandai selesai hanya jika pesanan sudah done (selesai dimasak)
+        // atau sudah delivered (sudah diantar pelayan)
         abort_if(
-            !in_array($order->status, ['process', 'done']),
+            !in_array($order->status, ['done', 'delivered']),
             422,
-            'Status tidak valid.'
+            'Pesanan belum selesai dimasak atau diantar.'
         );
 
         $order->update(['status' => 'delivered']);
@@ -148,7 +165,7 @@ class KasirController extends Controller
                     'admin',
                     'order_delivered',
                     '✅ Transaksi Selesai',
-                    "Pesanan {$order->queue_number} sudah diantar & selesai.",
+                    "Pesanan {$order->queue_number} sudah selesai & meja dikosongkan.",
                     $order
                 );
             } catch (\Throwable $e) {}
@@ -238,7 +255,7 @@ class KasirController extends Controller
         $tanggalLabel = \Carbon\Carbon::parse($label)->translatedFormat('d F Y');
 
         // Nama file download, misal: "laporan-penjualan-2026-06-04.pdf"
-        $namaFile = 'laporan-penjualan-' . $label . '.pdf';
+        $namaFile = 'laporan-kasir-' . $label . '.pdf';
 
         $pdf = Pdf::loadView('kasir.laporan_pdf', compact('orders', 'totalOmset', 'tanggalLabel'));
 

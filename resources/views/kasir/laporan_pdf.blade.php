@@ -18,8 +18,8 @@
         .item-list { margin: 0; padding: 0; list-style: none; }
         .item-list li { margin-bottom: 2px; }
         .badge-text { font-weight: bold; font-size: 10px; padding: 3px 6px; border-radius: 4px; display: inline-block; }
-        .b-cash { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-        .b-qris { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+        .b-cash     { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+        .b-midtrans { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
     </style>
 </head>
 <body>
@@ -45,7 +45,15 @@
         </thead>
 
         <tbody>
-            @php $totalSemua = 0; @endphp
+            @php
+                $totalSemua = 0;
+                $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+                $midtransNames   = [
+                    'gopay'=>'GoPay','ovo'=>'OVO','dana'=>'DANA','shopeepay'=>'ShopeePay',
+                    'bca'=>'BCA VA','bni'=>'BNI VA','bri'=>'BRI VA','mandiri'=>'Mandiri',
+                    'permata'=>'Permata VA','credit_card'=>'Kartu Kredit','midtrans'=>'Online',
+                ];
+            @endphp
 
             @forelse($orders as $index => $order)
             @php
@@ -97,10 +105,10 @@
                 <td class="text-center">
                     @if($order->payment_method === 'cash')
                         <span class="badge-text b-cash">CASH</span>
-                    @elseif($order->payment_method === 'qris')
-                        <span class="badge-text b-qris">QRIS</span>
+                    @elseif(in_array($order->payment_method, $midtransMethods))
+                        <span class="badge-text b-midtrans">{{ $midtransNames[$order->payment_method] ?? strtoupper($order->payment_method) }}</span>
                     @else
-                        {{ strtoupper($order->payment_method ?? '-') }}
+                        <span class="badge-text b-midtrans">{{ strtoupper($order->payment_method ?? '-') }}</span>
                     @endif
                 </td>
 

@@ -131,73 +131,40 @@ class PelayanController extends Controller
     {
         $order = Order::findOrFail($id);
 
-        // VALIDASI STATUS
-
+        // VALIDASI STATUS — hanya bisa antar jika pesanan sudah selesai dimasak
         abort_if(
-
             $order->status !== 'done',
-
             422,
-
-            'Pesanan belum siap diantar.'
-
+            'Pesanan belum selesai dimasak oleh dapur.'
         );
 
+        // UPDATE STATUS ORDER → delivered
+        $order->update(['status' => 'delivered']);
 
-        // UPDATE STATUS ORDER
-
-        $order->update([
-
-            'status' => 'delivered'
-
-        ]);
-
-
-        // =====================================
         // AUTO STATUS MEJA = KOSONG
-        // =====================================
-
         if ($order->table_number) {
-
             Meja::where(
                 'nomor_meja',
                 $order->table_number
-            )->update([
-                'status' => 'kosong'
-            ]);
-
+            )->update(['status' => 'kosong']);
         }
 
-
-        // NOTIF KE KASIR
-
+        // NOTIF KE KASIR & ADMIN
         Notification::kirim(
-
             'kasir',
-
             'order_delivered',
-
             '✅ Pesanan Berhasil Diantar',
-
             "Pesanan {$order->queue_number}" .
-
                 ($order->table_number
                     ? " Meja {$order->table_number}"
                     : '') .
-
                 " sudah diantar ke pelanggan.",
-
             $order
-
         );
 
-
         return back()->with(
-
             'success',
-
             "Pesanan meja {$order->table_number} berhasil diantar ✅"
-
         );
     }
 }

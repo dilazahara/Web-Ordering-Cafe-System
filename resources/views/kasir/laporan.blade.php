@@ -88,6 +88,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .filter-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(37,99,235,0.3); }
 .download-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; background: var(--red); color: white; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif; text-decoration: none; border: none; box-shadow: 0 3px 10px rgba(220,38,38,0.25); }
 .download-btn:hover { background: #b91c1c; box-shadow: 0 5px 15px rgba(220,38,38,0.3); transform: translateY(-1px); }
+@keyframes spin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes popIn  { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* Table & Datatable Styles */
 .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; box-shadow: var(--shadow); }
@@ -379,10 +381,48 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       </form>
 
       {{-- ✅ PERBAIKAN: Gunakan route() agar selalu mengarah ke KasirController --}}
-      <a href="{{ route('kasir.laporan.pdf', ['tanggal' => request('tanggal')]) }}" class="download-btn" style="margin-top:19px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Download PDF
+      <a href="{{ route('kasir.laporan.pdf', ['tanggal' => request('tanggal')]) }}"
+         class="download-btn"
+         id="downloadPdfBtn"
+         style="margin-top:19px;"
+         onclick="startDownload(event, this)">
+        <span id="downloadBtnContent" style="display:flex;align-items:center;gap:8px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download PDF
+        </span>
+        <span id="downloadBtnLoading" style="display:none;align-items:center;gap:8px;">
+          <svg id="spinnerIcon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.9s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          Menyiapkan PDF...
+        </span>
       </a>
+
+      {{-- Overlay loading --}}
+      <div id="downloadOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,22,35,.48);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:24px;padding:36px 44px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;min-width:280px;max-width:340px;">
+
+          {{-- State: Loading --}}
+          <div id="dlStateLoading">
+            <div style="width:60px;height:60px;margin:0 auto 18px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(220,38,38,.3);">
+              <svg viewBox="0 0 24 24" width="28" height="28" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 0.85s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:6px;font-family:'Plus Jakarta Sans',sans-serif;">Menyiapkan Laporan...</div>
+            <div style="font-size:12.5px;color:#64748b;font-family:'Inter',sans-serif;line-height:1.5;">PDF sedang diproses oleh server,<br>mohon tunggu sebentar</div>
+            <div style="margin-top:18px;height:5px;background:#f1f5f9;border-radius:99px;overflow:hidden;">
+              <div id="downloadProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#dc2626,#f97316);border-radius:99px;transition:width 0.35s ease;"></div>
+            </div>
+          </div>
+
+          {{-- State: Sukses --}}
+          <div id="dlStateSuccess" style="display:none;">
+            <div style="width:60px;height:60px;margin:0 auto 18px;background:linear-gradient(135deg,#059669,#047857);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(5,150,105,.3);animation:popIn .35s cubic-bezier(.34,1.56,.64,1) both;">
+              <svg viewBox="0 0 24 24" width="28" height="28" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:6px;font-family:'Plus Jakarta Sans',sans-serif;">Berhasil Diunduh!</div>
+            <div style="font-size:12.5px;color:#64748b;font-family:'Inter',sans-serif;">File laporan PDF sudah tersimpan<br>di folder unduhan kamu</div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <div class="table-wrap">
@@ -520,12 +560,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         @endif
                     </td>
                     <td>
-                        @if($order->payment_method === 'cash')
+                        @php
+                            $pm = $order->payment_method ?? 'cash';
+                            $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+                            $methodLabels = [
+                                'gopay'       => ['emoji'=>'💚','label'=>'GoPay'],
+                                'ovo'         => ['emoji'=>'💜','label'=>'OVO'],
+                                'dana'        => ['emoji'=>'💙','label'=>'DANA'],
+                                'shopeepay'   => ['emoji'=>'🧡','label'=>'ShopeePay'],
+                                'bca'         => ['emoji'=>'🏦','label'=>'BCA VA'],
+                                'bni'         => ['emoji'=>'🏦','label'=>'BNI VA'],
+                                'bri'         => ['emoji'=>'🏦','label'=>'BRI VA'],
+                                'mandiri'     => ['emoji'=>'🏦','label'=>'Mandiri VA'],
+                                'permata'     => ['emoji'=>'🏦','label'=>'Permata VA'],
+                                'credit_card' => ['emoji'=>'💳','label'=>'Kartu Kredit'],
+                                'midtrans'    => ['emoji'=>'💳','label'=>'Online'],
+                            ];
+                        @endphp
+                        @if($pm === 'cash')
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">💵 Cash</span>
-                        @elseif($order->payment_method === 'qris')
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;">📱 QRIS</span>
+                        @elseif(in_array($pm, $midtransMethods))
+                            @php $ml = $methodLabels[$pm] ?? ['emoji'=>'💳','label'=>ucfirst($pm)]; @endphp
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;">{{ $ml['emoji'] }} {{ $ml['label'] }}</span>
                         @else
-                            <span style="font-size:12px; color:var(--text-secondary); text-transform:capitalize;">{{ $order->payment_method ?? 'Tunai' }}</span>
+                            <span style="font-size:12px; color:var(--text-secondary); text-transform:capitalize;">{{ $pm }}</span>
                         @endif
                     </td>
                     <td>
@@ -731,9 +789,62 @@ document.querySelector('.filter-btn') && document.querySelector('.filter-btn').a
     if (tgl && tgl.value) ksToast('🗓️ Filter laporan: ' + tgl.value, 'info', 2000);
 });
 
-// feedback download PDF
-document.querySelector('.download-btn') && document.querySelector('.download-btn').addEventListener('click', function() {
-    ksToast('📄 Mengunduh laporan PDF...', 'success', 3000);
-});
+/* ── DOWNLOAD PDF FEEDBACK ── */
+function startDownload(e, btn) {
+    e.preventDefault();
+    var url = btn.getAttribute('href');
+
+    var overlay      = document.getElementById('downloadOverlay');
+    var btnContent   = document.getElementById('downloadBtnContent');
+    var btnLoading   = document.getElementById('downloadBtnLoading');
+    var progBar      = document.getElementById('downloadProgressBar');
+    var stateLoading = document.getElementById('dlStateLoading');
+    var stateSuccess = document.getElementById('dlStateSuccess');
+
+    // Tampilkan overlay dulu
+    overlay.style.display      = 'flex';
+    stateLoading.style.display = '';
+    stateSuccess.style.display = 'none';
+    btnContent.style.display   = 'none';
+    btnLoading.style.display   = 'flex';
+    btn.style.pointerEvents    = 'none';
+    btn.style.opacity          = '0.85';
+    progBar.style.width        = '0%';
+
+    // Progress bar animasi
+    var progress = 0;
+    var interval = setInterval(function() {
+        progress += Math.random() * 12 + 4;
+        if (progress > 85) progress = 85;
+        progBar.style.width = progress + '%';
+    }, 280);
+
+    // Trigger download via iframe hidden — browser tidak navigate, overlay tetap tampil
+    setTimeout(function() {
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        setTimeout(function() { document.body.removeChild(iframe); }, 10000);
+    }, 600);
+
+    // Selesai: progress 100% → state sukses → tutup overlay
+    setTimeout(function() {
+        clearInterval(interval);
+        progBar.style.width = '100%';
+        setTimeout(function() {
+            stateLoading.style.display = 'none';
+            stateSuccess.style.display = '';
+            btnContent.style.display   = 'flex';
+            btnLoading.style.display   = 'none';
+            btn.style.pointerEvents    = '';
+            btn.style.opacity          = '';
+            setTimeout(function() {
+                overlay.style.display = 'none';
+                progBar.style.width   = '0%';
+            }, 1600);
+        }, 350);
+    }, 3200);
+}
 </script>
 @endpush

@@ -9,15 +9,23 @@ use App\Models\Order;
 
 class LaporanController extends Controller
 {
+    // Midtrans methods — sama dengan di CustomerOrderController
+    private const MIDTRANS_METHODS = [
+        'gopay','ovo','dana','shopeepay',
+        'bca','bni','bri','mandiri','permata',
+        'credit_card','midtrans',
+    ];
+
     private function buildQuery(Request $request)
     {
+        // Hanya tampilkan order yang sudah benar-benar dibayar / sedang diproses / selesai
+        // Exclude: pending (belum bayar cash), waiting_payment (belum bayar Midtrans), cancelled
         $query = Order::with(['items.menu'])
             ->whereIn('status', [
-                'pending',
                 'paid',
                 'process',
                 'done',
-                'delivered'
+                'delivered',
             ]);
 
         if ($request->filled('tanggal')) {
@@ -56,10 +64,24 @@ class LaporanController extends Controller
     {
         $orders = $this->buildQuery($request)->get();
 
-        $pdf = Pdf::loadView('admin.laporan_pdf', compact('orders'));
+        // Label tanggal untuk nama file & judul PDF
+        if ($request->filled('tanggal')) {
+            $label = $request->tanggal;
+        } elseif ($request->filled('filter')) {
+            $label = match($request->filter) {
+                'hari'  => today()->format('Y-m-d'),
+                'bulan' => now()->format('Y-m'),
+                'tahun' => now()->format('Y'),
+                default => today()->format('Y-m-d'),
+            };
+        } else {
+            $label = today()->format('Y-m-d');
+        }
 
-        return $pdf->download(
-            'laporan-admin-' . now()->format('Y-m-d') . '.pdf'
-        );
+        $tanggalLabel = \Carbon\Carbon::parse($label)->translatedFormat('d F Y');
+
+        $pdf = Pdf::loadView('admin.laporan_pdf', compact('orders', 'tanggalLabel'));
+
+        return $pdf->download('laporan-admin-' . $label . '.pdf');
     }
 }

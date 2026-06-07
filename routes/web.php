@@ -81,20 +81,34 @@ Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])->n
 // ══════════════════════════════════════════════════════
 
 Route::prefix('customer')->name('customer.')->group(function () {
-
+ 
     Route::get('/home',                     [HomeController::class, 'index'])->name('home');
     Route::get('/scan/{nomor_meja}',        [HomeController::class, 'scanMeja'])->name('scan');
     Route::get('/addons',                   [AddonController::class, 'index'])->name('addons');
     Route::get('/cart',                     [CartController::class, 'index'])->name('cart');
     Route::get('/checkout',                 [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/order',                   [CustomerOrderController::class, 'store'])->name('order.store');
+ 
+    // ── Cash ──────────────────────────────────────────────────────────
     Route::get('/order/bill/{id}',          [CustomerOrderController::class, 'cashBill'])->name('order.bill');
+ 
+    // ── QRIS manual ───────────────────────────────────────────────────
     Route::get('/order/qris/{id}',          [CustomerOrderController::class, 'qrisPayment'])->name('order.qris');
     Route::post('/order/qris/{id}/confirm', [CustomerOrderController::class, 'qrisConfirm'])->name('order.qris.confirm');
     Route::get('/order/qris/{id}/receipt',  [CustomerOrderController::class, 'qrisReceipt'])->name('order.qris.receipt');
+ 
+    // ── Midtrans Snap ─────────────────────────────────────────────────
+    Route::get('/order/midtrans/{id}',          [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
+    Route::post('/order/midtrans/{id}/confirm', [CustomerOrderController::class, 'midtransConfirm'])->name('order.midtrans.confirm');
+    Route::get('/order/midtrans/{id}/receipt',  [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
+ 
+    // ── Success (fallback) ────────────────────────────────────────────
     Route::get('/order/success/{id}',       [CustomerOrderController::class, 'success'])->name('order.success');
-
+ 
 });
+ 
+// Midtrans webhook — harus di LUAR middleware auth, TANPA CSRF
+Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])->name('midtrans.webhook');
 
 // ══════════════════════════════════════════════════════
 // ADMIN
@@ -238,6 +252,8 @@ Route::middleware(['auth', 'role:pelayan'])->prefix('pelayan')->name('pelayan.')
     Route::put('/account/update',          [AccountPelayanController::class, 'updateProfil'])->name('account.update');
     Route::get('/account/ganti-sandi',     [AccountPelayanController::class, 'gantiSandi'])->name('account.ganti-sandi');
     Route::put('/account/update-password', [AccountPelayanController::class, 'updatePassword'])->name('account.update-password');
+    Route::post('/account/verify-password', [AccountPelayanController::class, 'verifyPassword'])->name('account.verify-password');
+Route::post('/account/update-avatar',   [AccountPelayanController::class, 'updateAvatar'])->name('account.update-avatar');
 
 });
 

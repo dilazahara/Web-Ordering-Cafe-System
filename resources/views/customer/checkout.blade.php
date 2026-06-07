@@ -13,29 +13,62 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .glass-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(226,232,240,0.8); }
         .card-shadow { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; }
-        .payment-item { padding: 14px 16px; border-radius: 16px; cursor: pointer; background: #ffffff; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); border: 2px solid #f1f5f9; display: flex; align-items: center; gap: 12px; }
-        .payment-item:hover { border-color: #fdba74; background: #fffbf5; }
-        .payment-item.selected { background: #fff7ed; border-color: #f97316; box-shadow: 0 4px 12px rgba(249,115,22,0.12); }
-        .payment-item .check-icon { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: auto; transition: all 0.2s; }
-        .payment-item.selected .check-icon { background: #f97316; border-color: #f97316; }
-        .payment-item.selected .check-icon::after { content: ''; width: 10px; height: 6px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translateY(-1px); display: block; }
+
+        /* ── Payment Option Cards ── */
+        .pay-opt {
+            position: relative;
+            cursor: pointer;
+            background: #ffffff;
+            border-radius: 18px;
+            border: 2px solid #f1f5f9;
+            transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+            overflow: hidden;
+        }
+        .pay-opt:hover { border-color: #fdba74; background: #fffbf5; }
+        .pay-opt.selected { border-color: #f97316; box-shadow: 0 4px 16px rgba(249,115,22,0.15); }
+        .pay-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+        /* Kasir option */
+        .pay-opt-kasir.selected { background: #fff7ed; border-color: #f97316; }
+        /* Midtrans option */
+        .pay-opt-midtrans.selected { background: #f0fdf4; border-color: #22c55e; box-shadow: 0 4px 16px rgba(34,197,94,0.12); }
+        .pay-opt-midtrans:hover { border-color: #86efac; background: #f0fdf4; }
+
+        .radio-dot {
+            width: 22px; height: 22px; border-radius: 50%;
+            border: 2px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all 0.2s;
+        }
+        .pay-opt-kasir.selected .radio-dot { background: #f97316; border-color: #f97316; }
+        .pay-opt-midtrans.selected .radio-dot { background: #22c55e; border-color: #22c55e; }
+        .pay-opt.selected .radio-dot::after {
+            content: ''; width: 8px; height: 8px;
+            background: white; border-radius: 50%; display: block;
+        }
+
         .qty-btn { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; transition: all 0.18s; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 18px; line-height: 1; color: #475569; border: none; cursor: pointer; }
         .qty-btn:hover { background: #f1f5f9; }
         .qty-btn:active { transform: scale(0.9); }
         .btn-order { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 10px 20px -4px rgba(249,115,22,0.35); transition: all 0.2s; }
-        .btn-order:active { transform: scale(0.98); box-shadow: none; }
-        .btn-order:disabled { opacity: 0.7; cursor: not-allowed; }
+        .btn-order-midtrans { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); box-shadow: 0 10px 20px -4px rgba(34,197,94,0.35); transition: all 0.2s; }
+        .btn-order:active, .btn-order-midtrans:active { transform: scale(0.98); box-shadow: none; }
+        .btn-order:disabled, .btn-order-midtrans:disabled { opacity: 0.7; cursor: not-allowed; }
         textarea:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
         @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
         .animate-fade { animation: fadeUp 0.35s ease-out forwards; }
-        .info-box { border-radius: 18px; padding: 16px 18px; display: flex; gap: 14px; align-items: flex-start; }
-        .info-box-icon { width: 44px; height: 44px; border-radius: 14px; background: white; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
         .item-row { display: flex; gap: 14px; align-items: center; }
         .item-img { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; border: 1px solid #f1f5f9; flex-shrink: 0; }
         .divider-dash { border: none; border-top: 2px dashed #f1f5f9; margin: 10px 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
-        #mejaPanelWrap { transition: all .3s ease; }
+
+        /* Info box bawah pilihan */
+        .info-pay {
+            border-radius: 14px; padding: 12px 14px;
+            display: flex; gap: 10px; align-items: flex-start;
+            font-size: 12px; line-height: 1.5;
+        }
     </style>
 </head>
 <body class="pb-12">
@@ -54,7 +87,6 @@
 
 <div class="max-w-xl mx-auto p-4 space-y-4">
 
-    {{-- ── ERROR SESSION DARI MIDTRANS / CONTROLLER ── --}}
     @if(session('error'))
     <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 flex items-center gap-3 animate-fade">
         <span class="text-red-500 text-xl flex-shrink-0">❌</span>
@@ -65,7 +97,6 @@
     </div>
     @endif
 
-    {{-- ── ERROR VALIDASI DARI FORM ── --}}
     @if($errors->any())
     <div class="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 animate-fade">
         <p class="text-red-700 font-bold text-sm mb-1">⚠️ Ada masalah saat memesan:</p>
@@ -77,8 +108,8 @@
     </div>
     @endif
 
-    {{-- ── NOMOR MEJA ── --}}
-    <div id="mejaPanelWrap" class="animate-fade">
+    {{-- NOMOR MEJA --}}
+    <div class="animate-fade">
         <div class="bg-white p-4 rounded-2xl card-shadow flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center">
@@ -93,12 +124,10 @@
                     </p>
                 </div>
             </div>
-            <a href="/customer/home"
-               class="text-sm px-4 py-2 bg-orange-50 text-orange-600 font-bold rounded-xl active:scale-95 transition-all hover:bg-orange-100">
+            <a href="/customer/home" class="text-sm px-4 py-2 bg-orange-50 text-orange-600 font-bold rounded-xl active:scale-95 transition-all hover:bg-orange-100">
                 + Menu
             </a>
         </div>
-
         @if(!$tableNumber)
         <div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center gap-2">
             <span class="text-amber-500 text-lg">⚠️</span>
@@ -107,7 +136,7 @@
         @endif
     </div>
 
-    {{-- ── ITEM PESANAN ── --}}
+    {{-- ITEM PESANAN --}}
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
             <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -120,7 +149,7 @@
         </div>
     </div>
 
-    {{-- ── NAMA PEMESAN ── --}}
+    {{-- NAMA PEMESAN --}}
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
             <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,7 +162,7 @@
                placeholder="Masukkan nama kamu">
     </div>
 
-    {{-- ── CATATAN ── --}}
+    {{-- CATATAN --}}
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider flex items-center gap-2">
             <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,7 +175,7 @@
                   placeholder="Contoh: tidak pakai sambal, level pedas, dll."></textarea>
     </div>
 
-    {{-- ── RINCIAN PEMBAYARAN ── --}}
+    {{-- RINCIAN BIAYA --}}
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider">Rincian Biaya</h2>
         <div id="detailItems" class="space-y-2 text-sm text-slate-500 mb-3"></div>
@@ -169,12 +198,6 @@
     </div>
 
     {{-- ── METODE PEMBAYARAN ── --}}
-    @if($paymentMethods->isEmpty())
-    <div class="bg-red-50 border border-red-100 p-5 rounded-2xl text-center animate-fade">
-        <p class="text-red-600 font-bold text-sm">⚠️ Tidak ada metode pembayaran aktif</p>
-        <p class="text-red-400 text-xs mt-1">Hubungi kasir untuk bantuan.</p>
-    </div>
-    @else
     <div class="bg-white p-5 rounded-2xl card-shadow animate-fade">
         <h2 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
             <svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,36 +205,65 @@
             </svg>
             Metode Pembayaran
         </h2>
-        <div class="space-y-3" id="paymentOptions">
-            @foreach($paymentMethods as $i => $pm)
-            @php
-                $icon = match($pm->kode) {
-                    'cash'  => '💵', 'qris'  => '📱', 'bank'  => '🏦', default => '💳',
-                };
-                $label = match($pm->kode) {
-                    'cash'  => 'Tunai / Cash', 'qris'  => 'QRIS', 'bank'  => 'Transfer Bank', default => $pm->nama,
-                };
-                $desc = match($pm->kode) {
-                    'cash'  => 'Bayar langsung ke kasir', 'qris'  => 'Scan QR Code untuk bayar', 'bank'  => 'Transfer ke rekening', default => 'Metode pembayaran lain',
-                };
-            @endphp
-            <div class="payment-item {{ $i === 0 ? 'selected' : '' }}"
-                 id="opt_{{ $pm->kode }}"
-                 onclick="selectPayment('{{ $pm->kode }}')">
-                <span class="text-2xl">{{ $icon }}</span>
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-sm text-slate-800">{{ $label }}</p>
-                    <p class="text-xs text-slate-400">{{ $desc }}</p>
-                </div>
-                <div class="check-icon"></div>
-            </div>
-            @endforeach
-        </div>
-    </div>
 
-    {{-- ── INFO BOX (dinamis) ── --}}
-    <div id="infoBoxWrap" class="animate-fade"></div>
-    @endif
+        @php
+            $midtransCodes  = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+            $kasirMethod    = $paymentMethods->firstWhere('kode', 'cash');
+            $midtransMethod = $paymentMethods->whereIn('kode', $midtransCodes)->first();
+            $hasCash        = $kasirMethod && $kasirMethod->aktif;
+            $hasMidtrans    = $midtransMethod && $midtransMethod->aktif;
+        @endphp
+
+        @if(!$hasCash && !$hasMidtrans)
+        <div class="bg-red-50 border border-red-100 p-4 rounded-2xl text-center">
+            <p class="text-red-600 font-bold text-sm">⚠️ Tidak ada metode pembayaran aktif</p>
+            <p class="text-red-400 text-xs mt-1">Hubungi kasir untuk bantuan.</p>
+        </div>
+        @else
+
+        <div class="space-y-3" id="paymentOptions">
+
+            {{-- ── OPSI 1: BAYAR DI KASIR ── --}}
+            @if($hasCash)
+            <label class="pay-opt pay-opt-kasir selected block p-4 cursor-pointer" id="opt_kasir" onclick="selectPayment('cash', 'kasir')">
+                <input type="radio" name="pay_choice" value="cash" checked>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
+                        🏪
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-slate-800 text-sm">Bayar di Kasir</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Tunjukkan pesanan ke kasir &amp; bayar tunai</p>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+            </label>
+            @endif
+
+            {{-- ── OPSI 2: BAYAR ONLINE MIDTRANS ── --}}
+            @if($hasMidtrans)
+            <label class="pay-opt pay-opt-midtrans {{ !$hasCash ? 'selected' : '' }} block p-4 cursor-pointer" id="opt_midtrans" onclick="selectPayment('midtrans_snap', 'midtrans')">
+                <input type="radio" name="pay_choice" value="midtrans_snap" {{ !$hasCash ? 'checked' : '' }}>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
+                        💳
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-slate-800 text-sm">Bayar Online Midtrans</p>
+                        <p class="text-xs text-slate-400 mt-0.5">GoPay, OVO, DANA, VA Bank &amp; lainnya</p>
+                    </div>
+                    <div class="radio-dot"></div>
+                </div>
+            </label>
+            @endif
+
+        </div>
+
+        {{-- ── INFO BOX DINAMIS ── --}}
+        <div id="infoPayBox" class="mt-3"></div>
+
+        @endif
+    </div>
 
     {{-- ── FORM PESAN ── --}}
     <form action="{{ route('customer.order.store') }}" method="POST" id="orderForm" class="pt-2">
@@ -219,13 +271,11 @@
         <input type="hidden" name="cart"           id="cartInput">
         <input type="hidden" name="note"           id="noteHidden">
         <input type="hidden" name="customer_name"  id="customerNameHidden">
-        <input type="hidden" name="payment_method" id="paymentMethodInput"
-               value="{{ $paymentMethods->first()?->kode ?? 'cash' }}">
-        <input type="hidden" name="table_number"   id="tableNumberInput"
-               value="{{ $tableNumber ?? '' }}">
-        <input type="hidden" name="order_type" value="dine_in">
+        <input type="hidden" name="payment_method" id="paymentMethodInput" value="{{ $hasCash ? 'cash' : ($hasMidtrans ? $midtransMethod->kode : '') }}">
+        <input type="hidden" name="table_number"   id="tableNumberInput"   value="{{ $tableNumber ?? '' }}">
+        <input type="hidden" name="order_type"     value="dine_in">
 
-        @if($paymentMethods->isEmpty())
+        @if(!$hasCash && !$hasMidtrans)
         <button type="button" disabled
                 class="w-full py-4 rounded-2xl font-black text-lg bg-slate-200 text-slate-400 cursor-not-allowed">
             Tidak Dapat Memesan
@@ -241,9 +291,7 @@
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════════════
+// ══ TOAST ═══════════════════════════════════════════
 (function initToast() {
     const el = document.createElement('div');
     el.id = 'toastContainer';
@@ -263,59 +311,105 @@ function showToast(msg, type = 'success', duration = 2200) {
     setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-10px) scale(0.95)'; setTimeout(()=>t.remove(),260); }, duration);
 }
 
-// ══════════════════════════════════════════════════════
-//  DATA FROM BLADE
-// ══════════════════════════════════════════════════════
-const paymentMethods = @json($paymentMethods->values());
-const pmMap = {};
-paymentMethods.forEach(pm => { pmMap[pm.kode] = pm; });
+// ══ DATA FROM BLADE ═══════════════════════════════
+const paymentMethods   = @json($paymentMethods->values());
 const serverTableNumber = @json($tableNumber ?? null);
 
-// ══════════════════════════════════════════════════════
-//  INFO BOX
-// ══════════════════════════════════════════════════════
-function getInfoBox(kode) {
-    const pm = pmMap[kode];
-    if (!pm) return '';
-    const configs = {
-        cash: { bg:'bg-orange-50', border:'border-orange-100', icon:'💵', title:'Bayar ke Kasir', titleColor:'text-orange-900', textColor:'text-orange-700', body:'Setelah klik <strong>Pesan Sekarang</strong>, tunjukkan nomor pesananmu ke kasir untuk melakukan pembayaran tunai.' },
-        qris: { bg:'bg-indigo-50', border:'border-indigo-100', icon:'📱', title:'Bayar via QRIS', titleColor:'text-indigo-900', textColor:'text-indigo-700', body:'Setelah klik <strong>Pesan Sekarang</strong>, halaman QR Code akan muncul. Scan menggunakan aplikasi dompet digitalmu.' },
-        bank: { bg:'bg-blue-50', border:'border-blue-100', icon:'🏦', title:'Transfer Bank', titleColor:'text-blue-900', textColor:'text-blue-700', body:'Setelah memesan, lakukan transfer ke rekening yang tertera dan konfirmasi ke kasir.' },
-    };
-    const cfg = configs[kode] ?? { bg:'bg-slate-50', border:'border-slate-100', icon:'💳', title:pm.nama, titleColor:'text-slate-800', textColor:'text-slate-600', body:'Setelah memesan, ikuti instruksi pembayaran dari kasir.' };
-    return `<div class="info-box ${cfg.bg} border ${cfg.border}"><div class="info-box-icon">${cfg.icon}</div><div class="space-y-1 flex-1"><p class="font-bold text-sm ${cfg.titleColor}">${cfg.title}</p><p class="text-xs leading-relaxed ${cfg.textColor}">${cfg.body}</p></div></div>`;
+// State aktif dari server
+const hasCash          = @json($hasCash);
+const hasMidtrans      = @json($hasMidtrans);
+const midtransKode     = @json($hasMidtrans ? $midtransMethod->kode : 'midtrans');
+const midtransCodes    = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+
+function getDefaultMidtransKode() {
+    // Gunakan kode aktual dari database, bukan hardcode 'midtrans'
+    return midtransKode;
 }
 
-// ══════════════════════════════════════════════════════
-//  STATE & CART
-// ══════════════════════════════════════════════════════
+// ══ STATE ═════════════════════════════════════════
 let cart = JSON.parse(localStorage.getItem('checkoutCart')) || JSON.parse(localStorage.getItem('cart')) || [];
-let selectedKode = paymentMethods.length > 0 ? paymentMethods[0].kode : 'cash';
+// 'kasir' atau 'midtrans'
+let selectedType = hasCash ? 'kasir' : 'midtrans';
+// kode aktual yang dikirim ke server
+let selectedKode = hasCash ? 'cash' : getDefaultMidtransKode();
+// Set initial value untuk hidden input
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('paymentMethodInput').value = selectedKode;
+});
 
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
+// ══ INIT ══════════════════════════════════════════
 (function init() {
     const tableNum = serverTableNumber || localStorage.getItem('table_number');
     if (tableNum) {
         localStorage.setItem('table_number', tableNum);
         document.getElementById('tableNumberInput').value = tableNum;
         const disp = document.getElementById('tableNumberDisplay');
-        if (disp && !serverTableNumber) {
-            disp.textContent = 'Meja ' + tableNum;
-        }
+        if (disp && !serverTableNumber) disp.textContent = 'Meja ' + tableNum;
     }
     renderCart();
-    renderInfoBox(selectedKode);
+    updatePaymentUI(selectedType, selectedKode);
 })();
 
-// ══════════════════════════════════════════════════════
-//  RENDER CART
-// ══════════════════════════════════════════════════════
+// ══ PILIH PEMBAYARAN ══════════════════════════════
+function selectPayment(kodeValue, type) {
+    selectedType = type;
+
+    if (type === 'kasir') {
+        selectedKode = 'cash';
+        document.getElementById('opt_kasir')?.classList.add('selected');
+        document.getElementById('opt_midtrans')?.classList.remove('selected');
+    } else {
+        selectedKode = getDefaultMidtransKode();
+        document.getElementById('opt_kasir')?.classList.remove('selected');
+        document.getElementById('opt_midtrans')?.classList.add('selected');
+    }
+
+    document.getElementById('paymentMethodInput').value = selectedKode;
+    updatePaymentUI(type, selectedKode);
+}
+
+function updatePaymentUI(type, kode) {
+    // Update tombol submit
+    const btn = document.getElementById('btnSubmitOrder');
+    if (btn) {
+        if (type === 'midtrans') {
+            btn.className = 'w-full btn-order-midtrans text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2';
+            btn.innerHTML = '💳 Pesan &amp; Bayar Online';
+        } else {
+            btn.className = 'w-full btn-order text-white py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-2';
+            btn.innerHTML = '🛒 Pesan Sekarang';
+        }
+    }
+
+    // Info box
+    const box = document.getElementById('infoPayBox');
+    if (!box) return;
+    if (type === 'kasir') {
+        box.innerHTML = `
+        <div class="info-pay bg-orange-50 border border-orange-100">
+            <span class="text-xl">🏪</span>
+            <div>
+                <p class="font-bold text-orange-900 text-xs">Bayar di Kasir</p>
+                <p class="text-orange-700 text-xs mt-0.5">Setelah klik <strong>Pesan Sekarang</strong>, tunjukkan nomor antrianmu ke kasir dan bayar tunai di tempat.</p>
+            </div>
+        </div>`;
+    } else {
+        box.innerHTML = `
+        <div class="info-pay bg-green-50 border border-green-100">
+            <span class="text-xl">💳</span>
+            <div>
+                <p class="font-bold text-green-900 text-xs">Bayar Online via Midtrans</p>
+                <p class="text-green-700 text-xs mt-0.5">Setelah klik <strong>Pesan &amp; Bayar Online</strong>, kamu akan diarahkan ke halaman pembayaran Midtrans. Pilih metode (GoPay, VA Bank, dll.) lalu selesaikan pembayaran.</p>
+            </div>
+        </div>`;
+    }
+}
+
+// ══ RENDER CART ═══════════════════════════════════
 function renderCart() {
     const container = document.getElementById('checkoutItems');
     const detail    = document.getElementById('detailItems');
-    let subtotal    = 0;
+    let subtotal = 0;
 
     if (!cart || cart.length === 0) {
         container.innerHTML = `<div class="text-center py-8"><p class="text-4xl mb-2">🛒</p><p class="text-slate-400 text-sm font-medium">Keranjang kosong</p><a href="/customer/home" class="text-orange-500 text-sm font-bold mt-1 inline-block">Kembali ke Menu →</a></div>`;
@@ -382,28 +476,7 @@ function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-// ══════════════════════════════════════════════════════
-//  PAYMENT SELECTION
-// ══════════════════════════════════════════════════════
-function selectPayment(kode) {
-    document.querySelectorAll('.payment-item').forEach(el => el.classList.remove('selected'));
-    const el = document.getElementById('opt_' + kode);
-    if (el) el.classList.add('selected');
-    selectedKode = kode;
-    document.getElementById('paymentMethodInput').value = kode;
-    const labels = { cash:'Tunai / Cash 💵', qris:'QRIS 📱', bank:'Transfer Bank 🏦' };
-    showToast(`Metode: ${labels[kode] || kode}`, 'info', 1600);
-    renderInfoBox(kode);
-}
-
-function renderInfoBox(kode) {
-    const wrap = document.getElementById('infoBoxWrap');
-    if (wrap) wrap.innerHTML = getInfoBox(kode);
-}
-
-// ══════════════════════════════════════════════════════
-//  FORM SUBMIT
-// ══════════════════════════════════════════════════════
+// ══ FORM SUBMIT ═══════════════════════════════════
 document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     if (!cart || cart.length === 0) {
         e.preventDefault();
@@ -416,12 +489,9 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         e.preventDefault();
         document.getElementById('customerNameInput').focus();
         document.getElementById('customerNameInput').style.borderColor = '#ef4444';
-        document.getElementById('customerNameInput').style.boxShadow = '0 0 0 3px rgba(239,68,68,0.15)';
         showToast('⚠️ Nama pemesan wajib diisi!', 'error', 2800);
         return;
     }
-    document.getElementById('customerNameInput').style.borderColor = '';
-    document.getElementById('customerNameInput').style.boxShadow = '';
 
     const tn = document.getElementById('tableNumberInput').value;
     if (!tn || tn.trim() === '') {
@@ -430,12 +500,14 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
         return;
     }
 
-    document.getElementById('cartInput').value  = JSON.stringify(cart);
-    document.getElementById('noteHidden').value = document.getElementById('noteInput').value;
-    document.getElementById('customerNameHidden').value = document.getElementById('customerNameInput').value;
-    document.getElementById('paymentMethodInput').value = selectedKode;
+    document.getElementById('cartInput').value           = JSON.stringify(cart);
+    document.getElementById('noteHidden').value          = document.getElementById('noteInput').value;
+    document.getElementById('customerNameHidden').value  = document.getElementById('customerNameInput').value;
+    document.getElementById('paymentMethodInput').value  = selectedKode;
 
-    showToast('Pesanan sedang diproses... 🍽️', 'success', 2500);
+    const msg = selectedType === 'midtrans' ? 'Mengarahkan ke pembayaran... 💳' : 'Pesanan sedang diproses... 🍽️';
+    showToast(msg, 'success', 2500);
+
     const btn = document.getElementById('btnSubmitOrder');
     if (btn) {
         btn.disabled = true;
@@ -443,22 +515,17 @@ document.getElementById('orderForm')?.addEventListener('submit', function(e) {
     }
 });
 
-// ══════════════════════════════════════════════════════
-//  RESET TOMBOL SAAT BROWSER BACK (bfcache)
-// ══════════════════════════════════════════════════════
+// Reset tombol saat browser back (bfcache)
 window.addEventListener('pageshow', function(e) {
     if (e.persisted) {
         const btn = document.getElementById('btnSubmitOrder');
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = '🛒 Pesan Sekarang';
+            updatePaymentUI(selectedType, selectedKode);
         }
     }
 });
 
-// ══════════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════════
 function escHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

@@ -33,6 +33,16 @@ class PaymentMethodSeeder extends Seeder
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ],
+            [
+                'nama'          => 'Bayar Online (GoPay, OVO, VA Bank, dll.)',
+                'kode'          => 'midtrans',
+                'aktif'         => 1,
+                'qris_image'    => null,
+                'nama_rekening' => null,
+                'no_rekening'   => null,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ],
         ]);
     }
 }

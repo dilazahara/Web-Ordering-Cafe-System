@@ -118,10 +118,29 @@
               <p>
                 {{ $order->queue_number }}
                 &nbsp;·&nbsp;
+                @php
+                  $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+                  $midtransLabel = match($order->payment_method) {
+                      'gopay'       => '💚 GoPay',
+                      'ovo'         => '🟣 OVO',
+                      'dana'        => '🔵 DANA',
+                      'shopeepay'   => '🟠 ShopeePay',
+                      'bca'         => '🏦 VA BCA',
+                      'bni'         => '🏦 VA BNI',
+                      'bri'         => '🏦 VA BRI',
+                      'mandiri'     => '🏦 Mandiri',
+                      'permata'     => '🏦 Permata',
+                      'credit_card' => '💳 Kartu Kredit',
+                      'midtrans'    => '💳 Midtrans',
+                      default       => null,
+                  };
+                @endphp
                 @if($order->payment_method === 'qris')
-                  <span class="pill pill-green">📱 QRIS (Auto)</span>
+                  <span class="pill pill-green">📱 QRIS (Lunas)</span>
+                @elseif(in_array($order->payment_method, $midtransMethods))
+                  <span class="pill pill-green" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">✅ {{ $midtransLabel }} (Lunas)</span>
                 @else
-                  <span class="pill pill-amber">💵 Cash</span>
+                  <span class="pill pill-green" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">✅ Cash (Lunas)</span>
                 @endif
                 &nbsp;·&nbsp;
                 <span class="pill pill-blue">Diproses</span>

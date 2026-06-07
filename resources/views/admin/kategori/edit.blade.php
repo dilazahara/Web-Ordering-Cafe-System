@@ -102,11 +102,7 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 
 <script>
 lucide.createIcons();
-function confirmDelete() {
-    if (confirm('Yakin ingin menghapus kategori ini? Tindakan ini tidak bisa dibatalkan.')) {
-        document.getElementById('deleteForm').submit();
-    }
-}
+
 </script>
 </body>
 </html>

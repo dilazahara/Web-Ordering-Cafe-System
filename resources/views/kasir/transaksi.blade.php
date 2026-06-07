@@ -467,12 +467,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         Rp {{ number_format($order->total ?? 0, 0, ',', '.') }}
                     </td>
                     <td>
-                        @if($order->payment_method === 'cash')
+                        @php
+                            $pm = $order->payment_method ?? 'cash';
+                            $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+                            $methodLabels = [
+                                'gopay'       => ['emoji'=>'💚','label'=>'GoPay'],
+                                'ovo'         => ['emoji'=>'💜','label'=>'OVO'],
+                                'dana'        => ['emoji'=>'💙','label'=>'DANA'],
+                                'shopeepay'   => ['emoji'=>'🧡','label'=>'ShopeePay'],
+                                'bca'         => ['emoji'=>'🏦','label'=>'BCA VA'],
+                                'bni'         => ['emoji'=>'🏦','label'=>'BNI VA'],
+                                'bri'         => ['emoji'=>'🏦','label'=>'BRI VA'],
+                                'mandiri'     => ['emoji'=>'🏦','label'=>'Mandiri VA'],
+                                'permata'     => ['emoji'=>'🏦','label'=>'Permata VA'],
+                                'credit_card' => ['emoji'=>'💳','label'=>'Kartu Kredit'],
+                                'midtrans'    => ['emoji'=>'💳','label'=>'Online'],
+                            ];
+                        @endphp
+                        @if($pm === 'cash')
                             <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">💵 Cash</span>
-                        @elseif($order->payment_method === 'qris')
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;">📱 QRIS</span>
+                        @elseif(in_array($pm, $midtransMethods))
+                            @php $ml = $methodLabels[$pm] ?? ['emoji'=>'💳','label'=>ucfirst($pm)]; @endphp
+                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;">{{ $ml['emoji'] }} {{ $ml['label'] }}</span>
                         @else
-                            <span style="font-size:12px; color:#64748b; text-transform:capitalize;">{{ $order->payment_method ?? 'Tunai' }}</span>
+                            <span style="font-size:12px; color:#64748b; text-transform:capitalize;">{{ $pm }}</span>
                         @endif
                     </td>
                     <td>
@@ -574,6 +592,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
             <tr><td style="padding:3px 0;">Uang Diterima</td><td style="text-align:right;" id="sUang">—</td></tr>
             <tr style="font-weight:700;"><td style="padding:3px 0;">Kembalian</td><td style="text-align:right;" id="sKembali">—</td></tr>
           </table>
+        </div>
+        <div id="sMidtransBlock" style="display:none;margin-top:6px;">
+          <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px 10px;text-align:center;font-family:'Poppins',sans-serif;">
+            <span style="font-size:11px;font-weight:700;color:#065f46;">✅ Lunas via Online Payment (Midtrans)</span>
+          </div>
         </div>
         <div style="border-top:2px dashed #bbb;margin:10px 0 8px;"></div>
         <div style="text-align:center;font-size:11px;color:#666;line-height:1.8;font-family:'Poppins',sans-serif;">
@@ -919,7 +942,8 @@ function openStrukModal(id, queueNum, meja, total, metode, waktu, items, uangDit
     document.getElementById('sNama').textContent    = customerName || '—';
     document.getElementById('sMeja').textContent    = meja ? 'Meja ' + meja : 'Take Away';
     document.getElementById('sWaktu').textContent   = waktu;
-    document.getElementById('sMetode').textContent  = metode === 'cash' ? '💵 Cash' : '📱 QRIS';
+    var metodeLabels = {'cash':'💵 Cash (Bayar di Kasir)','gopay':'💚 GoPay (Midtrans)','ovo':'💜 OVO (Midtrans)','dana':'💙 DANA (Midtrans)','shopeepay':'🧡 ShopeePay (Midtrans)','bca':'🏦 BCA Virtual Account','bni':'🏦 BNI Virtual Account','bri':'🏦 BRI Virtual Account','mandiri':'🏦 Mandiri Virtual Account','permata':'🏦 Permata Virtual Account','credit_card':'💳 Kartu Kredit (Midtrans)','midtrans':'💳 Online (Midtrans)'};
+    document.getElementById('sMetode').textContent = metodeLabels[metode] || ('💳 ' + metode);
     document.getElementById('sTotal').textContent   = 'Rp ' + Number(total).toLocaleString('id-ID');
     document.getElementById('sPrintTime').textContent = new Date().toLocaleString('id-ID');
 
@@ -939,15 +963,23 @@ function openStrukModal(id, queueNum, meja, total, metode, waktu, items, uangDit
     }
     document.getElementById('sItems').innerHTML = itemsHtml;
 
-    // Uang diterima & kembalian (hanya cash)
+    // Uang diterima & kembalian (hanya cash) / info Midtrans
+    var midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
     var uangBlock = document.getElementById('sUangBlock');
+    var midtransBlock = document.getElementById('sMidtransBlock');
+
     if (metode === 'cash' && Number(uangDiterima) > 0) {
         document.getElementById('sUang').textContent    = 'Rp ' + Number(uangDiterima).toLocaleString('id-ID');
         var kembalian = Math.max(0, Number(uangDiterima) - Number(total));
         document.getElementById('sKembali').textContent = 'Rp ' + kembalian.toLocaleString('id-ID');
         uangBlock.style.display = '';
+        if (midtransBlock) midtransBlock.style.display = 'none';
+    } else if (midtransMethods.indexOf(metode) !== -1) {
+        uangBlock.style.display = 'none';
+        if (midtransBlock) midtransBlock.style.display = '';
     } else {
         uangBlock.style.display = 'none';
+        if (midtransBlock) midtransBlock.style.display = 'none';
     }
 
     var modal = document.getElementById('strukModal');

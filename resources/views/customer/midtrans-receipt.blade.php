@@ -45,7 +45,6 @@
         }
         .bounce { animation: bounce 1.5s infinite; }
 
-        /* ── Tombol aksi ── */
         .btn-action {
             display: flex;
             align-items: center;
@@ -74,18 +73,10 @@
             box-shadow: 0 8px 20px -4px rgba(16,185,129,0.45);
         }
 
-        /* ── Print styles ── */
         @media print {
-            body {
-                background: white !important;
-                padding: 0 !important;
-            }
+            body { background: white !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            .receipt-card {
-                box-shadow: none !important;
-                border-radius: 0 !important;
-                border: 1px solid #e5e7eb;
-            }
+            .receipt-card { box-shadow: none !important; border-radius: 0 !important; border: 1px solid #e5e7eb; }
             .fade-up { animation: none !important; }
             .bounce  { animation: none !important; }
         }
@@ -95,25 +86,27 @@
 
 @php
     $methodIcons = [
-        'gopay'     => ['icon' => '💚', 'color' => '#00AED6', 'label' => 'GoPay'],
-        'ovo'       => ['icon' => '💜', 'color' => '#4C3494', 'label' => 'OVO'],
-        'dana'      => ['icon' => '💙', 'color' => '#118EEA', 'label' => 'DANA'],
-        'shopeepay' => ['icon' => '🧡', 'color' => '#EE4D2D', 'label' => 'ShopeePay'],
-        'bca'       => ['icon' => '🏦', 'color' => '#003D8F', 'label' => 'BCA Virtual Account'],
-        'bni'       => ['icon' => '🏦', 'color' => '#FF6600', 'label' => 'BNI Virtual Account'],
-        'bri'       => ['icon' => '🏦', 'color' => '#00529C', 'label' => 'BRI Virtual Account'],
-        'mandiri'   => ['icon' => '🏦', 'color' => '#003087', 'label' => 'Mandiri Bill'],
-        'permata'   => ['icon' => '🏦', 'color' => '#E31837', 'label' => 'Permata Virtual Account'],
+        'gopay'       => ['icon' => '💚', 'color' => '#00AED6', 'label' => 'GoPay'],
+        'ovo'         => ['icon' => '💜', 'color' => '#4C3494', 'label' => 'OVO'],
+        'dana'        => ['icon' => '💙', 'color' => '#118EEA', 'label' => 'DANA'],
+        'shopeepay'   => ['icon' => '🧡', 'color' => '#EE4D2D', 'label' => 'ShopeePay'],
+        'bca'         => ['icon' => '🏦', 'color' => '#003D8F', 'label' => 'BCA Virtual Account'],
+        'bni'         => ['icon' => '🏦', 'color' => '#FF6600', 'label' => 'BNI Virtual Account'],
+        'bri'         => ['icon' => '🏦', 'color' => '#00529C', 'label' => 'BRI Virtual Account'],
+        'mandiri'     => ['icon' => '🏦', 'color' => '#003087', 'label' => 'Mandiri Bill'],
+        'permata'     => ['icon' => '🏦', 'color' => '#E31837', 'label' => 'Permata Virtual Account'],
+        'credit_card' => ['icon' => '💳', 'color' => '#6366f1', 'label' => 'Kartu Kredit'],
+        'midtrans'    => ['icon' => '💳', 'color' => '#6366f1', 'label' => 'Midtrans'],
     ];
-    $methodInfo = $methodIcons[$order->payment_method] ?? ['icon' => '💳', 'color' => '#6366f1', 'label' => strtoupper($order->payment_method)];
-    $subtotal   = $order->items->sum(fn($i) => $i->subtotal);
+    $methodInfo   = $methodIcons[$order->payment_method] ?? ['icon' => '💳', 'color' => '#6366f1', 'label' => strtoupper($order->payment_method)];
+    $subtotal     = $order->items->sum(fn($i) => $i->price * $i->qty);
     $biayaLayanan = $order->total - $subtotal;
 @endphp
 
 <div class="w-full max-w-sm fade-up">
     <div class="receipt-card">
 
-        {{-- ── HEADER SUKSES ── --}}
+        {{-- HEADER SUKSES --}}
         <div class="px-5 pt-7 pb-5 text-center"
              style="background: linear-gradient(135deg, {{ $methodInfo['color'] }}, {{ $methodInfo['color'] }}cc);">
             <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 bounce">
@@ -126,20 +119,23 @@
             <p class="text-white/70 text-xs mt-1">via {{ $methodInfo['icon'] }} {{ $methodInfo['label'] }}</p>
         </div>
 
-        {{-- ── NOMOR ANTRIAN ── --}}
+        {{-- NOMOR ANTRIAN --}}
         <div class="bg-green-50 px-5 py-4 text-center">
             <p class="text-xs text-gray-500 mb-1">Nomor Antrian</p>
             <p class="text-4xl font-black text-green-600 tracking-widest">{{ $order->queue_number }}</p>
+            @if($order->customer_name)
+            <p class="text-xs text-gray-500 mt-1 font-semibold">{{ $order->customer_name }}</p>
+            @endif
             @if($order->table_number)
-            <p class="text-xs text-gray-400 mt-1">Meja {{ $order->table_number }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">Meja {{ $order->table_number }}</p>
             @endif
         </div>
 
         <hr class="divider-dashed mx-5">
 
-        {{-- ── HEADER STRUK ── --}}
+        {{-- HEADER STRUK --}}
         <div class="px-5 pt-4 pb-2 text-center">
-            <p class="font-black text-gray-800 text-base">Momoo Juice Bar Coffee Windsor</p>
+            <p class="font-black text-gray-800 text-base">Cafe Tugas Akhir</p>
             <p class="text-xs text-gray-400">Batam, Kepulauan Riau</p>
             <p class="text-[10px] text-gray-400 mt-1">
                 {{ now()->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
@@ -148,7 +144,7 @@
 
         <hr class="divider-dashed mx-5">
 
-        {{-- ── DETAIL PESANAN ── --}}
+        {{-- DETAIL PESANAN --}}
         <div class="px-5 py-4 space-y-2">
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detail Pesanan</p>
             @foreach($order->items as $item)
@@ -161,7 +157,7 @@
                     <p class="text-xs text-gray-400">{{ $item->qty }} × Rp {{ number_format($item->price, 0, ',', '.') }}</p>
                 </div>
                 <div class="text-right ml-3 shrink-0">
-                    <p class="font-bold text-gray-700">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</p>
+                    <p class="font-bold text-gray-700">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</p>
                 </div>
             </div>
             @endforeach
@@ -169,7 +165,7 @@
 
         <hr class="divider-dashed mx-5">
 
-        {{-- ── RINCIAN HARGA ── --}}
+        {{-- RINCIAN HARGA --}}
         <div class="px-5 py-4 space-y-1.5">
             <div class="flex justify-between text-sm text-gray-500">
                 <span>Subtotal</span>
@@ -191,40 +187,63 @@
             </div>
             <div class="flex justify-between items-center text-xs text-gray-400">
                 <span>Status</span>
-                <span class="font-bold text-green-600">✅ LUNAS</span>
+                @if(in_array($order->status, ['process', 'done', 'completed']))
+                    <span class="font-bold text-green-600">✅ LUNAS</span>
+                @elseif($order->status === 'waiting_payment')
+                    <span class="font-bold text-amber-500">⏳ MENUNGGU PEMBAYARAN</span>
+                @elseif($order->status === 'cancelled')
+                    <span class="font-bold text-red-500">❌ DIBATALKAN</span>
+                @else
+                    <span class="font-bold text-blue-500">🔄 DIPROSES</span>
+                @endif
             </div>
             <div class="flex justify-between items-center text-xs text-gray-400">
                 <span>ID Pesanan</span>
                 <span class="font-mono text-gray-500">#{{ $order->id }}</span>
             </div>
-        </div>
-
-        <hr class="divider-dashed mx-5">
-
-        {{-- ── INFO TUNGGU ── --}}
-        <div class="px-5 py-4">
-            <div class="bg-green-50 rounded-xl p-3 text-center">
-                <p class="text-sm font-bold text-green-700">⏳ Pesanan sedang diproses</p>
-                <p class="text-xs text-green-600 mt-0.5">Silakan tunggu, kasir akan segera mengkonfirmasi pesanan kamu.</p>
+            @if($order->midtrans_order_id)
+            <div class="flex justify-between items-center text-xs text-gray-400">
+                <span>ID Transaksi</span>
+                <span class="font-mono text-gray-500 text-[10px]">{{ $order->midtrans_order_id }}</span>
             </div>
+            @endif
         </div>
 
         <hr class="divider-dashed mx-5">
 
-        {{-- ── TOMBOL AKSI ── --}}
+        {{-- INFO STATUS --}}
+        <div class="px-5 py-4">
+            @if(in_array($order->status, ['process', 'done', 'delivered', 'completed']))
+            <div class="bg-green-50 rounded-xl p-3 text-center">
+                <p class="text-sm font-bold text-green-700">🔥 Pesanan sudah masuk dapur!</p>
+                <p class="text-xs text-green-600 mt-0.5">Pesananmu sedang dimasak. Harap tunggu ya 😊</p>
+            </div>
+            @elseif($order->status === 'waiting_payment')
+            <div class="bg-amber-50 rounded-xl p-3 text-center">
+                <p class="text-sm font-bold text-amber-700">⏳ Menunggu konfirmasi pembayaran</p>
+                <p class="text-xs text-amber-600 mt-0.5">Selesaikan pembayaranmu, pesanan akan otomatis diproses.</p>
+            </div>
+            @else
+            <div class="bg-blue-50 rounded-xl p-3 text-center">
+                <p class="text-sm font-bold text-blue-700">🔄 Pesanan sedang diverifikasi</p>
+                <p class="text-xs text-blue-600 mt-0.5">Mohon tunggu sebentar.</p>
+            </div>
+            @endif
+        </div>
+
+        <hr class="divider-dashed mx-5">
+
+        {{-- TOMBOL AKSI --}}
         <div class="px-5 py-4 space-y-2.5 no-print">
-            {{-- Print/Simpan Struk --}}
             <button onclick="cetakStruk()" class="btn-action btn-print">
                 🖨️ Cetak / Simpan Struk
             </button>
-
-            {{-- Kembali ke Home --}}
-            <a href="{{ url('/customer') }}" class="btn-action btn-home">
+            <a href="{{ url('/customer/home') }}" class="btn-action btn-home">
                 🏠 Kembali ke Menu
             </a>
         </div>
 
-        {{-- ── FOOTER ── --}}
+        {{-- FOOTER --}}
         <div class="px-5 pb-5 flex items-center justify-between text-[10px] text-gray-300">
             <span>Diproses oleh Midtrans</span>
             <span>Terima kasih! 🙏</span>
@@ -238,7 +257,6 @@
 
 <script>
 function cetakStruk() {
-    // Sembunyikan tombol sementara, lalu print
     const noPrint = document.querySelectorAll('.no-print');
     noPrint.forEach(el => el.style.display = 'none');
     window.print();

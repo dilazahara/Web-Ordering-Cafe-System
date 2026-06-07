@@ -28,6 +28,8 @@ class DapurController extends Controller
 
     public function proses()
     {
+        // Dapur menerima semua pesanan berstatus 'process'
+        // baik cash (sudah dikonfirmasi kasir), QRIS/Midtrans (sudah bayar otomatis)
         $query = Order::with(['items.menu'])
             ->where('status', 'process')
             ->whereDate('created_at', today());

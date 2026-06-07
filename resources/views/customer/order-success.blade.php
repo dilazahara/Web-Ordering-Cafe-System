@@ -9,34 +9,17 @@
 <style>
 body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-.glass-card {
-    background: rgba(255,255,255,0.88);
-    backdrop-filter: blur(18px);
-    border: 1px solid rgba(255,255,255,0.6);
+@keyframes pulse-orange {
+    0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(249,115,22,0.45); }
+    70%  { transform: scale(1.04); box-shadow: 0 0 0 20px rgba(249,115,22,0); }
+    100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(249,115,22,0); }
 }
+.success-ring { animation: pulse-orange 2.2s infinite; }
 
-@keyframes pulse-green {
-    0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(34,197,94,0.45); }
-    70%  { transform: scale(1.04); box-shadow: 0 0 0 20px rgba(34,197,94,0); }
-    100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(34,197,94,0); }
-}
-.success-ring { animation: pulse-green 2.2s infinite; }
-
-@keyframes fadeUp {
-    from { opacity:0; transform: translateY(18px); }
-    to   { opacity:1; transform: translateY(0); }
-}
+@keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
 .fade-up { animation: fadeUp 0.6s ease forwards; }
 
-/* Stagger children */
-.fade-up:nth-child(1) { animation-delay: 0s; }
-.fade-up:nth-child(2) { animation-delay: .1s; }
-.fade-up:nth-child(3) { animation-delay: .2s; }
-
-.item-card {
-    transition: all 0.2s;
-    border: 1px solid #f1f5f9;
-}
+.item-card { transition: all 0.2s; border: 1px solid #f1f5f9; }
 .item-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); transform: translateY(-1px); }
 
 .btn-back {
@@ -54,35 +37,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 @php
     $pm = $order->payment_method;
 
-    // Label tampil di kartu
     $pmLabel = match($pm) {
         'cash' => 'Tunai (Cash)',
-        'qris' => 'QRIS',
-        'bank' => 'Transfer Bank',
         default => ucfirst($pm),
     };
 
-    // Icon metode
     $pmIcon = match($pm) {
         'cash' => '💵',
-        'qris' => '📱',
-        'bank' => '🏦',
         default => '💳',
     };
-
-    // Status badge
-    // QRIS → sudah lunas (konfirmasi di halaman QRIS sebelumnya)
-    // Cash/bank/lainnya → pending (kasir yang proses)
-    $isLunas = $pm === 'qris';
-    $badgeClass = $isLunas
-        ? 'bg-emerald-100 text-emerald-700'
-        : 'bg-amber-100 text-amber-700';
-    $badgeText  = $isLunas ? '✅ Lunas' : '⏳ Menunggu Pembayaran';
 @endphp
 
 <div class="w-full max-w-md fade-up">
 
-    <div class="glass-card rounded-[32px] shadow-2xl overflow-hidden">
+    <div class="bg-white/90 backdrop-blur rounded-[32px] shadow-2xl border border-white/60 overflow-hidden">
 
         {{-- TOP GRADIENT --}}
         <div class="relative bg-gradient-to-r from-orange-500 to-orange-600 px-8 pt-10 pb-16 text-center">
@@ -104,7 +72,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
         <div class="px-7 pb-7 -mt-8 relative z-20">
 
             {{-- SUMMARY CARD --}}
-            <div class="bg-white rounded-3xl shadow-lg border border-orange-100 p-5 space-y-4 fade-up">
+            <div class="bg-white rounded-3xl shadow-lg border border-orange-100 p-5 space-y-4">
 
                 {{-- MEJA --}}
                 <div class="flex items-center justify-between">
@@ -117,7 +85,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
                 <div class="border-t border-dashed border-gray-200"></div>
 
-                {{-- METODE PEMBAYARAN (dinamis) --}}
+                {{-- METODE PEMBAYARAN --}}
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Metode Pembayaran</p>
@@ -125,8 +93,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                             <span>{{ $pmIcon }}</span> {{ $pmLabel }}
                         </h3>
                     </div>
-                    <span class="px-3 py-1.5 rounded-full text-xs font-bold {{ $badgeClass }}">
-                        {{ $badgeText }}
+                    <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700">
+                        ⏳ Menunggu Pembayaran
                     </span>
                 </div>
 
@@ -141,15 +109,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         </h3>
                     </div>
                     <div class="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center text-2xl shadow-lg">
-                        💳
+                        💵
                     </div>
                 </div>
 
             </div>
 
-            {{-- INFO INSTRUKSI (per metode) --}}
-            @if($pm === 'cash')
-            <div class="mt-5 bg-orange-50 border border-orange-100 rounded-2xl p-4 flex gap-3 items-start fade-up">
+            {{-- INFO INSTRUKSI --}}
+            <div class="mt-5 bg-orange-50 border border-orange-100 rounded-2xl p-4 flex gap-3 items-start">
                 <span class="text-2xl">💵</span>
                 <div>
                     <p class="text-sm font-bold text-orange-800">Bayar ke Kasir</p>
@@ -158,38 +125,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     </p>
                 </div>
             </div>
-            @elseif($pm === 'bank')
-            <div class="mt-5 bg-blue-50 border border-blue-100 rounded-2xl p-4 flex gap-3 items-start fade-up">
-                <span class="text-2xl">🏦</span>
-                <div>
-                    <p class="text-sm font-bold text-blue-800">Selesaikan Transfer</p>
-                    <p class="text-xs text-blue-600 mt-1 leading-relaxed"> Lakukan transfer ke rekening yang tertera dan konfirmasikan ke kasir dengan nomor pesanan <strong>{{ $order->queue_number }}</strong></p>
-                </div>
-            </div>
-            @elseif($pm === 'qris')
-            <div class="mt-5 bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex gap-3 items-start fade-up">
-                <span class="text-2xl">✅</span>
-                <div>
-                    <p class="text-sm font-bold text-emerald-800">Pembayaran QRIS Dikonfirmasi</p>
-                    <p class="text-xs text-emerald-600 mt-1 leading-relaxed">
-                        Terima kasih! Pembayaran QRIS sudah tercatat. Pesananmu sedang diproses dapur.
-                    </p>
-                </div>
-            </div>
-            @else
-            <div class="mt-5 bg-slate-50 border border-slate-100 rounded-2xl p-4 flex gap-3 items-start fade-up">
-                <span class="text-2xl">💳</span>
-                <div>
-                    <p class="text-sm font-bold text-slate-700">Selesaikan Pembayaran</p>
-                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-                        Hubungi kasir untuk menyelesaikan pembayaran dengan nomor pesanan <strong>{{ $order->queue_number }}</strong>.
-                    </p>
-                </div>
-            </div>
-            @endif
 
             {{-- ITEM PESANAN --}}
-            <div class="mt-6 fade-up">
+            <div class="mt-6">
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-xs font-extrabold text-gray-500 uppercase tracking-wider">Item Pesanan</h2>
                     <span class="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full font-semibold">
@@ -221,11 +159,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
             {{-- TOMBOL KEMBALI --}}
             <button
-                onclick="
-                    localStorage.removeItem('cart');
-                    localStorage.removeItem('checkoutCart');
-                    window.location.href='/customer/home';
-                "
+                onclick="localStorage.removeItem('cart'); localStorage.removeItem('checkoutCart'); window.location.href='/customer/home';"
                 class="btn-back mt-7 w-full text-white py-4 rounded-2xl font-extrabold text-sm tracking-wide">
                 🏠 Kembali ke Menu
             </button>

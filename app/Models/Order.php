@@ -12,6 +12,8 @@ class Order extends Model
         'customer_name',
         'order_type',
         'payment_method',
+        'midtrans_order_id', // ← tambah ini
+        'snap_token',        // ← tambah ini
         'status',
         'total',
         'note',
@@ -20,12 +22,6 @@ class Order extends Model
         'process_at',
         'done_at',
     ];
-
-    // ✅ HAPUS $attributes — ini yang bikin status selalu pending
-    // protected $attributes = [
-    //     'status' => 'pending',
-    //     'payment_method' => 'cash',
-    // ];
 
     public function items()
     {
