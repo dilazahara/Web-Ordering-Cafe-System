@@ -71,44 +71,43 @@ Route::middleware('auth')->group(function () {
 });
 
 // ══════════════════════════════════════════════════════
-// MIDTRANS WEBHOOK — tanpa CSRF
+// MIDTRANS WEBHOOK — di luar middleware, tanpa CSRF
+// Satu-satunya sumber kebenaran status pembayaran Midtrans
 // ══════════════════════════════════════════════════════
 
-Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])->name('midtrans.webhook');
+Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])
+    ->name('midtrans.webhook');
 
 // ══════════════════════════════════════════════════════
 // CUSTOMER
 // ══════════════════════════════════════════════════════
 
 Route::prefix('customer')->name('customer.')->group(function () {
- 
-    Route::get('/home',                     [HomeController::class, 'index'])->name('home');
-    Route::get('/scan/{nomor_meja}',        [HomeController::class, 'scanMeja'])->name('scan');
-    Route::get('/addons',                   [AddonController::class, 'index'])->name('addons');
-    Route::get('/cart',                     [CartController::class, 'index'])->name('cart');
-    Route::get('/checkout',                 [CheckoutController::class, 'index'])->name('checkout');
-    Route::post('/order',                   [CustomerOrderController::class, 'store'])->name('order.store');
- 
+
+    Route::get('/home',              [HomeController::class, 'index'])->name('home');
+    Route::get('/scan/{nomor_meja}', [HomeController::class, 'scanMeja'])->name('scan');
+    Route::get('/addons',            [AddonController::class, 'index'])->name('addons');
+    Route::get('/cart',              [CartController::class, 'index'])->name('cart');
+    Route::get('/checkout',          [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/order',            [CustomerOrderController::class, 'store'])->name('order.store');
+
     // ── Cash ──────────────────────────────────────────────────────────
-    Route::get('/order/bill/{id}',          [CustomerOrderController::class, 'cashBill'])->name('order.bill');
- 
+    Route::get('/order/bill/{id}', [CustomerOrderController::class, 'cashBill'])->name('order.bill');
+
     // ── QRIS manual ───────────────────────────────────────────────────
     Route::get('/order/qris/{id}',          [CustomerOrderController::class, 'qrisPayment'])->name('order.qris');
     Route::post('/order/qris/{id}/confirm', [CustomerOrderController::class, 'qrisConfirm'])->name('order.qris.confirm');
     Route::get('/order/qris/{id}/receipt',  [CustomerOrderController::class, 'qrisReceipt'])->name('order.qris.receipt');
- 
+
     // ── Midtrans Snap ─────────────────────────────────────────────────
-    Route::get('/order/midtrans/{id}',          [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
-    Route::post('/order/midtrans/{id}/confirm', [CustomerOrderController::class, 'midtransConfirm'])->name('order.midtrans.confirm');
-    Route::get('/order/midtrans/{id}/receipt',  [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
- 
-    // ── Success (fallback) ────────────────────────────────────────────
-    Route::get('/order/success/{id}',       [CustomerOrderController::class, 'success'])->name('order.success');
- 
+    Route::get('/order/midtrans/{id}',         [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
+    Route::post('/order/midtrans/{id}/confirm',[CustomerOrderController::class, 'midtransCheckStatus'])->name('order.midtrans.confirm');
+    Route::get('/order/midtrans/{id}/receipt', [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
+
+    // ── Success (fallback cash) ───────────────────────────────────────
+    Route::get('/order/success/{id}', [CustomerOrderController::class, 'success'])->name('order.success');
+
 });
- 
-// Midtrans webhook — harus di LUAR middleware auth, TANPA CSRF
-Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])->name('midtrans.webhook');
 
 // ══════════════════════════════════════════════════════
 // ADMIN
@@ -120,9 +119,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
     // ── ORDER ─────────────────────────────────────────
-    Route::get('/order',                [OrderController::class, 'index'])->name('order.index');
-    Route::post('/order/process/{id}',  [OrderController::class, 'process'])->name('order.process');
-    Route::post('/order/done/{id}',     [OrderController::class, 'done'])->name('order.done');
+    Route::get('/order',               [OrderController::class, 'index'])->name('order.index');
+    Route::post('/order/process/{id}', [OrderController::class, 'process'])->name('order.process');
+    Route::post('/order/done/{id}',    [OrderController::class, 'done'])->name('order.done');
 
     // ── MENU ──────────────────────────────────────────
     Route::get('/menu',              [MenuController::class, 'index'])->name('menu.index');
@@ -141,36 +140,36 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/kategori/delete/{id}', [KategoriController::class, 'destroy'])->name('kategori.delete');
 
     // ── ADDONS ────────────────────────────────────────
-    Route::get('/addons',                [AddOnsController::class, 'index'])->name('addons.index');
-    Route::get('/addons/create',         [AddOnsController::class, 'create'])->name('addons.create');
-    Route::post('/addons/store',         [AddOnsController::class, 'store'])->name('addons.store');
-    Route::post('/addon-groups/store',   [AddonGroupController::class, 'store'])->name('addon-groups.store');
-    Route::get('/addons/edit/{id}',      [AddOnsController::class, 'edit'])->name('addons.edit');
-    Route::put('/addons/update/{id}',    [AddOnsController::class, 'update'])->name('addons.update');
-    Route::post('/addons/delete/{id}',   [AddOnsController::class, 'destroy'])->name('addons.delete');
+    Route::get('/addons',              [AddOnsController::class, 'index'])->name('addons.index');
+    Route::get('/addons/create',       [AddOnsController::class, 'create'])->name('addons.create');
+    Route::post('/addons/store',       [AddOnsController::class, 'store'])->name('addons.store');
+    Route::post('/addon-groups/store', [AddonGroupController::class, 'store'])->name('addon-groups.store');
+    Route::get('/addons/edit/{id}',    [AddOnsController::class, 'edit'])->name('addons.edit');
+    Route::put('/addons/update/{id}',  [AddOnsController::class, 'update'])->name('addons.update');
+    Route::post('/addons/delete/{id}', [AddOnsController::class, 'destroy'])->name('addons.delete');
 
     // ── MEJA ──────────────────────────────────────────
-    Route::get('/meja',              [MejaController::class, 'index'])->name('meja.index');
-    Route::get('/meja/create',       [MejaController::class, 'create'])->name('meja.create');
-    Route::post('/meja/store',       [MejaController::class, 'store'])->name('meja.store');
-    Route::get('/meja/edit/{id}',    [MejaController::class, 'edit'])->name('meja.edit');
-    Route::put('/meja/update/{id}',  [MejaController::class, 'update'])->name('meja.update');
+    Route::get('/meja',                [MejaController::class, 'index'])->name('meja.index');
+    Route::get('/meja/create',         [MejaController::class, 'create'])->name('meja.create');
+    Route::post('/meja/store',         [MejaController::class, 'store'])->name('meja.store');
+    Route::get('/meja/edit/{id}',      [MejaController::class, 'edit'])->name('meja.edit');
+    Route::put('/meja/update/{id}',    [MejaController::class, 'update'])->name('meja.update');
     Route::delete('/meja/delete/{id}', [MejaController::class, 'destroy'])->name('meja.delete');
 
     // ── PEMBAYARAN ────────────────────────────────────
-    Route::get('/pembayaran',                [PaymentMethodController::class, 'index'])->name('pembayaran.index');
-    Route::post('/pembayaran',               [PaymentMethodController::class, 'store'])->name('pembayaran.store');
-    Route::put('/pembayaran/{id}',           [PaymentMethodController::class, 'update'])->name('pembayaran.update');
-    Route::post('/pembayaran/toggle/{id}',   [PaymentMethodController::class, 'toggle'])->name('pembayaran.toggle');
-    Route::post('/pembayaran/qris/{id}',     [PaymentMethodController::class, 'updateQris'])->name('pembayaran.qris');
-    Route::delete('/pembayaran/{id}',        [PaymentMethodController::class, 'destroy'])->name('pembayaran.destroy');
+    Route::get('/pembayaran',              [PaymentMethodController::class, 'index'])->name('pembayaran.index');
+    Route::post('/pembayaran',             [PaymentMethodController::class, 'store'])->name('pembayaran.store');
+    Route::put('/pembayaran/{id}',         [PaymentMethodController::class, 'update'])->name('pembayaran.update');
+    Route::post('/pembayaran/toggle/{id}', [PaymentMethodController::class, 'toggle'])->name('pembayaran.toggle');
+    Route::post('/pembayaran/qris/{id}',   [PaymentMethodController::class, 'updateQris'])->name('pembayaran.qris');
+    Route::delete('/pembayaran/{id}',      [PaymentMethodController::class, 'destroy'])->name('pembayaran.destroy');
 
     // ── USER ──────────────────────────────────────────
-    Route::get('/user',              [UserController::class, 'index'])->name('user.index');
-    Route::get('/user/create',       [UserController::class, 'create'])->name('user.create');
-    Route::post('/user/store',       [UserController::class, 'store'])->name('user.store');
-    Route::get('/user/edit/{id}',    [UserController::class, 'edit'])->name('user.edit');
-    Route::post('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::get('/user',                [UserController::class, 'index'])->name('user.index');
+    Route::get('/user/create',         [UserController::class, 'create'])->name('user.create');
+    Route::post('/user/store',         [UserController::class, 'store'])->name('user.store');
+    Route::get('/user/edit/{id}',      [UserController::class, 'edit'])->name('user.edit');
+    Route::post('/user/update/{id}',   [UserController::class, 'update'])->name('user.update');
     Route::delete('/user/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 
     // ── LAPORAN ───────────────────────────────────────
@@ -193,11 +192,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->group(function () {
 
-    Route::get('/dashboard',  [KasirController::class, 'dashboard'])->name('dashboard');
-    Route::get('/poll',       [KasirController::class, 'poll'])->name('poll');
-    Route::get('/pesanan',    [KasirController::class, 'pesanan'])->name('pesanan');
-    Route::get('/transaksi',  [KasirController::class, 'transaksi'])->name('transaksi');
-    Route::get('/detail/{id}',[KasirController::class, 'detail'])->name('detail');
+    Route::get('/dashboard',   [KasirController::class, 'dashboard'])->name('dashboard');
+    Route::get('/poll',        [KasirController::class, 'poll'])->name('poll');
+    Route::get('/pesanan',     [KasirController::class, 'pesanan'])->name('pesanan');
+    Route::get('/transaksi',   [KasirController::class, 'transaksi'])->name('transaksi');
+    Route::get('/detail/{id}', [KasirController::class, 'detail'])->name('detail');
 
     // ── LAPORAN ───────────────────────────────────────
     Route::get('/laporan',     [KasirController::class, 'laporan'])->name('laporan');
@@ -208,10 +207,10 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
     Route::patch('/pesanan/{id}/selesai',    [KasirController::class, 'selesai'])->name('selesai');
 
     // ── ACCOUNT ───────────────────────────────────────
-    Route::get('/account/profil',          [AccountKasirController::class, 'profil'])->name('account.profil');
-    Route::put('/account/update',          [AccountKasirController::class, 'updateProfil'])->name('account.update');
-    Route::get('/account/ganti-sandi',     [AccountKasirController::class, 'gantiSandi'])->name('account.ganti-sandi');
-    Route::put('/account/update-password', [AccountKasirController::class, 'updatePassword'])->name('account.update-password');
+    Route::get('/account/profil',           [AccountKasirController::class, 'profil'])->name('account.profil');
+    Route::put('/account/update',           [AccountKasirController::class, 'updateProfil'])->name('account.update');
+    Route::get('/account/ganti-sandi',      [AccountKasirController::class, 'gantiSandi'])->name('account.ganti-sandi');
+    Route::put('/account/update-password',  [AccountKasirController::class, 'updatePassword'])->name('account.update-password');
     Route::post('/account/update-avatar',   [AccountKasirController::class, 'updateAvatar'])->name('account.update-avatar');
     Route::post('/account/verify-password', [AccountKasirController::class, 'verifyPassword'])->name('account.verify-password');
 
@@ -228,12 +227,12 @@ Route::middleware(['auth', 'role:dapur'])->prefix('dapur')->name('dapur.')->grou
     Route::post('/selesai/{id}', [DapurController::class, 'selesai'])->name('tandaiSelesai');
 
     // ── ACCOUNT ───────────────────────────────────────
-    Route::get('/account/profil',          [AccountDapurController::class, 'profil'])->name('account.profil');
-    Route::put('/account/update',          [AccountDapurController::class, 'updateProfil'])->name('account.update');
-    Route::get('/account/ganti-sandi',     [AccountDapurController::class, 'gantiSandi'])->name('account.ganti-sandi');
-    Route::put('/account/update-password', [AccountDapurController::class, 'updatePassword'])->name('account.update-password');
-    Route::post('/account/update-avatar',  [AccountDapurController::class, 'updateAvatar'])->name('account.update-avatar');
-    Route::post('/account/verify-password',[AccountDapurController::class, 'verifyPassword'])->name('account.verify-password');
+    Route::get('/account/profil',           [AccountDapurController::class, 'profil'])->name('account.profil');
+    Route::put('/account/update',           [AccountDapurController::class, 'updateProfil'])->name('account.update');
+    Route::get('/account/ganti-sandi',      [AccountDapurController::class, 'gantiSandi'])->name('account.ganti-sandi');
+    Route::put('/account/update-password',  [AccountDapurController::class, 'updatePassword'])->name('account.update-password');
+    Route::post('/account/update-avatar',   [AccountDapurController::class, 'updateAvatar'])->name('account.update-avatar');
+    Route::post('/account/verify-password', [AccountDapurController::class, 'verifyPassword'])->name('account.verify-password');
 
 });
 
@@ -243,17 +242,17 @@ Route::middleware(['auth', 'role:dapur'])->prefix('dapur')->name('dapur.')->grou
 
 Route::middleware(['auth', 'role:pelayan'])->prefix('pelayan')->name('pelayan.')->group(function () {
 
-    Route::get('/antar',               [PelayanController::class, 'antar'])->name('antar');
-    Route::get('/poll',                [PelayanController::class, 'poll'])->name('poll');
-    Route::patch('/antar/{id}/diantar',[PelayanController::class, 'tandaiDiantar'])->name('antar.selesai');
+    Route::get('/antar',                [PelayanController::class, 'antar'])->name('antar');
+    Route::get('/poll',                 [PelayanController::class, 'poll'])->name('poll');
+    Route::patch('/antar/{id}/diantar', [PelayanController::class, 'tandaiDiantar'])->name('antar.selesai');
 
     // ── ACCOUNT ───────────────────────────────────────
-    Route::get('/account/profil',          [AccountPelayanController::class, 'profil'])->name('account.profil');
-    Route::put('/account/update',          [AccountPelayanController::class, 'updateProfil'])->name('account.update');
-    Route::get('/account/ganti-sandi',     [AccountPelayanController::class, 'gantiSandi'])->name('account.ganti-sandi');
-    Route::put('/account/update-password', [AccountPelayanController::class, 'updatePassword'])->name('account.update-password');
+    Route::get('/account/profil',           [AccountPelayanController::class, 'profil'])->name('account.profil');
+    Route::put('/account/update',           [AccountPelayanController::class, 'updateProfil'])->name('account.update');
+    Route::get('/account/ganti-sandi',      [AccountPelayanController::class, 'gantiSandi'])->name('account.ganti-sandi');
+    Route::put('/account/update-password',  [AccountPelayanController::class, 'updatePassword'])->name('account.update-password');
+    Route::post('/account/update-avatar',   [AccountPelayanController::class, 'updateAvatar'])->name('account.update-avatar');
     Route::post('/account/verify-password', [AccountPelayanController::class, 'verifyPassword'])->name('account.verify-password');
-Route::post('/account/update-avatar',   [AccountPelayanController::class, 'updateAvatar'])->name('account.update-avatar');
 
 });
 

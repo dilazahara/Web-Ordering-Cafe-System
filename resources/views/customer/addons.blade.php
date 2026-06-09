@@ -1,470 +1,318 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Detail Menu - {{ $menu->name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>{{ $menu->name }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <style>
-        * { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent;
+        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #fff; overflow-x: hidden; }
+
+        /* Hero image */
+        .hero { position: relative; width: 100%; height: 45vw; max-height: 280px; min-height: 200px; overflow: hidden; background: #f3f4f6; }
+        .hero img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.35) 0%, transparent 30%, transparent 65%, rgba(0,0,0,.55) 100%); }
+
+        /* Back btn */
+        .btn-back {
+            position: absolute; top: max(env(safe-area-inset-top), 12px); left: 16px; z-index: 10;
+            width: 44px; height: 44px;
+            background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,.15);
         }
-        
-        /* ── Body diubah agar support desktop (berwarna abu-abu) ── */
-        body {
-            background-color: #e5e7eb; /* Warna background luar untuk layar besar */
-            margin: 0;
-            display: flex;
-            justify-content: center;
+        .btn-back:active { transform: scale(0.90); }
+
+        /* Expand btn */
+        .btn-expand {
+            position: absolute; bottom: 14px; right: 14px;
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,.85); backdrop-filter: blur(8px);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
         }
 
-        /* ── App Container (Pembungkus agar tidak over-stretch di PC) ── */
-        .app-container {
-            width: 100%;
-            max-width: 480px; /* Lebar maksimal layaknya layar HP */
-            background-color: #ffffff;
-            min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.08);
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+        /* Content */
+        .content { background: #fff; border-radius: 28px 28px 0 0; margin-top: -20px; position: relative; padding: 24px 16px 200px; }
 
-        /* ── Image Header Modern ── */
-        .menu-img-wrap {
-            position: relative;
-            width: 100%;
-            height: 40vh;
-            min-height: 280px;
-            max-height: 400px;
-            overflow: hidden;
-            background: #f3f4f6;
+        /* Badge */
+        .badge-req  { background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.04em; }
+        .badge-opt  { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.04em; }
+        .badge-max  { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.04em; }
+
+        /* Addon row */
+        .addon-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 0; border-bottom: 1px solid #f3f4f6;
             cursor: pointer;
         }
-        .menu-img-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        .img-overlay {
-            position: absolute; 
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 70%, rgba(0,0,0,0.6) 100%);
-        }
+        .addon-row:last-child { border-bottom: none; }
+        .addon-row:active { background: #fff7ed; margin: 0 -16px; padding-left: 16px; padding-right: 16px; border-radius: 12px; }
 
-        /* ── Preview Icon ── */
-        .preview-trigger {
-            position: absolute;
-            bottom: 40px;
-            right: 16px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(8px);
-            padding: 8px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            color: #1f2937;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        /* ── Back Button Floating ── */
-        .back-btn {
-            position: absolute; /* Ubah ke absolute agar relatif terhadap app-container */
-            top: 16px; 
-            left: 16px; 
-            z-index: 100;
-            width: 42px; 
-            height: 42px; 
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            border: 1px solid rgba(255,255,255,0.3);
-            transition: all 0.2s;
-        }
-        .back-btn:active { transform: scale(0.9); }
-
-        /* ── Content Card ── */
-        .content-card {
-            position: relative;
-            margin-top: -24px;
-            background: white;
-            border-radius: 28px 28px 0 0;
-            padding: 24px 20px 140px;
-            box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
-            flex: 1; /* Penuhi sisa ruang */
-        }
-
-        /* ── Badge Styling ── */
-        .badge {
-            font-size: 10px; 
-            font-weight: 700;
-            padding: 4px 10px; 
-            border-radius: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.025em;
-        }
-        .badge-required { background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
-        .badge-max { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
-        .badge-free { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
-
-        /* ── Addon Group Card ── */
-        .group-card {
-            background: #ffffff;
-            border: 1px solid #f3f4f6;
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        /* ── Custom Input Controls ── */
+        /* Custom radio/checkbox */
         input[type=radio], input[type=checkbox] {
-            appearance: none;
-            width: 22px; height: 22px;
-            border: 2px solid #e5e7eb;
+            appearance: none; -webkit-appearance: none;
+            width: 24px; height: 24px;
+            border: 2.5px solid #d1d5db;
             background: #fff;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
+            cursor: pointer; transition: all 0.2s;
+            position: relative; flex-shrink: 0;
         }
         input[type=radio] { border-radius: 50%; }
-        input[type=checkbox] { border-radius: 7px; }
-        input[type=radio]:checked, input[type=checkbox]:checked {
-            background: #f97316;
-            border-color: #f97316;
-        }
+        input[type=checkbox] { border-radius: 8px; }
+        input[type=radio]:checked, input[type=checkbox]:checked { background: #f97316; border-color: #f97316; }
         input[type=radio]:checked::after {
-            content: ''; position: absolute; top: 5px; left: 5px;
-            width: 8px; height: 8px; border-radius: 50%; background: white;
+            content: ''; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 9px; height: 9px; border-radius: 50%; background: white;
         }
         input[type=checkbox]:checked::after {
-            content: '✓'; position: absolute; top: -1px; left: 3px;
-            color: white; font-size: 14px; font-weight: bold;
+            content: ''; position: absolute; top: 5px; left: 8px;
+            width: 6px; height: 10px;
+            border: 2.5px solid white; border-top: none; border-left: none;
+            transform: rotate(45deg);
         }
 
-        /* ── Quantity Controls ── */
-        .qty-container {
-            display: flex;
-            align-items: center;
-            background: #f9fafb;
-            padding: 6px;
-            border-radius: 16px;
-            border: 1px solid #f3f4f6;
-        }
-        .qty-btn {
-            width: 38px; height: 38px;
-            border-radius: 12px;
-            background: white;
-            color: #1f2937;
+        /* Qty */
+        .qty-row { display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border-radius:18px; padding:14px 16px; }
+        .qty-ctrl { display:flex; align-items:center; gap:4px; }
+        .q-btn {
+            width: 42px; height: 42px;
+            border-radius: 14px; border: none;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            font-weight: 700;
+            font-size: 22px; font-weight: 500; cursor: pointer; transition: all 0.15s;
         }
+        .q-btn.minus { background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); color: #374151; }
+        .q-btn.minus:active { background: #f1f5f9; transform: scale(.90); }
+        .q-btn.plus  { background: #f97316; color: #fff; }
+        .q-btn.plus:active { background: #ea580c; transform: scale(.90); }
 
-        /* ── Sticky Bottom Bar ── */
+        /* Bottom bar */
         .bottom-bar {
-            position: fixed; 
-            bottom: 0; 
-            width: 100%;
-            max-width: 480px; /* Ikuti lebar app-container */
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
-            border-top: 1px solid rgba(0,0,0,0.05);
-            z-index: 100;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #fff;
+            padding: 16px 16px max(env(safe-area-inset-bottom), 20px);
+            border-top: 1px solid #f0f0f0;
+            z-index: 50;
         }
-        .cta-btn {
-            width: 100%;
-            background: #f97316;
-            color: white;
-            border-radius: 18px;
-            padding: 16px 24px;
-            font-weight: 800;
+        .btn-addcart {
+            width: 100%; padding: 17px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #fff; border: none; border-radius: 20px;
+            font-size: 16px; font-weight: 800;
             display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.25);
+            cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 8px 24px -4px rgba(249,115,22,.4);
         }
+        .btn-addcart:active { transform: scale(0.97); box-shadow: none; }
 
-        /* ── Image Preview Modal ── */
-        #imageModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 200;
-            backdrop-filter: blur(5px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        /* Image modal */
+        #imgModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.92); z-index: 200;
+            align-items: center; justify-content: center; padding: 20px;
         }
-        #imageModal.active {
-            display: flex;
-            opacity: 1;
-        }
-        #imageModal img {
-            max-width: 100%;
-            max-height: 80vh;
-            border-radius: 16px;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-        }
-        #imageModal.active img {
-            transform: scale(1);
-        }
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-        }
+        #imgModal.open { display: flex; }
+        #imgModal img { max-width: 100%; max-height: 82vh; border-radius: 16px; }
 
-        /* Animations */
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+        /* Textarea */
+        .note-input { width:100%; background:#f4f6f9; border:2px solid transparent; border-radius:14px; padding:12px 14px; font-size:14px; resize:none; transition:border-color .2s, background .2s; }
+        .note-input:focus { background:#fff; border-color:#f97316; outline:none; }
+
+        /* Toast */
+        #toastWrap { position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; pointer-events:none; width:max-content; max-width:calc(100vw - 32px); }
+        .toast { display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:14px; font-size:13px; font-weight:600; box-shadow:0 4px 20px rgba(0,0,0,.15); opacity:0; transform:translateY(-8px) scale(.95); transition:all .25s; background:#111827; color:#fff; }
+        .toast.show { opacity:1; transform:translateY(0) scale(1); }
+        .toast.warn  { background:#f59e0b; }
+        .toast.err   { background:#ef4444; }
+
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+        .slide-up { animation: slideUp 0.4s ease-out; }
     </style>
 </head>
+<body>
 
-<body class="animate-slide-up">
-
-<!-- Semua konten dibungkus dalam div.app-container agar responsif di layar besar -->
-<div class="app-container">
-
-    <!-- ══ Tombol Kembali Floating ══ -->
-    <button class="back-btn" onclick="goBack()">
-        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+<!-- Hero -->
+<div class="hero">
+    <img src="/storage/{{ $menu->image }}" alt="{{ $menu->name }}" id="heroImg">
+    <div class="hero-overlay"></div>
+    <button class="btn-back" onclick="window.location.href='/customer/home'">
+        <svg class="w-5 h-5 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
     </button>
+    <button class="btn-expand" onclick="openImg()">
+        <svg class="w-4 h-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"/>
+        </svg>
+    </button>
+</div>
 
-    <!-- ══ IMAGE HEADER (Click to Preview) ══ -->
-    <div class="menu-img-wrap" onclick="openPreview()">
-        <img src="/storage/{{ $menu->image }}" alt="{{ $menu->name }}" id="mainImage">
-        <div class="img-overlay"></div>
-        <!-- Preview Icon -->
-        <div class="preview-trigger">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
-            </svg>
-        </div>
+<!-- Content -->
+<div class="content slide-up">
+
+    <!-- Menu info -->
+    <div class="mb-6">
+        <h1 class="font-extrabold text-2xl text-gray-900 leading-tight mb-1">{{ $menu->name }}</h1>
+        <p class="font-extrabold text-2xl text-orange-500 mb-3">Rp {{ number_format($menu->price, 0, ',', '.') }}</p>
+        @if($menu->description)
+        <p class="text-gray-500 text-sm leading-relaxed bg-gray-50 rounded-2xl px-4 py-3 border-l-4 border-orange-300">{{ $menu->description }}</p>
+        @endif
     </div>
 
-    <!-- ══ CONTENT CARD ══ -->
-    <div class="content-card">
-
-        <!-- MENU INFO -->
-        <div class="mb-8">
-            <div class="flex justify-between items-start mb-2">
-                <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight flex-1">{{ $menu->name }}</h1>
-            </div>
-            <p class="text-2xl font-black text-orange-500 mb-3">
-                Rp {{ number_format($menu->price, 0, ',', '.') }}
-            </p>
-            @if($menu->description)
-            <p class="text-gray-500 text-sm leading-relaxed bg-gray-50 p-3 rounded-xl border-l-4 border-orange-200">
-                {{ $menu->description }}
-            </p>
-            @endif
-        </div>
-
-        <!-- ADDON GROUPS -->
-        @if($menu->addonGroups->count())
-        <div class="flex items-center gap-2 mb-4">
-            <div class="h-1 w-8 bg-orange-500 rounded-full"></div>
-            <h2 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Kustomisasi Menu</h2>
-        </div>
-
+    <!-- Addon groups -->
+    @if($menu->addonGroups->count())
+    <div class="space-y-4 mb-6">
         @foreach($menu->addonGroups as $group)
-        <div class="group-card">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-base font-bold text-gray-800">{{ $group->name }}</span>
+        <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <span class="font-extrabold text-sm text-gray-900">{{ $group->name }}</span>
                 @if($group->required)
-                    <span class="badge badge-required">Wajib</span>
+                    <span class="badge-req">Wajib</span>
                 @elseif($group->max)
-                    <span class="badge badge-max">Pilih Maks. {{ $group->max }}</span>
+                    <span class="badge-max">Maks. {{ $group->max }}</span>
                 @else
-                    <span class="badge badge-free">Opsional</span>
+                    <span class="badge-opt">Opsional</span>
                 @endif
             </div>
-
-            <div class="space-y-1">
+            <div>
                 @forelse($group->addons as $addon)
-                <label class="flex justify-between items-center py-3 group cursor-pointer border-b border-gray-50 last:border-0">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-semibold text-gray-700 group-active:text-orange-600 transition-colors">{{ $addon->name }}</span>
+                <label class="addon-row">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-800">{{ $addon->name }}</p>
                         @if($addon->price > 0)
-                        <span class="text-xs font-bold text-orange-500 mt-0.5">+Rp {{ number_format($addon->price, 0, ',', '.') }}</span>
+                        <p class="text-xs font-bold text-orange-500 mt-0.5">+Rp {{ number_format($addon->price, 0, ',', '.') }}</p>
                         @endif
                     </div>
-
                     @if($group->max == 1 || $group->required)
                     <input type="radio" name="group_{{ $group->id }}" value="{{ $addon->id }}" data-price="{{ $addon->price }}" data-name="{{ $addon->name }}" onchange="updateTotal()">
                     @else
-                    <input type="checkbox" name="group_{{ $group->id }}[]" value="{{ $addon->id }}" data-price="{{ $addon->price }}" data-name="{{ $addon->name }}" data-group="{{ $group->id }}" onchange="handleCheckbox(this, {{ $group->max ?? 999 }}, {{ $group->id }})">
+                    <input type="checkbox" name="group_{{ $group->id }}[]" value="{{ $addon->id }}" data-price="{{ $addon->price }}" data-name="{{ $addon->name }}" data-group="{{ $group->id }}" onchange="handleCb(this, {{ $group->max ?? 999 }}, {{ $group->id }})">
                     @endif
                 </label>
                 @empty
-                <p class="text-gray-400 text-xs italic">Pilihan tidak tersedia</p>
+                <p class="text-gray-400 text-xs py-2">Pilihan tidak tersedia</p>
                 @endforelse
             </div>
         </div>
         @endforeach
-        @endif
+    </div>
+    @endif
 
-        <!-- NOTES -->
-        <div class="mb-8">
-            <label class="block text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Catatan Tambahan
-            </label>
-            <textarea id="notes" rows="3" class="notes-input w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 text-sm outline-none focus:border-orange-500 transition-all" placeholder="Contoh: Takaran es sedikit saja..."></textarea>
-        </div>
+    <!-- Notes -->
+    <div class="mb-5">
+        <p class="font-extrabold text-sm text-gray-900 mb-2 flex items-center gap-2">
+            <svg class="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+            Catatan
+        </p>
+        <textarea id="notes" rows="2" placeholder="Contoh: Es dipisah, tidak pakai gula..." class="note-input"></textarea>
+    </div>
 
-        <!-- QUANTITY -->
-        <div class="flex justify-between items-center bg-white border border-gray-100 p-5 rounded-2xl shadow-sm">
-            <p class="text-sm font-extrabold text-gray-900">Jumlah Pesanan</p>
-            <div class="qty-container">
-                <button class="qty-btn" onclick="changeQty(-1)"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M20 12H4"/></svg></button>
-                <span class="text-lg font-black px-5 text-gray-800" id="qty">1</span>
-                <button class="qty-btn" onclick="changeQty(1)"><svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M12 4v16m8-8H4"/></svg></button>
-            </div>
+    <!-- Quantity -->
+    <div class="qty-row mb-2">
+        <p class="font-extrabold text-sm text-gray-900">Jumlah</p>
+        <div class="qty-ctrl">
+            <button onclick="changeQty(-1)" class="q-btn minus">−</button>
+            <span id="qty" class="text-xl font-extrabold text-gray-900 w-10 text-center">1</span>
+            <button onclick="changeQty(1)" class="q-btn plus">+</button>
         </div>
     </div>
 
-    <!-- ══ BOTTOM BAR ══ -->
-    <div class="bottom-bar">
-        <button class="cta-btn" onclick="addToCart()">
-            <span class="text-[10px] opacity-80 font-bold uppercase tracking-widest leading-tight">Tambah Pesanan</span>
-            <span id="totalPrice" class="text-lg font-black tracking-tight">Rp 0</span>
-        </button>
-    </div>
+</div>
 
-</div> <!-- End of .app-container -->
+<!-- Bottom bar -->
+<div class="bottom-bar">
+    <button id="btnAddCart" class="btn-addcart" onclick="addToCart()">
+        <span class="text-sm font-extrabold">Tambah ke Keranjang</span>
+        <span id="totalPrice" class="font-extrabold text-lg">Rp 0</span>
+    </button>
+</div>
 
-<!-- ══ IMAGE PREVIEW MODAL (Diluar app-container agar fullscreen seutuhnya) ══ -->
-<div id="imageModal" onclick="closePreview()">
-    <div class="close-modal">
-        <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#1f2937" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-    </div>
+<!-- Image modal -->
+<div id="imgModal" onclick="closeImg()">
     <img src="/storage/{{ $menu->image }}" alt="Preview" onclick="event.stopPropagation()">
 </div>
 
-<!-- ══ TOAST FEEDBACK ══ -->
-<div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[99999] flex flex-col gap-2 items-center pointer-events-none" style="min-width:0;width:max-content;max-width:calc(100vw - 32px);"></div>
+<div id="toastWrap"></div>
 
 <script>
-// ═══════════════════════════════
-//  TOAST SYSTEM
-// ═══════════════════════════════
-function showToast(msg, type = 'success', duration = 2000) {
-    const container = document.getElementById('toastContainer');
-    const colors = { success:'bg-green-500 text-white', info:'bg-gray-800 text-white', warning:'bg-amber-500 text-white', error:'bg-red-500 text-white' };
-    const icons  = { success:'✅', info:'ℹ️', warning:'⚠️', error:'❌' };
-    const toast = document.createElement('div');
-    toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold ${colors[type]||colors.info}`;
-    toast.style.cssText = 'opacity:0;transform:translateY(-10px) scale(0.95);transition:all 0.25s ease;white-space:nowrap;';
-    toast.innerHTML = `<span>${icons[type]||'📢'}</span><span>${msg}</span>`;
-    container.appendChild(toast);
-    requestAnimationFrame(()=>{ toast.style.opacity='1'; toast.style.transform='translateY(0) scale(1)'; });
-    setTimeout(()=>{ toast.style.opacity='0'; toast.style.transform='translateY(-10px) scale(0.95)'; setTimeout(()=>toast.remove(),260); }, duration);
-}
-
 const menu = @json($menu);
 let qty = 1;
 
-// --- PREVIEW LOGIC ---
-function openPreview() {
-    const modal = document.getElementById('imageModal');
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; 
+function toast(msg, cls = '') {
+    const w = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${cls}`;
+    el.textContent = msg;
+    w.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add('show'));
+    setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),280); }, 2000);
 }
 
-function closePreview() {
-    const modal = document.getElementById('imageModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = ''; 
-}
+function openImg()  { document.getElementById('imgModal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeImg() { document.getElementById('imgModal').classList.remove('open'); document.body.style.overflow=''; }
 
-// --- PRICE LOGIC ---
-function updateTotal(){
-    let addonTotal = 0;
-    document.querySelectorAll('input[type=radio]:checked, input[type=checkbox]:checked')
-        .forEach(el => { addonTotal += Number(el.dataset.price); });
-    const total = (Number(menu.price) + addonTotal) * qty;
+function updateTotal() {
+    let addon = 0;
+    document.querySelectorAll('input[type=radio]:checked,input[type=checkbox]:checked').forEach(el => addon += Number(el.dataset.price));
+    const total = (Number(menu.price) + addon) * qty;
     document.getElementById('totalPrice').textContent = 'Rp ' + total.toLocaleString('id-ID');
 }
 
-function handleCheckbox(el, max, groupId){
-    if(max && max < 999){
-        const checked = document.querySelectorAll(`input[data-group="${groupId}"]:checked`);
-        if(checked.length > max){
-            el.checked = false;
-            showToast(`Maksimal pilih ${max} pilihan`, 'warning', 2000);
-            return;
-        }
+function handleCb(el, max, groupId) {
+    if(max < 999) {
+        const n = document.querySelectorAll(`input[data-group="${groupId}"]:checked`).length;
+        if(n > max) { el.checked = false; toast(`Maks. pilih ${max}`, 'warn'); return; }
     }
-    if(el.checked) showToast(`${el.dataset.name} dipilih ✓`, 'success', 1500);
+    if(el.checked) toast(`${el.dataset.name} ✓`);
     updateTotal();
 }
 
-function changeQty(val){
-    qty = Math.min(20, Math.max(1, qty + val));
+function changeQty(v) {
+    qty = Math.min(20, Math.max(1, qty + v));
     document.getElementById('qty').textContent = qty;
-    showToast(val > 0 ? `Jumlah: ${qty} 🔢` : `Jumlah: ${qty} 🔢`, 'info', 1200);
     updateTotal();
 }
 
-function addToCart(){
+function addToCart() {
     @foreach($menu->addonGroups->where('required', true) as $group)
-    if(!document.querySelector('input[name="group_{{ $group->id }}"]:checked')){
-        showToast('Mohon pilih "{{ $group->name }}"', 'error', 2500); return;
+    if(!document.querySelector('input[name="group_{{ $group->id }}"]:checked')) {
+        toast('Pilih "{{ $group->name }}" dulu!', 'err'); return;
     }
     @endforeach
 
-    const selectedAddons = [];
-    document.querySelectorAll('input[type=radio]:checked, input[type=checkbox]:checked').forEach(el => {
-        selectedAddons.push({ id: Number(el.value), name: el.dataset.name, price: Number(el.dataset.price) });
+    const addons = [];
+    document.querySelectorAll('input[type=radio]:checked,input[type=checkbox]:checked').forEach(el => {
+        addons.push({ id: Number(el.value), name: el.dataset.name, price: Number(el.dataset.price) });
     });
 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     cart.push({
-        id: menu.id, name: menu.name, price: (Number(menu.price) + selectedAddons.reduce((s, a) => s + a.price, 0)),
-        image: menu.image, quantity: qty, notes: document.getElementById('notes').value, addons: selectedAddons,
+        id: menu.id, name: menu.name,
+        price: Number(menu.price) + addons.reduce((s,a)=>s+a.price,0),
+        image: menu.image, quantity: qty,
+        notes: document.getElementById('notes').value, addons
     });
-
     localStorage.setItem('cart', JSON.stringify(cart));
-    const btn = document.querySelector('.cta-btn');
-    btn.innerHTML = "<span>Berhasil Ditambah! 🎉</span>";
-    btn.style.background = "#16a34a";
-    showToast(`${menu.name} ditambahkan ke keranjang! 🛒`, 'success', 2000);
-    setTimeout(() => { window.location.href = '/customer/home'; }, 800);
+
+    const btn = document.getElementById('btnAddCart');
+    btn.style.background = '#16a34a';
+    btn.innerHTML = `<span class="font-extrabold text-sm">Berhasil Ditambah!</span><svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+    toast('Ditambahkan ke keranjang 🛒');
+    setTimeout(()=>{ window.location.href = '/customer/home'; }, 700);
 }
 
-function goBack(){ window.location.href = '/customer/home'; }
 document.addEventListener('DOMContentLoaded', updateTotal);
-</script>
 
+// Back gesture guard
+history.replaceState(null,'',location.href);
+for(var i=0;i<50;i++) history.pushState(null,'',location.href);
+window.addEventListener('popstate',()=>history.pushState(null,'',location.href));
+var _sx=0;
+window.addEventListener('touchstart',e=>{ _sx=e.touches[0].clientX; },{passive:true});
+window.addEventListener('touchmove',e=>{ if(_sx<40) e.preventDefault(); },{passive:false});
+</script>
 </body>
 </html>

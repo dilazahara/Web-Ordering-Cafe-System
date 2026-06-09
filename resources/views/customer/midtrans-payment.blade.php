@@ -1,516 +1,391 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pembayaran Online – {{ $order->queue_number }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    {{-- Snap.js Midtrans harus load sebelum konten lain --}}
-    <script src="{{ $snapUrl }}" data-client-key="{{ $clientKey }}"></script>
-
+    <title>Pembayaran – {{ $order->queue_number }}</title>
+    <script src="{{ $snapUrl }}" data-client-key="{{ $clientKey }}" async></script>
     <style>
-        * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; }
-        body { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #ecfdf5 100%); min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-        .fade-up { animation: fadeUp 0.5s ease forwards; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f9ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-        .pulse { animation: pulse 1.4s ease-in-out infinite; }
+        /* ── Loading awal (sebelum Snap terbuka) ── */
+        #screenLoading {
+            text-align: center;
+            color: #64748b;
+        }
 
-        .success-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.55);
+        /* ── Overlay sukses (muncul setelah onSuccess) ── */
+        #screenSuccess {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 32px;
+            animation: fadeIn 0.3s ease;
+        }
+        #screenSuccess.show {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 52px;
+            height: 52px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #22c55e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        .spinner-blue {
+            border-top-color: #3b82f6;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Centang sukses */
+        .check-circle {
+            width: 72px;
+            height: 72px;
+            background: #dcfce7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: popIn 0.4s cubic-bezier(.34,1.56,.64,1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0); opacity: 0; }
+            to   { transform: scale(1); opacity: 1; }
+        }
+        .check-circle svg {
+            width: 36px;
+            height: 36px;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        .sub {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 28px;
+        }
+        .redirect-hint {
+            font-size: 13px;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        .dot-pulse span {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: #9ca3af;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: dotBounce 1.2s ease-in-out infinite;
+        }
+        .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+        .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40%            { transform: translateY(-5px); opacity: 1; }
+        }
+
+        /* loading awal spinner kecil */
+        #screenLoading .spinner { width: 44px; height: 44px; margin-bottom: 14px; }
+        #screenLoading p { font-size: 14px; }
+
+        /* Back Popup */
+        .back-popup-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+            z-index: 9997; opacity: 0; pointer-events: none;
+            transition: opacity 0.25s;
+            display: flex; align-items: flex-end; justify-content: center;
+        }
+        .back-popup-overlay.show { opacity: 1; pointer-events: auto; }
+        .back-popup-box {
+            background: #fff; width: 100%; max-width: 480px;
+            border-radius: 24px 24px 0 0;
+            padding: 20px 20px max(env(safe-area-inset-bottom), 24px);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.32,0.72,0,1);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        .back-popup-overlay.show .back-popup-box { transform: translateY(0); }
+        .back-popup-handle {
+            width: 40px; height: 4px; background: #e5e7eb;
+            border-radius: 2px; margin: 0 auto 20px;
+        }
+        .back-popup-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 16px;
+        }
+        .back-popup-icon {
+            width: 48px; height: 48px; min-width: 48px;
+            background: #fef2f2; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
-            z-index: 9999;
-            opacity: 0; pointer-events: none;
-            transition: opacity 0.3s;
         }
-        .success-overlay.show { opacity: 1; pointer-events: auto; }
-        .success-box {
-            background: #fff; border-radius: 24px; padding: 36px 28px;
-            text-align: center; max-width: 320px; width: 90%;
-            transform: scale(0.85); transition: transform 0.3s;
+        .back-popup-icon svg { width: 24px; height: 24px; }
+        .back-popup-title {
+            font-size: 16px; font-weight: 800; color: #111827; margin-bottom: 3px;
         }
-        .success-overlay.show .success-box { transform: scale(1); }
-
-        @keyframes checkmark { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
-        .check-path { stroke-dasharray: 100; stroke-dashoffset: 100; animation: checkmark 0.6s 0.3s ease forwards; }
-
-        .pay-card { background: #fff; border-radius: 24px; box-shadow: 0 20px 60px rgba(16,185,129,0.15); overflow: hidden; }
-
-        .btn-primary {
-            width: 100%; padding: 15px 20px; border-radius: 16px;
-            font-weight: 800; font-size: 15px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            box-shadow: 0 8px 20px -4px rgba(34,197,94,0.45);
-            transition: transform 0.15s, opacity 0.15s;
+        .back-popup-subtitle { font-size: 13px; color: #9ca3af; }
+        .back-popup-warning {
+            font-size: 13px; color: #92400e;
+            background: #fffbeb; border-left: 4px solid #f59e0b;
+            border-radius: 14px; padding: 12px 14px;
+            margin-bottom: 20px; line-height: 1.5;
         }
-        .btn-primary:active { transform: scale(0.97); }
-        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-        .btn-secondary {
-            width: 100%; padding: 13px 20px; border-radius: 14px;
-            font-weight: 600; font-size: 13px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            background: #f1f5f9; color: #64748b;
-            transition: background 0.15s;
-            text-decoration: none;
+        .back-popup-btns {
+            display: flex; gap: 12px;
         }
-        .btn-secondary:hover { background: #e2e8f0; }
+        .back-popup-btns button {
+            flex: 1; padding: 14px 8px;
+            border-radius: 16px; font-size: 14px; font-weight: 700;
+            cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s;
+        }
+        .back-popup-btns button:active { opacity: 0.85; transform: scale(0.97); }
+        .btn-cancel-back {
+            background: #f3f4f6; color: #374151;
+        }
+        .btn-confirm-back {
+            background: #ef4444; color: #fff;
+        }
+        .btn-reopen-snap {
+            background: #22c55e; color: #fff;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 min-h-screen">
+<body>
 
-{{-- SUCCESS OVERLAY --}}
-<div class="success-overlay" id="successOverlay">
-    <div class="success-box">
-        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-10 h-10" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="#22c55e" stroke-width="3" fill="#dcfce7"/>
-                <path class="check-path" d="M11 20l7 7 11-13" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </div>
-        <h2 class="text-xl font-black text-gray-800 mb-1">Pembayaran Berhasil!</h2>
-        <p class="text-sm text-gray-500 mb-1">Pesanan <span class="font-bold text-green-600">{{ $order->queue_number }}</span></p>
-        <p class="text-sm text-gray-400">Mengalihkan ke struk...</p>
-    </div>
+{{-- SCREEN 1: Loading awal sebelum Snap terbuka --}}
+<div id="screenLoading">
+    <div class="spinner spinner-blue"></div>
+    <p>Membuka halaman pembayaran...</p>
 </div>
 
-{{-- MAIN CARD --}}
-<div class="w-full max-w-sm fade-up">
-    <div class="pay-card">
+{{-- SCREEN 2: Muncul setelah pembayaran sukses & Snap ditutup --}}
+<div id="screenSuccess">
+    <div class="check-circle">
+        <svg viewBox="0 0 50 50" fill="none">
+            <path d="M13 25l9 9 15-16" stroke="#16a34a" stroke-width="3.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+    <h2>Pembayaran Berhasil! 🎉</h2>
+    <p class="sub">Pesanan kamu sedang diproses</p>
 
-        {{-- HEADER --}}
-        <div class="px-5 pt-5 pb-4" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">💳</div>
-                <div>
-                    <p class="text-white font-black text-sm">Bayar Online</p>
-                    <p class="text-white/60 text-xs mt-0.5">GoPay · OVO · DANA · VA Bank & lainnya</p>
-                </div>
-            </div>
-            <p class="text-white font-black text-2xl">Rp {{ number_format($order->total, 0, ',', '.') }}</p>
-            <div class="flex items-center gap-2 mt-1.5 flex-wrap text-xs">
-                <span class="text-white/50">{{ $order->queue_number }}</span>
-                @if($order->table_number)
-                    <span class="text-white/30">·</span>
-                    <span class="text-white/50">Meja {{ $order->table_number }}</span>
-                @endif
-                @if($order->customer_name)
-                    <span class="text-white/30">·</span>
-                    <span class="text-white/50">{{ $order->customer_name }}</span>
-                @endif
-            </div>
-        </div>
-
-        <div class="px-5 py-5 space-y-3">
-
-            {{-- STATUS BADGE --}}
-            <div id="statusBadge" class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-                <span id="statusIcon" class="pulse">⏳</span>
-                <p id="statusText" class="text-xs font-semibold text-blue-700">Menyiapkan pembayaran...</p>
-            </div>
-
-            {{-- SIMULATOR PANEL — muncul setelah pilih metode --}}
-            <div class="sim-panel" id="simPanel">
-                <div class="flex items-center justify-between mb-3">
-                    <p class="text-xs font-black text-amber-800">🧪 Mode Sandbox — Simulator</p>
-                    <span class="sim-method-badge" id="simMethodBadge">⏳ Menunggu...</span>
-                </div>
-
-                <p class="text-xs text-amber-700 mb-3 leading-relaxed">
-                    Ini adalah mode <strong>testing</strong>. Gunakan simulator Midtrans untuk mensimulasikan pembayaran berhasil.
-                </p>
-
-                <ol id="simInstructions" class="space-y-2 mb-4 pl-0 list-none">
-                    <li class="step-item"><div class="step-num">1</div><span>Klik <strong>Buka Simulator</strong> di bawah</span></li>
-                    <li class="step-item"><div class="step-num">2</div><span>Masukkan <strong>VA Number / Order ID</strong>, klik <strong>Inquire</strong></span></li>
-                    <li class="step-item"><div class="step-num">3</div><span>Klik <strong>Pay</strong> untuk simulasi pembayaran berhasil</span></li>
-                    <li class="step-item"><div class="step-num">4</div><span>Kembali ke sini, klik <strong>Cek Status Pembayaran</strong></span></li>
-                </ol>
-
-                <div class="bg-white/70 rounded-xl px-3 py-2 mb-3 flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wide">Order ID Midtrans</p>
-                        <p class="text-xs font-black text-amber-900 mt-0.5" id="simOrderId">–</p>
-                    </div>
-                    <button onclick="copyOrderId()" class="text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold px-3 py-1.5 rounded-lg transition-colors">
-                        📋 Copy
-                    </button>
-                </div>
-
-                <a id="btnSimulator" href="#" target="_blank" class="btn-simulator" onclick="onSimulatorClick()">
-                    🧪 Buka Simulator Midtrans
-                </a>
-
-                {{-- AUTO POLLING INDICATOR --}}
-                <div id="pollingWrap" style="display:none" class="mt-3">
-                    <div class="polling-info">
-                        <span><span class="spin-icon">🔄</span> Mengecek status otomatis...</span>
-                        <span id="pollingCountdown" class="font-bold">Cek dalam 5 detik</span>
-                    </div>
-                    <div class="polling-bar-wrap">
-                        <div class="polling-bar" id="pollingBar"></div>
-                    </div>
-                    <p class="text-[10px] text-amber-600 mt-1 text-center">Halaman akan otomatis update setelah pembayaran simulator berhasil</p>
-                </div>
-            </div>
-
-            {{-- TOMBOL BAYAR — selalu terlihat --}}
-            <button id="btnPay" onclick="openSnap()" class="btn-primary">
-                💳 Buka Halaman Pembayaran
-            </button>
-
-            {{-- RINGKASAN PESANAN --}}
-            <div class="bg-gray-50 rounded-xl p-4 space-y-2">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Ringkasan Pesanan</p>
-                @foreach($order->items as $item)
-                <div class="flex justify-between text-xs">
-                    <span class="text-gray-500">{{ $item->name ?? 'Item' }}
-                        <span class="font-semibold text-gray-600">×{{ $item->qty }}</span>
-                    </span>
-                    <span class="font-semibold text-gray-700">
-                        Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}
-                    </span>
-                </div>
-                @endforeach
-                <div class="border-t border-gray-200 pt-2 mt-1 flex justify-between text-sm font-bold">
-                    <span class="text-gray-600">Total</span>
-                    <span class="text-gray-800">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
-                </div>
-            </div>
-
-            {{-- TOMBOL KEMBALI --}}
-            <a href="{{ url('/customer/checkout') }}" class="btn-secondary">← Kembali ke Checkout</a>
-
-        </div>
-
-        <div class="px-5 pb-4 flex items-center justify-between text-[10px]">
-            <span class="text-gray-400">Diproses oleh <strong class="text-gray-500">Midtrans</strong></span>
-            <span class="text-gray-300">Aman & Terpercaya 🔒</span>
+    <div class="redirect-hint">
+        <div class="spinner" style="width:18px;height:18px;border-width:3px;margin:0;"></div>
+        <span>Mengalihkan ke struk</span>
+        <div class="dot-pulse">
+            <span></span><span></span><span></span>
         </div>
     </div>
 </div>
 
 <script>
-const SNAP_TOKEN        = @json($snapToken);
-const CONFIRM_URL       = @json(route('customer.order.midtrans.confirm', $order->id));
-const RECEIPT_URL       = @json(route('customer.order.midtrans.receipt', $order->id));
-const CSRF_TOKEN        = @json(csrf_token());
-const MIDTRANS_ORDER_ID = @json($order->midtrans_order_id ?? '');
+const SNAP_TOKEN  = @json($snapToken);
+const CONFIRM_URL = @json(route('customer.order.midtrans.confirm', $order->id));
+const RECEIPT_URL = @json(route('customer.order.midtrans.receipt', $order->id));
+const CSRF_TOKEN  = @json(csrf_token());
 
-// ── Simulator helpers ──────────────────────────────────────────────
-const SIMULATOR_URLS = {
-    // E-wallet
-    gopay:        'https://simulator.sandbox.midtrans.com/gopay/ui/index',
-    shopeepay:    'https://simulator.sandbox.midtrans.com/shopeepay/index',
-    qris:         'https://simulator.sandbox.midtrans.com/qris/index',
-    // VA Bank — masing-masing punya halaman sendiri
-    bca:          'https://simulator.sandbox.midtrans.com/bca/va/index',
-    bni:          'https://simulator.sandbox.midtrans.com/bni/va/index',
-    bri:          'https://simulator.sandbox.midtrans.com/bri/va/index',
-    permata:      'https://simulator.sandbox.midtrans.com/permata/va/index',
-    mandiri:      'https://simulator.sandbox.midtrans.com/mandiri/bill/index',
-    bank_transfer:'https://simulator.sandbox.midtrans.com/bca/va/index',
-    // Default fallback
-    default:      'https://simulator.sandbox.midtrans.com/bca/va/index',
-};
+let paymentDone = false;
 
-function showSimulatorPanel(paymentType, bankCode) {
-    const panel  = document.getElementById('simPanel');
-    const badge  = document.getElementById('simMethodBadge');
-    const elId   = document.getElementById('simOrderId');
-    const btnSim = document.getElementById('btnSimulator');
-    const instrEl = document.getElementById('simInstructions');
+// ── Tampilkan screen sukses lalu redirect ──────────────────────────────────
+function tampilSukses(redirectUrl) {
+    paymentDone = true;
+    bersihkanCart();
 
-    // Tentukan key untuk URL — prioritaskan bankCode jika ada
-    const key = bankCode || paymentType || 'default';
+    // Sembunyikan loading awal, tampilkan screen sukses
+    document.getElementById('screenLoading').style.display = 'none';
+    document.getElementById('screenSuccess').classList.add('show');
 
-    const labels = {
-        gopay: '💚 GoPay', shopeepay: '🟠 ShopeePay',
-        qris: '📱 QRIS',
-        bca: '🏦 VA BCA', bni: '🏦 VA BNI', bri: '🏦 VA BRI',
-        permata: '🏦 VA Permata', mandiri: '🏦 Mandiri Bill',
-        bank_transfer: '🏦 VA Bank', credit_card: '💳 Kartu Kredit',
-    };
-    badge.textContent = labels[key] || labels[paymentType] || '💳 Online';
-
-    elId.textContent = MIDTRANS_ORDER_ID || '(belum tersedia)';
-    btnSim.href      = SIMULATOR_URLS[key] || SIMULATOR_URLS[paymentType] || SIMULATOR_URLS.default;
-
-    // Instruksi khusus per metode
-    if (instrEl) {
-        if (['gopay','shopeepay'].includes(key)) {
-            instrEl.innerHTML = `
-                <li>Klik <strong>Buka Simulator</strong> di bawah — halaman simulator terbuka di tab baru</li>
-                <li>Masukkan <strong>nomor HP</strong>: <code class="bg-amber-200 px-1 rounded font-mono">08123456789</code>, klik <strong>Pay</strong></li>
-                <li>Masukkan <strong>PIN</strong>: <code class="bg-amber-200 px-1 rounded font-mono">12345</code>, klik <strong>Confirm</strong></li>
-                <li>Kembali ke tab ini — halaman akan <strong>otomatis update</strong> setelah pembayaran terdeteksi</li>`;
-        } else if (key === 'qris') {
-            instrEl.innerHTML = `
-                <li>Klik <strong>Buka Simulator</strong> di bawah — halaman simulator terbuka di tab baru</li>
-                <li>Paste <strong>URL gambar QR</strong> dari halaman pembayaran ke kolom yang tersedia</li>
-                <li>Klik <strong>Scan QR</strong> lalu klik <strong>Pay</strong></li>
-                <li>Kembali ke tab ini — halaman akan <strong>otomatis update</strong> setelah pembayaran terdeteksi</li>`;
-        } else if (key === 'mandiri') {
-            instrEl.innerHTML = `
-                <li>Klik <strong>Buka Simulator</strong> di bawah — halaman simulator terbuka di tab baru</li>
-                <li>Masukkan <strong>Biller Code</strong> dan <strong>Bill Key</strong> dari halaman pembayaran</li>
-                <li>Klik <strong>Inquire</strong>, lalu klik <strong>Pay</strong></li>
-                <li>Kembali ke tab ini — halaman akan <strong>otomatis update</strong> setelah pembayaran terdeteksi</li>`;
-        } else {
-            // VA Bank (BCA, BNI, BRI, Permata, dll)
-            instrEl.innerHTML = `
-                <li>Klik <strong>Buka Simulator</strong> di bawah — halaman simulator terbuka di tab baru</li>
-                <li>Copy <strong>Order ID</strong> di bawah, paste ke kolom <strong>VA Number</strong> di simulator</li>
-                <li>Klik <strong>Inquire</strong> — data transaksi akan muncul</li>
-                <li>Klik <strong>Pay</strong> untuk simulasi pembayaran berhasil</li>
-                <li>Kembali ke tab ini — halaman akan <strong>otomatis update</strong> setelah pembayaran terdeteksi</li>`;
-        }
-    }
-
-    panel.classList.add('show');
-
-    // Mulai auto polling begitu panel muncul (belum klik simulator pun sudah poll)
-    startAutoPolling();
+    // Redirect setelah 2 detik (biar user sempat lihat animasi)
+    setTimeout(() => {
+        window.location.href = redirectUrl || RECEIPT_URL;
+    }, 2000);
 }
 
-function copyOrderId() {
-    const id = document.getElementById('simOrderId').textContent;
-    if (!id || id === '–' || id === '(belum tersedia)') return;
-    navigator.clipboard.writeText(id).then(() => {
-        const btn = event.target;
-        const orig = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => { btn.textContent = orig; }, 2000);
+// ── Buka Snap ─────────────────────────────────────────────────────────────
+function bukaSnap() {
+    if (!SNAP_TOKEN || typeof window.snap === 'undefined') {
+        document.querySelector('#screenLoading p').textContent =
+            'Gagal memuat pembayaran. Silakan hubungi kasir.';
+        return;
+    }
+
+    window.snap.pay(SNAP_TOKEN, {
+
+        // User klik OK setelah "Payment successfully" di simulator
+        onSuccess: function(result) {
+            tampilSukses(RECEIPT_URL);
+        },
+
+        // Pembayaran pending (VA Bank dll) — mulai polling di background
+        onPending: function(result) {
+            mulaiPolling();
+        },
+
+        onError: function(result) {
+            document.querySelector('#screenLoading p').textContent =
+                'Terjadi kesalahan. Silakan hubungi kasir.';
+        },
+
+        onClose: function() {
+            if (paymentDone) return;
+            // Tampilkan popup peringatan saat user swipe back / tutup Snap
+            openSnapClosePopup();
+        }
     });
 }
 
-// ── AUTO POLLING ───────────────────────────────────────────────────
-let pollingTimer   = null;
-let pollingActive  = false;
-const POLL_INTERVAL = 5000; // cek setiap 5 detik
-
-function startAutoPolling() {
-    if (pollingActive) return;
-    pollingActive = true;
-
-    const wrap = document.getElementById('pollingWrap');
-    if (wrap) wrap.style.display = 'block';
-
-    schedulePoll();
+// ── Popup saat Snap ditutup / swipe back ──────────────────────────────────
+let _snapPopupOpen = false;
+function openSnapClosePopup() {
+    if (_snapPopupOpen) return;
+    _snapPopupOpen = true;
+    document.getElementById('snapClosePopup').classList.add('show');
+}
+function closeSnapClosePopup() {
+    _snapPopupOpen = false;
+    document.getElementById('snapClosePopup').classList.remove('show');
+}
+function reopenSnap() {
+    closeSnapClosePopup();
+    // Tunggu animasi popup tutup dulu baru buka Snap lagi
+    setTimeout(() => { bukaSnap(); }, 300);
 }
 
-function stopAutoPolling() {
-    pollingActive = false;
-    clearTimeout(pollingTimer);
-    const wrap = document.getElementById('pollingWrap');
-    if (wrap) wrap.style.display = 'none';
+// ── Bersihkan cart ────────────────────────────────────────────────────────
+function bersihkanCart() {
+    try {
+        localStorage.removeItem('cart');
+        localStorage.removeItem('checkoutCart');
+    } catch(e) {}
 }
 
-function schedulePoll() {
-    if (!pollingActive) return;
-
-    let elapsed = 0;
-    const bar   = document.getElementById('pollingBar');
-    const label = document.getElementById('pollingCountdown');
-    const step  = 100;
-
-    // Animasi progress bar
-    const ticker = setInterval(() => {
-        elapsed += step;
-        const pct = Math.min((elapsed / POLL_INTERVAL) * 100, 100);
-        if (bar)   bar.style.width = pct + '%';
-        const remaining = Math.ceil((POLL_INTERVAL - elapsed) / 1000);
-        if (label) label.textContent = remaining > 0 ? `Cek dalam ${remaining} detik` : 'Mengecek...';
-        if (elapsed >= POLL_INTERVAL) clearInterval(ticker);
-    }, step);
-
-    pollingTimer = setTimeout(async () => {
-        if (!pollingActive) return;
-        try {
-            const res  = await fetch(CONFIRM_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'Accept': 'application/json',
-                },
-            });
-            const data = await res.json();
-
-            if (data.status === 'ok') {
-                // BERHASIL — stop polling, tampilkan success overlay & redirect
-                stopAutoPolling();
-                setStatus('success', '✅', 'Pembayaran berhasil! Mengalihkan...');
-                setBtn('Pembayaran Berhasil ✅', true);
-                const overlay = document.getElementById('successOverlay');
-                if (overlay) overlay.classList.add('show');
-                setTimeout(() => { window.location.href = data.redirect || RECEIPT_URL; }, 2000);
-
-            } else if (data.status === 'pending') {
-                // Masih pending — jadwalkan polling berikutnya
-                schedulePoll();
-
-            } else {
-                // Gagal / cancel — stop polling
-                stopAutoPolling();
-                setStatus('error', '❌', data.message || 'Pembayaran gagal atau dibatalkan.');
-                setBtn('Coba Lagi');
-            }
-        } catch (err) {
-            console.error('[poll]', err);
-            // Network error — coba lagi
-            schedulePoll();
-        }
-    }, POLL_INTERVAL);
-}
-
-function onSimulatorClick() {
-    // Mulai auto polling saat user klik tombol simulator
-    setTimeout(startAutoPolling, 1000);
-}
-
-let snapOpened = false;
-
-// ── Tampilan status ────────────────────────────────────────────────
-function setStatus(type, icon, text, pulse) {
-    const map = {
-        loading: ['bg-blue-50 border-blue-200',   'text-blue-700'],
-        waiting: ['bg-amber-50 border-amber-200', 'text-amber-700'],
-        success: ['bg-green-50 border-green-200', 'text-green-700'],
-        error:   ['bg-red-50 border-red-200',     'text-red-700'],
-    };
-    const [bg, tc] = map[type] || map.loading;
-    document.getElementById('statusBadge').className =
-        `flex items-center gap-2 rounded-xl px-4 py-3 border ${bg}`;
-    const ico = document.getElementById('statusIcon');
-    ico.textContent = icon;
-    ico.className = pulse ? 'pulse' : '';
-    const st = document.getElementById('statusText');
-    st.className = `text-xs font-semibold ${tc}`;
-    st.textContent = text;
-}
-
-function setBtn(label, disabled) {
-    const btn = document.getElementById('btnPay');
-    btn.textContent = label ? '💳 ' + label : '💳 Buka Halaman Pembayaran';
-    btn.disabled = !!disabled;
-}
-
-// ── Verifikasi ke server ───────────────────────────────────────────
-async function verifyPayment() {
-    setStatus('loading', '🔄', 'Memverifikasi pembayaran...', true);
-    setBtn('Memverifikasi...', true);
+// ── Polling untuk pembayaran pending (VA Bank) ────────────────────────────
+async function cekKonfirmasi() {
+    if (paymentDone) return;
     try {
         const res  = await fetch(CONFIRM_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
-                'Accept': 'application/json',
-            },
+                'Accept': 'application/json'
+            }
         });
         const data = await res.json();
 
         if (data.status === 'ok') {
-            stopAutoPolling();
-            setStatus('success', '✅', 'Pembayaran berhasil! Mengalihkan...');
-            setBtn('Pembayaran Berhasil ✅', true);
-            const overlay = document.getElementById('successOverlay');
-            if (overlay) overlay.classList.add('show');
-            setTimeout(() => { window.location.href = data.redirect || RECEIPT_URL; }, 2000);
-
-        } else if (data.status === 'pending') {
-            setStatus('waiting', '⏳', 'Belum ada pembayaran terdeteksi. Selesaikan di simulator.');
-            setBtn('Cek Status Pembayaran');
-
-        } else {
-            setStatus('error', '❌', data.message || 'Pembayaran gagal atau dibatalkan.');
-            setBtn('Coba Lagi');
+            tampilSukses(data.redirect || RECEIPT_URL);
+        } else if (data.status === 'cancelled') {
+            window.location.href = '/';
         }
-    } catch (err) {
-        console.error('[verify]', err);
-        setStatus('error', '❌', 'Koneksi bermasalah. Hubungi kasir.');
-        setBtn('Coba Lagi');
-    }
+    } catch(e) { /* abaikan error jaringan sementara */ }
 }
 
-// ── Buka Snap popup ───────────────────────────────────────────────
-function openSnap() {
-    if (!SNAP_TOKEN) {
-        setStatus('error', '❌', 'Token tidak tersedia. Hubungi kasir.');
-        return;
-    }
-    if (typeof window.snap === 'undefined') {
-        setStatus('error', '⚠️', 'Midtrans belum siap. Tunggu sebentar lalu coba lagi.');
-        return;
-    }
-
-    snapOpened = true;
-    setStatus('loading', '⏳', 'Membuka halaman pembayaran...', true);
-    setBtn('Sedang Membuka...', true);
-
-    window.snap.pay(SNAP_TOKEN, {
-        onSuccess: function(result) {
-            console.log('[snap] success', result);
-            // Langsung tampilkan success & redirect
-            stopAutoPolling();
-            setStatus('success', '✅', 'Pembayaran berhasil! Mengalihkan...');
-            setBtn('Pembayaran Berhasil ✅', true);
-            document.getElementById('successOverlay').classList.add('show');
-            // Verifikasi ke server untuk update status order, lalu redirect
-            verifyPayment();
-        },
-        onPending: function(result) {
-            console.log('[snap] pending', result);
-            const pType    = result.payment_type || 'default';
-            const bankCode = result.va_numbers?.[0]?.bank || result.payment_type || null;
-            showSimulatorPanel(pType, bankCode);
-            setStatus('waiting', '⏳', 'Menunggu pembayaran. Gunakan simulator di bawah.');
-            setBtn('Cek Status Pembayaran');
-            // Tetap verifikasi untuk VA bank yang perlu dicek manual
-            if (!['gopay','shopeepay','qris'].includes(pType)) {
-                verifyPayment();
-            }
-        },
-        onError: function(result) {
-            console.log('[snap] error', result);
-            setStatus('error', '❌', 'Pembayaran gagal. Silakan coba lagi.');
-            setBtn('Coba Lagi');
-        },
-        onClose: function() {
-            console.log('[snap] closed');
-            // Snap onClose terpicu saat user klik "Return to merchant's page"
-            // Langsung verifikasi ke server — jika sudah dibayar di simulator, akan langsung redirect
-            setStatus('loading', '🔄', 'Memverifikasi status pembayaran...', true);
-            setBtn('Memverifikasi...', true);
-            verifyPayment();
-        },
-    });
+function mulaiPolling() {
+    setInterval(cekKonfirmasi, 5000);
 }
 
-// ── AUTO-OPEN: tunggu snap.js siap lalu langsung buka ─────────────
-(function autoOpen() {
-    let elapsed = 0;
-    const timer = setInterval(function() {
-        elapsed += 200;
+// Cek saat user balik ke tab (e.g. setelah bayar di GoPay)
+window.addEventListener('focus', () => { if (!paymentDone) cekKonfirmasi(); });
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !paymentDone) cekKonfirmasi();
+});
+
+// ── Tunggu Snap.js siap lalu buka otomatis ────────────────────────────────
+(function waitForSnap() {
+    let t = 0;
+    const iv = setInterval(() => {
+        t += 200;
         if (typeof window.snap !== 'undefined') {
-            clearInterval(timer);
-            openSnap(); // langsung buka popup
-        } else if (elapsed >= 6000) {
-            clearInterval(timer);
-            // snap.js gagal load — tombol tetap aktif, user klik manual
-            setStatus('error', '⚠️', 'Gagal memuat Midtrans. Klik tombol di bawah.');
-            setBtn('Buka Halaman Pembayaran');
+            clearInterval(iv);
+            bukaSnap();
+        } else if (t >= 15000) {
+            clearInterval(iv);
+            document.querySelector('#screenLoading p').textContent =
+                'Gagal memuat Midtrans. Silakan refresh halaman.';
         }
     }, 200);
 })();
+
+// ── Back popup pembayaran Midtrans ────────────────────────────────
+let _midtransBackPopupOpen = false;
+function openMidtransBackPopup() {
+    _midtransBackPopupOpen = true;
+    document.getElementById('midtransBackPopup').classList.add('show');
+    history.pushState({ popup: true }, '', location.href);
+}
+function closeMidtransBackPopup(e) {
+    if (e && e.target !== document.getElementById('midtransBackPopup')) return;
+    _midtransBackPopupOpen = false;
+    document.getElementById('midtransBackPopup').classList.remove('show');
+}
+window.addEventListener('popstate', function() {
+    if (_midtransBackPopupOpen) {
+        _midtransBackPopupOpen = false;
+        document.getElementById('midtransBackPopup').classList.remove('show');
+        return;
+    }
+    if (!paymentDone) openMidtransBackPopup();
+    else window.location.href = '/customer/home';
+});
+history.pushState(null, '', location.href);
 </script>
-</body>
-</html>
+
+<!-- Back Popup Midtrans -->
+<div id="midtransBackPopup" class="back-popup-overlay" onclick="closeMidtransBackPopup(event)">
+    <div class="back-popup-box">
+        <div class="back-popup-handle"></div>
+        <div class="back-popup-header">
+            <div class="back-popup-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/>
+                    <path stroke-linecap="round" d="M12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+            </div>
+            <div>
+                <div class="back-popup-title">Batalkan pembayaran?</div>
+                <div class="back-popup-subtitle">Transaksi online sedang berlangsung</div>
+            </div>
+        </div>
+        <div class="back-popup-warning">
+            ⚠️ Keluar sekarang bisa menyebabkan pembayaran tidak terproses. Pastikan sudah menyelesaikan pembayaran terlebih dahulu.
+        </div>
+        <div class="back-popup-btns">
+            <button class="btn-cancel-back" onclick="closeMidtransBackPopup(null)">Lanjutkan Bayar</button>
+            <button class="btn-confirm-back" onclick="window.location.href='/customer/home'">Keluar</button>
+        </div>
+    </div>
+</div>

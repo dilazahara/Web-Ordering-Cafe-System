@@ -514,8 +514,47 @@ tbody tr:hover { background: #f8fafc; }
 
         {{-- PAGINATION hanya muncul jika ada data --}}
         @if($menus->isNotEmpty())
-        <div class="pagination-wrap">
-            {{ $menus->appends(request()->query())->links() }}
+        <div class="pagination-wrap" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+            <div style="font-size:13px; color:#64748b;">
+                Menampilkan <strong style="color:#334155;">{{ $menus->firstItem() }}</strong>
+                &ndash;
+                <strong style="color:#334155;">{{ $menus->lastItem() }}</strong>
+                dari <strong style="color:#334155;">{{ $menus->total() }}</strong> data
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+                {{-- Tombol Previous --}}
+                @if($menus->onFirstPage())
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#d1d5db;cursor:not-allowed;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><polyline points="15 18 9 12 15 6"/></svg>
+                    </span>
+                @else
+                    <a href="{{ $menus->appends(request()->query())->previousPageUrl() }}" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#374151;text-decoration:none;transition:all .15s;" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><polyline points="15 18 9 12 15 6"/></svg>
+                    </a>
+                @endif
+
+                {{-- Nomor halaman --}}
+                @foreach($menus->appends(request()->query())->getUrlRange(1, $menus->lastPage()) as $page => $url)
+                    @if($page == $menus->currentPage())
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:white;font-size:13px;font-weight:700;">{{ $page }}</span>
+                    @elseif($page == 1 || $page == $menus->lastPage() || abs($page - $menus->currentPage()) <= 1)
+                        <a href="{{ $url }}" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#374151;font-size:13px;font-weight:600;text-decoration:none;transition:all .15s;" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">{{ $page }}</span>
+                    @elseif(abs($page - $menus->currentPage()) == 2)
+                        <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;color:#9ca3af;font-size:13px;">…</span>
+                    @endif
+                @endforeach
+
+                {{-- Tombol Next --}}
+                @if($menus->hasMorePages())
+                    <a href="{{ $menus->appends(request()->query())->nextPageUrl() }}" style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#374151;text-decoration:none;transition:all .15s;" onmouseover="this.style.borderColor='#6366f1';this.style.color='#6366f1'" onmouseout="this.style.borderColor='#e5e7eb';this.style.color='#374151'">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                @else
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#d1d5db;cursor:not-allowed;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;"><polyline points="9 18 15 12 9 6"/></svg>
+                    </span>
+                @endif
+            </div>
         </div>
         @endif
 

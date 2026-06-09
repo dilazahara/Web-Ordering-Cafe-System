@@ -191,10 +191,7 @@
                 ✅ Simulasi Pembayaran Berhasil
             </button>
 
-            <a href="/customer/checkout"
-               class="block w-full py-2.5 rounded-2xl font-semibold text-xs text-center text-gray-400 bg-gray-50 hover:bg-gray-100 transition-colors">
-                ← Kembali ke Checkout
-            </a>
+            {{-- Tombol kembali dihapus: pesanan sudah dibuat --}}
 
         </div>
 
@@ -319,6 +316,17 @@ async function simulatePayment() {
         btn.innerHTML = '✅ Simulasi Pembayaran Berhasil';
     }
 }
+
+// ── Blokir gesture back / swipe-right ────────────────────────────
+(function blockAllBack() {
+    for (var i = 0; i < 50; i++) { history.pushState({ blocked: true }, '', location.href); }
+    window.addEventListener('popstate', function () {
+        for (var i = 0; i < 50; i++) { history.pushState({ blocked: true }, '', location.href); }
+    });
+    var _tsx = 0;
+    document.addEventListener('touchstart', function(e){ _tsx = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchmove', function(e){ if (_tsx < 30) e.preventDefault(); }, { passive: false });
+})();
 </script>
 </body>
 </html>

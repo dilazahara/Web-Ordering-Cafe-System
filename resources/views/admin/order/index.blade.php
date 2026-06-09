@@ -182,13 +182,25 @@ body { font-family: 'Inter', sans-serif; background: #f1f5f9; color: var(--text-
                         Rp {{ number_format($order->total ?? 0, 0, ',', '.') }}
                     </td>
                     <td>
-                        @if($order->payment_method === 'cash')
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#fef3c7; color:#92400e; border:1px solid #fde68a;">💵 Cash</span>
-                        @elseif($order->payment_method === 'qris')
-                            <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:#ede9fe; color:#5b21b6; border:1px solid #ddd6fe;">📱 QRIS</span>
-                        @else
-                            <span style="font-size:12px; color:#64748b; text-transform:capitalize;">{{ $order->payment_method ?? 'Tunai' }}</span>
-                        @endif
+                        @php
+                            $pmLabels = [
+                                'cash'        => ['icon'=>'💵','label'=>'Cash',        'bg'=>'#fef3c7','color'=>'#92400e','border'=>'#fde68a'],
+                                'qris'        => ['icon'=>'📱','label'=>'QRIS',        'bg'=>'#ede9fe','color'=>'#5b21b6','border'=>'#ddd6fe'],
+                                'gopay'       => ['icon'=>'💚','label'=>'GoPay',       'bg'=>'#f0fdf4','color'=>'#065f46','border'=>'#a7f3d0'],
+                                'ovo'         => ['icon'=>'💜','label'=>'OVO',         'bg'=>'#f5f3ff','color'=>'#4c1d95','border'=>'#ddd6fe'],
+                                'dana'        => ['icon'=>'💙','label'=>'DANA',        'bg'=>'#eff6ff','color'=>'#1e40af','border'=>'#bfdbfe'],
+                                'shopeepay'   => ['icon'=>'🧡','label'=>'ShopeePay',  'bg'=>'#fff7ed','color'=>'#9a3412','border'=>'#fed7aa'],
+                                'bca'         => ['icon'=>'🏦','label'=>'VA BCA',     'bg'=>'#eff6ff','color'=>'#1e40af','border'=>'#bfdbfe'],
+                                'bni'         => ['icon'=>'🏦','label'=>'VA BNI',     'bg'=>'#fff7ed','color'=>'#9a3412','border'=>'#fed7aa'],
+                                'bri'         => ['icon'=>'🏦','label'=>'VA BRI',     'bg'=>'#f0fdf4','color'=>'#065f46','border'=>'#a7f3d0'],
+                                'mandiri'     => ['icon'=>'🏦','label'=>'Mandiri',    'bg'=>'#eff6ff','color'=>'#1e40af','border'=>'#bfdbfe'],
+                                'permata'     => ['icon'=>'🏦','label'=>'Permata',    'bg'=>'#fdf2f8','color'=>'#831843','border'=>'#fbcfe8'],
+                                'credit_card' => ['icon'=>'💳','label'=>'Kartu Kredit','bg'=>'#eef2ff','color'=>'#3730a3','border'=>'#c7d2fe'],
+                                'midtrans'    => ['icon'=>'💳','label'=>'Midtrans',   'bg'=>'#eef2ff','color'=>'#3730a3','border'=>'#c7d2fe'],
+                            ];
+                            $pm = $pmLabels[$order->payment_method] ?? ['icon'=>'💳','label'=>strtoupper($order->payment_method ?? '-'),'bg'=>'#f1f5f9','color'=>'#475569','border'=>'#e2e8f0'];
+                        @endphp
+                        <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:700; background:{{ $pm['bg'] }}; color:{{ $pm['color'] }}; border:1px solid {{ $pm['border'] }};">{{ $pm['icon'] }} {{ $pm['label'] }}</span>
                     </td>
                     <td>
                         @php

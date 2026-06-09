@@ -377,5 +377,27 @@
 
 </div>
 
+<script>
+// Blokir gesture swipe-right / tombol back browser
+(function() {
+    // Push banyak state palsu agar stack history tebal — tidak bisa ditembus gesture
+    for (var i = 0; i < 50; i++) {
+        history.pushState({ blocked: true }, '', location.href);
+    }
+    window.addEventListener('popstate', function () {
+        for (var i = 0; i < 50; i++) {
+            history.pushState({ blocked: true }, '', location.href);
+        }
+    });
+    // Blokir gesture swipe dari pinggir kiri layar (Android navigation gesture)
+    var touchStartX = 0;
+    document.addEventListener('touchstart', function (e) {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    document.addEventListener('touchmove', function (e) {
+        if (touchStartX < 30) { e.preventDefault(); }
+    }, { passive: false });
+})();
+</script>
 </body>
 </html>

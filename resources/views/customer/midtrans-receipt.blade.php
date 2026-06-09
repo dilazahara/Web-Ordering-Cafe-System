@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Struk Pembayaran – {{ $order->queue_number }}</title>
@@ -9,76 +12,25 @@
     <style>
         * { font-family: 'Plus Jakarta Sans', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #ecfdf5 100%); min-height: 100vh; }
-
-        .receipt-card {
-            background: #fff;
-            border-radius: 28px;
-            box-shadow: 0 24px 64px rgba(16,185,129,0.15), 0 4px 16px rgba(0,0,0,0.06);
-            overflow: hidden;
-        }
-
-        .divider-dashed {
-            border: none;
-            border-top: 2px dashed #e5e7eb;
-            margin: 0;
-        }
-
-        @keyframes fadeUp {
-            from { opacity:0; transform:translateY(20px); }
-            to   { opacity:1; transform:translateY(0); }
-        }
+        .receipt-card { background: #fff; border-radius: 28px; box-shadow: 0 24px 64px rgba(16,185,129,0.15), 0 4px 16px rgba(0,0,0,0.06); overflow: hidden; }
+        .divider-dashed { border: none; border-top: 2px dashed #e5e7eb; margin: 0; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
         .fade-up { animation: fadeUp 0.5s ease forwards; }
-
-        @keyframes checkmark {
-            from { stroke-dashoffset: 100; }
-            to   { stroke-dashoffset: 0; }
-        }
-        .check-path {
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            animation: checkmark 0.6s 0.3s ease forwards;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-6px); }
-        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         .bounce { animation: bounce 1.5s infinite; }
-
-        .btn-action {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 14px 20px;
-            border-radius: 16px;
-            font-weight: 800;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            text-decoration: none;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { display:inline-block; animation:spin 0.8s linear infinite; }
+        .btn-action { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px; border: none; cursor: pointer; transition: transform 0.15s; text-decoration: none; }
         .btn-action:active { transform: scale(0.97); }
-
-        .btn-print {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            box-shadow: 0 8px 20px -4px rgba(99,102,241,0.45);
-        }
-        .btn-home {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 8px 20px -4px rgba(16,185,129,0.45);
-        }
-
+        .btn-print { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; box-shadow: 0 8px 20px -4px rgba(99,102,241,0.45); }
+        .btn-home  { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 8px 20px -4px rgba(16,185,129,0.45); }
+        /* ── WAITING POLLING BAR ── */
+        .poll-bar-wrap { height:3px; border-radius:99px; background:#fde68a; overflow:hidden; margin-top:8px; }
+        .poll-bar { height:100%; border-radius:99px; background:#f59e0b; width:0%; transition:width 0.1s linear; }
         @media print {
             body { background: white !important; padding: 0 !important; }
             .no-print { display: none !important; }
             .receipt-card { box-shadow: none !important; border-radius: 0 !important; border: 1px solid #e5e7eb; }
-            .fade-up { animation: none !important; }
-            .bounce  { animation: none !important; }
         }
     </style>
 </head>
@@ -90,50 +42,70 @@
         'ovo'         => ['icon' => '💜', 'color' => '#4C3494', 'label' => 'OVO'],
         'dana'        => ['icon' => '💙', 'color' => '#118EEA', 'label' => 'DANA'],
         'shopeepay'   => ['icon' => '🧡', 'color' => '#EE4D2D', 'label' => 'ShopeePay'],
-        'bca'         => ['icon' => '🏦', 'color' => '#003D8F', 'label' => 'BCA Virtual Account'],
-        'bni'         => ['icon' => '🏦', 'color' => '#FF6600', 'label' => 'BNI Virtual Account'],
-        'bri'         => ['icon' => '🏦', 'color' => '#00529C', 'label' => 'BRI Virtual Account'],
+        'bca'         => ['icon' => '🏦', 'color' => '#003D8F', 'label' => 'BCA VA'],
+        'bni'         => ['icon' => '🏦', 'color' => '#FF6600', 'label' => 'BNI VA'],
+        'bri'         => ['icon' => '🏦', 'color' => '#00529C', 'label' => 'BRI VA'],
         'mandiri'     => ['icon' => '🏦', 'color' => '#003087', 'label' => 'Mandiri Bill'],
-        'permata'     => ['icon' => '🏦', 'color' => '#E31837', 'label' => 'Permata Virtual Account'],
+        'permata'     => ['icon' => '🏦', 'color' => '#E31837', 'label' => 'Permata VA'],
         'credit_card' => ['icon' => '💳', 'color' => '#6366f1', 'label' => 'Kartu Kredit'],
         'midtrans'    => ['icon' => '💳', 'color' => '#6366f1', 'label' => 'Midtrans'],
+        'qris'        => ['icon' => '📱', 'color' => '#dc2626', 'label' => 'QRIS'],
     ];
+
     $methodInfo   = $methodIcons[$order->payment_method] ?? ['icon' => '💳', 'color' => '#6366f1', 'label' => strtoupper($order->payment_method)];
     $subtotal     = $order->items->sum(fn($i) => $i->price * $i->qty);
-    $biayaLayanan = $order->total - $subtotal;
+    $biayaLayanan = max(0, $order->total - $subtotal);
+
+    $isPaid      = in_array($order->status, ['process', 'done', 'delivered', 'completed']);
+    $isWaiting   = $order->status === 'waiting_payment';
+    $isCancelled = $order->status === 'cancelled';
+
+    $headerColor = $methodInfo['color'];
+    if ($isWaiting)   $headerColor = '#d97706';
+    if ($isCancelled) $headerColor = '#dc2626';
 @endphp
 
 <div class="w-full max-w-sm fade-up">
     <div class="receipt-card">
 
-        {{-- HEADER SUKSES --}}
-        <div class="px-5 pt-7 pb-5 text-center"
-             style="background: linear-gradient(135deg, {{ $methodInfo['color'] }}, {{ $methodInfo['color'] }}cc);">
+        {{-- HEADER --}}
+        <div class="px-5 pt-7 pb-5 text-center" style="background: linear-gradient(135deg, {{ $headerColor }}, {{ $headerColor }}cc);">
             <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 bounce">
-                <svg class="w-9 h-9" viewBox="0 0 40 40" fill="none">
-                    <circle cx="20" cy="20" r="18" stroke="white" stroke-width="2.5" fill="rgba(255,255,255,0.2)"/>
-                    <path class="check-path" d="M11 20l7 7 11-13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                @if($isPaid)
+                    <svg class="w-9 h-9" viewBox="0 0 40 40" fill="none">
+                        <circle cx="20" cy="20" r="18" stroke="white" stroke-width="2.5" fill="rgba(255,255,255,0.2)"/>
+                        <path d="M11 20l7 7 11-13" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                @elseif($isWaiting)
+                    <span class="text-3xl text-white">⏳</span>
+                @else
+                    <span class="text-3xl text-white">❌</span>
+                @endif
             </div>
-            <h1 class="text-white font-black text-xl">Pembayaran Berhasil!</h1>
+            <h1 class="text-white font-black text-xl">
+                @if($isPaid) Pembayaran Berhasil!
+                @elseif($isWaiting) Menunggu Verifikasi
+                @else Transaksi Gagal
+                @endif
+            </h1>
             <p class="text-white/70 text-xs mt-1">via {{ $methodInfo['icon'] }} {{ $methodInfo['label'] }}</p>
         </div>
 
         {{-- NOMOR ANTRIAN --}}
-        <div class="bg-green-50 px-5 py-4 text-center">
+        <div class="bg-slate-50 px-5 py-4 text-center">
             <p class="text-xs text-gray-500 mb-1">Nomor Antrian</p>
-            <p class="text-4xl font-black text-green-600 tracking-widest">{{ $order->queue_number }}</p>
+            <p class="text-4xl font-black text-blue-600 tracking-widest">{{ $order->queue_number }}</p>
             @if($order->customer_name)
-            <p class="text-xs text-gray-500 mt-1 font-semibold">{{ $order->customer_name }}</p>
+                <p class="text-xs text-gray-600 mt-1 font-bold">{{ $order->customer_name }}</p>
             @endif
             @if($order->table_number)
-            <p class="text-xs text-gray-400 mt-0.5">Meja {{ $order->table_number }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">Meja Nomor {{ $order->table_number }}</p>
             @endif
         </div>
 
         <hr class="divider-dashed mx-5">
 
-        {{-- HEADER STRUK --}}
+        {{-- INFO RESTORAN --}}
         <div class="px-5 pt-4 pb-2 text-center">
             <p class="font-black text-gray-800 text-base">Cafe Tugas Akhir</p>
             <p class="text-xs text-gray-400">Batam, Kepulauan Riau</p>
@@ -144,124 +116,455 @@
 
         <hr class="divider-dashed mx-5">
 
-        {{-- DETAIL PESANAN --}}
+        {{-- DAFTAR MENU --}}
         <div class="px-5 py-4 space-y-2">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Detail Pesanan</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Daftar Menu</p>
             @foreach($order->items as $item)
-            <div class="flex justify-between items-start text-sm">
-                <div class="flex-1">
-                    <p class="font-semibold text-gray-700">{{ $item->name }}</p>
-                    @if($item->notes)
-                    <p class="text-xs text-gray-400 italic">* {{ $item->notes }}</p>
-                    @endif
-                    <p class="text-xs text-gray-400">{{ $item->qty }} × Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">
+                        {{ $item->menu->nama ?? $item->name }}
+                        <span class="text-gray-400 font-semibold">×{{ $item->qty }}</span>
+                    </span>
+                    <span class="font-bold text-gray-700">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</span>
                 </div>
-                <div class="text-right ml-3 shrink-0">
-                    <p class="font-bold text-gray-700">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</p>
-                </div>
-            </div>
             @endforeach
+
+            <div class="border-t border-gray-100 my-2 pt-2 space-y-1">
+                <div class="flex justify-between text-xs text-gray-400">
+                    <span>Subtotal</span>
+                    <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between text-xs text-gray-400">
+                    <span>Biaya Layanan</span>
+                    <span>Rp {{ number_format($biayaLayanan, 0, ',', '.') }}</span>
+                </div>
+                <div class="mt-1 flex justify-between items-center">
+                    <span class="font-bold text-gray-700 text-sm">Total Dibayar</span>
+                    <span class="font-black text-xl text-gray-900">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-2 space-y-1">
+                <div class="flex justify-between items-center text-xs text-gray-400">
+                    <span>Status Keuangan</span>
+                    @if($isPaid)
+                        <span class="font-bold text-green-600">✅ LUNAS</span>
+                    @elseif($isWaiting)
+                        <span class="font-bold text-amber-500">⏳ PENDING</span>
+                    @else
+                        <span class="font-bold text-red-500">❌ BATAL</span>
+                    @endif
+                </div>
+                <div class="flex justify-between items-center text-xs text-gray-400">
+                    <span>ID Transaksi</span>
+                    <span class="font-mono text-gray-500">#{{ $order->id }}</span>
+                </div>
+            </div>
         </div>
 
         <hr class="divider-dashed mx-5">
 
-        {{-- RINCIAN HARGA --}}
-        <div class="px-5 py-4 space-y-1.5">
-            <div class="flex justify-between text-sm text-gray-500">
-                <span>Subtotal</span>
-                <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
-            </div>
-            @if($biayaLayanan > 0)
-            <div class="flex justify-between text-sm text-gray-500">
-                <span>Biaya Layanan</span>
-                <span>Rp {{ number_format($biayaLayanan, 0, ',', '.') }}</span>
-            </div>
-            @endif
-            <div class="border-t border-gray-200 pt-2 mt-1 flex justify-between items-center">
-                <span class="font-bold text-gray-700 text-sm">Total Dibayar</span>
-                <span class="font-black text-xl text-gray-900">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
-            </div>
-            <div class="flex justify-between items-center text-xs text-gray-400 mt-0.5">
-                <span>Metode Pembayaran</span>
-                <span class="font-semibold text-gray-600">{{ $methodInfo['icon'] }} {{ $methodInfo['label'] }}</span>
-            </div>
-            <div class="flex justify-between items-center text-xs text-gray-400">
-                <span>Status</span>
-                @if(in_array($order->status, ['process', 'done', 'completed']))
-                    <span class="font-bold text-green-600">✅ LUNAS</span>
-                @elseif($order->status === 'waiting_payment')
-                    <span class="font-bold text-amber-500">⏳ MENUNGGU PEMBAYARAN</span>
-                @elseif($order->status === 'cancelled')
-                    <span class="font-bold text-red-500">❌ DIBATALKAN</span>
-                @else
-                    <span class="font-bold text-blue-500">🔄 DIPROSES</span>
-                @endif
-            </div>
-            <div class="flex justify-between items-center text-xs text-gray-400">
-                <span>ID Pesanan</span>
-                <span class="font-mono text-gray-500">#{{ $order->id }}</span>
-            </div>
-            @if($order->midtrans_order_id)
-            <div class="flex justify-between items-center text-xs text-gray-400">
-                <span>ID Transaksi</span>
-                <span class="font-mono text-gray-500 text-[10px]">{{ $order->midtrans_order_id }}</span>
-            </div>
-            @endif
-        </div>
-
-        <hr class="divider-dashed mx-5">
-
-        {{-- INFO STATUS --}}
+        {{-- STATUS SECTION --}}
         <div class="px-5 py-4">
-            @if(in_array($order->status, ['process', 'done', 'delivered', 'completed']))
-            <div class="bg-green-50 rounded-xl p-3 text-center">
-                <p class="text-sm font-bold text-green-700">🔥 Pesanan sudah masuk dapur!</p>
-                <p class="text-xs text-green-600 mt-0.5">Pesananmu sedang dimasak. Harap tunggu ya 😊</p>
-            </div>
-            @elseif($order->status === 'waiting_payment')
-            <div class="bg-amber-50 rounded-xl p-3 text-center">
-                <p class="text-sm font-bold text-amber-700">⏳ Menunggu konfirmasi pembayaran</p>
-                <p class="text-xs text-amber-600 mt-0.5">Selesaikan pembayaranmu, pesanan akan otomatis diproses.</p>
-            </div>
+            @if($isPaid)
+                <div class="bg-green-50 rounded-xl p-3 text-center">
+                    <p class="text-sm font-bold text-green-700">🔥 Pesanan telah dikirim ke dapur!</p>
+                    <p class="text-xs text-green-600 mt-0.5">Pesanan sedang diproses juru masak. Mohon menunggu ya.</p>
+                </div>
+
+            @elseif($isWaiting)
+                {{-- ✅ FIX: Tampilkan info menunggu + polling JS smart (bukan reload setiap 3 detik) --}}
+                <div class="bg-amber-50 rounded-xl p-3 text-center" id="waitingBox">
+                    <p class="text-sm font-bold text-amber-700">
+                        <span class="spin">🔄</span> Menunggu konfirmasi pembayaran...
+                    </p>
+                    <p class="text-xs text-amber-600 mt-0.5" id="waitingHint">Halaman otomatis memperbarui status.</p>
+                    <div class="poll-bar-wrap mt-2">
+                        <div class="poll-bar" id="pollBar"></div>
+                    </div>
+                </div>
+                <button onclick="cekSekarang()" id="btnCekSekarang"
+                        class="mt-2 w-full py-3 rounded-xl bg-amber-100 text-amber-800 font-bold text-sm border border-amber-200 cursor-pointer"
+                        style="border:none;">
+                    🔍 Cek Status Sekarang
+                </button>
+
             @else
-            <div class="bg-blue-50 rounded-xl p-3 text-center">
-                <p class="text-sm font-bold text-blue-700">🔄 Pesanan sedang diverifikasi</p>
-                <p class="text-xs text-blue-600 mt-0.5">Mohon tunggu sebentar.</p>
-            </div>
+                <div class="bg-red-50 rounded-xl p-3 text-center">
+                    <p class="text-sm font-bold text-red-700">Transaksi Gagal</p>
+                    <p class="text-xs text-red-600 mt-0.5">Silakan lakukan pemesanan ulang atau hubungi kasir.</p>
+                </div>
             @endif
         </div>
 
-        <hr class="divider-dashed mx-5">
-
-        {{-- TOMBOL AKSI --}}
-        <div class="px-5 py-4 space-y-2.5 no-print">
-            <button onclick="cetakStruk()" class="btn-action btn-print">
-                🖨️ Cetak / Simpan Struk
-            </button>
-            <a href="{{ url('/customer/home') }}" class="btn-action btn-home">
-                🏠 Kembali ke Menu
+        {{-- ACTIONS --}}
+        <div class="px-5 pb-6 space-y-2 no-print">
+            @if($isPaid)
+                <button onclick="bukaModal()" class="btn-action btn-print">
+                    🧾 Lihat Struk
+                </button>
+            @endif
+            <a href="{{ route('customer.home') }}" class="btn-action btn-home">
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg> Kembali ke Menu
             </a>
         </div>
 
-        {{-- FOOTER --}}
-        <div class="px-5 pb-5 flex items-center justify-between text-[10px] text-gray-300">
-            <span>Diproses oleh Midtrans</span>
-            <span>Terima kasih! 🙏</span>
-        </div>
     </div>
-
-    <p class="text-center text-[11px] text-slate-400 mt-3 no-print">
-        Simpan struk ini sebagai bukti pembayaran
-    </p>
 </div>
 
+@if($isWaiting)
+{{-- ✅ FIX: Ganti setTimeout reload() dengan polling JSON ke endpoint confirm --}}
+{{-- Lebih hemat battery & data dibanding reload halaman penuh setiap 3 detik --}}
 <script>
-function cetakStruk() {
-    const noPrint = document.querySelectorAll('.no-print');
-    noPrint.forEach(el => el.style.display = 'none');
-    window.print();
-    noPrint.forEach(el => el.style.display = '');
+const CONFIRM_URL = @json(route('customer.order.midtrans.confirm', $order->id));
+const RECEIPT_URL = @json(route('customer.order.midtrans.receipt', $order->id));
+const CSRF_TOKEN  = @json(csrf_token());
+
+// Polling setiap 4 detik, maksimal 15 menit (225 kali)
+const POLL_INTERVAL    = 4000;
+const MAX_POLL_COUNT   = 225;
+let   pollCount        = 0;
+let   pollTimer        = null;
+let   isChecking       = false;
+
+function animatePollBar(durationMs) {
+    const bar = document.getElementById('pollBar');
+    if (!bar) return;
+    bar.style.width = '0%';
+    bar.style.transition = 'none';
+    setTimeout(() => {
+        bar.style.transition = `width ${durationMs}ms linear`;
+        bar.style.width = '100%';
+    }, 50);
+}
+
+async function cekStatus() {
+    if (isChecking) return;
+    isChecking = true;
+
+    try {
+        const res  = await fetch(CONFIRM_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'X-CSRF-TOKEN':  CSRF_TOKEN,
+                'Accept':        'application/json',
+            }
+        });
+        const data = await res.json();
+
+        if (data.status === 'ok') {
+            // Pembayaran berhasil — reload halaman ini untuk tampilkan struk lunas
+            clearTimeout(pollTimer);
+            window.location.reload();
+            return;
+
+        } else if (data.status === 'cancelled') {
+            clearTimeout(pollTimer);
+            window.location.reload();
+            return;
+        }
+        // 'pending' → lanjut polling
+    } catch(e) {
+        // Abaikan error jaringan sementara, tetap lanjut polling
+    } finally {
+        isChecking = false;
+    }
+
+    jadwalkanPoll();
+}
+
+function jadwalkanPoll() {
+    clearTimeout(pollTimer);
+    pollCount++;
+
+    if (pollCount >= MAX_POLL_COUNT) {
+        // 15 menit sudah lewat — berhenti auto-polling
+        const hint = document.getElementById('waitingHint');
+        if (hint) hint.textContent = 'Auto-cek berhenti. Tap "Cek Status Sekarang" jika sudah bayar.';
+        const bar = document.getElementById('pollBar');
+        if (bar) { bar.style.width = '0%'; bar.style.transition = 'none'; }
+        return;
+    }
+
+    // Animasi bar untuk interval berikutnya
+    animatePollBar(POLL_INTERVAL - 200);
+    pollTimer = setTimeout(cekStatus, POLL_INTERVAL);
+}
+
+// Tombol cek manual
+function cekSekarang() {
+    const btn = document.getElementById('btnCekSekarang');
+    if (btn) btn.disabled = true;
+    clearTimeout(pollTimer);
+    pollCount = 0; // Reset counter supaya auto-polling jalan lagi
+    cekStatus();
+    setTimeout(() => { if (btn) btn.disabled = false; }, 5000);
+}
+
+// Mulai polling pertama kali
+jadwalkanPoll();
+
+// Cek ulang saat kembali ke tab
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        clearTimeout(pollTimer);
+        setTimeout(cekStatus, 500);
+    }
+});
+</script>
+@endif
+
+{{-- ════════════════════════════════════════ --}}
+{{-- MODAL BOTTOM SHEET — STRUK DOWNLOAD     --}}
+{{-- ════════════════════════════════════════ --}}
+@if($isPaid)
+<style>
+.struk-modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
+    align-items: flex-end; justify-content: center;
+}
+.struk-modal-overlay.active { display: flex; }
+.struk-modal-sheet {
+    background: #fff; border-radius: 28px 28px 0 0;
+    width: 100%; max-width: 420px; max-height: 92vh; overflow-y: auto;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    animation: struKSlideUp 0.35s cubic-bezier(0.34,1.2,0.64,1) forwards;
+}
+@keyframes struKSlideUp   { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes struKSlideDown { from { transform:translateY(0); opacity:1; } to { transform:translateY(100%); opacity:0; } }
+.struk-modal-sheet.closing { animation: struKSlideDown 0.25s ease forwards; }
+.receipt-zigzag-modal {
+    width:100%; height:20px; background:#fff;
+    margin-top:-18px; z-index:2; position:relative;
+    clip-path: polygon(
+        0% 100%, 3.33% 0%, 6.66% 100%, 10% 0%, 13.33% 100%, 16.66% 0%,
+        20% 100%, 23.33% 0%, 26.66% 100%, 30% 0%, 33.33% 100%, 36.66% 0%,
+        40% 100%, 43.33% 0%, 46.66% 100%, 50% 0%, 53.33% 100%, 56.66% 0%,
+        60% 100%, 63.33% 0%, 66.66% 100%, 70% 0%, 73.33% 100%, 76.66% 0%,
+        80% 100%, 83.33% 0%, 86.66% 100%, 90% 0%, 93.33% 100%, 96.66% 0%, 100% 100%
+    );
+}
+.receipt-divider-modal { border:none; border-top:1.5px dashed #e2e8f0; margin:10px 0; }
+@keyframes thumbIn { from { opacity:0; transform:scale(0.8) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.preview-thumb-wrap { animation: thumbIn 0.3s ease forwards; }
+</style>
+
+<div id="modalStruk" class="struk-modal-overlay" onclick="if(event.target===this)tutupModal()">
+    <div id="modalSheet" class="struk-modal-sheet">
+
+        <div style="display:flex;justify-content:center;padding-top:12px;padding-bottom:4px;">
+            <div style="width:40px;height:4px;background:#e2e8f0;border-radius:99px;"></div>
+        </div>
+
+        {{-- ISI RECEIPT (di-capture html2canvas) --}}
+        <div id="isiReceipt" style="margin:0 16px 8px;border-radius:24px;overflow:hidden;border:1px solid #c7d2fe;box-shadow:0 8px 32px rgba(99,102,241,0.12);">
+
+            {{-- Header --}}
+            <div style="background:linear-gradient(135deg,#6366f1,#4338ca);padding:24px 20px 36px;position:relative;overflow:hidden;text-align:center;">
+                <div style="position:absolute;width:160px;height:160px;background:rgba(255,255,255,0.1);border-radius:50%;top:-50px;right:-30px;"></div>
+                <div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px;">✅</div>
+                <p style="color:#fff;font-weight:900;font-size:18px;margin:0;">Struk Pembayaran</p>
+                <p style="color:rgba(255,255,255,0.75);font-size:11px;margin:4px 0 0;">
+                    @php
+                        $mIcons = ['gopay'=>'💚','ovo'=>'💜','dana'=>'💙','shopeepay'=>'🧡','bca'=>'🏦','bni'=>'🏦','bri'=>'🏦','mandiri'=>'🏦','permata'=>'🏦','credit_card'=>'💳','midtrans'=>'💳','qris'=>'📱'];
+                        $mLabels = ['gopay'=>'GoPay','ovo'=>'OVO','dana'=>'DANA','shopeepay'=>'ShopeePay','bca'=>'BCA VA','bni'=>'BNI VA','bri'=>'BRI VA','mandiri'=>'Mandiri','permata'=>'Permata VA','credit_card'=>'Kartu Kredit','midtrans'=>'Midtrans','qris'=>'QRIS'];
+                        $mIcon  = $mIcons[$order->payment_method]  ?? '💳';
+                        $mLabel = $mLabels[$order->payment_method] ?? strtoupper($order->payment_method);
+                    @endphp
+                    {{ $mIcon }} {{ $mLabel }}
+                </p>
+                <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);border-radius:14px;padding:8px 20px;">
+                    <p style="color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 3px;">NOMOR ANTRIAN</p>
+                    <p style="color:#fff;font-size:28px;font-weight:900;letter-spacing:3px;margin:0;line-height:1;">{{ $order->queue_number }}</p>
+                </div>
+            </div>
+            <div class="receipt-zigzag-modal"></div>
+
+            {{-- Body --}}
+            <div style="padding:4px 18px 18px;background:#fff;">
+
+                <div style="text-align:center;padding:10px 0 8px;">
+                    <p style="font-weight:900;color:#1e293b;font-size:15px;margin:0;">Cafe Momoo</p>
+                    <p style="color:#94a3b8;font-size:10px;margin:2px 0 0;">Batam, Kepulauan Riau</p>
+                    <p style="color:#94a3b8;font-size:10px;margin:2px 0 0;">{{ now()->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</p>
+                </div>
+
+                <hr class="receipt-divider-modal">
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;">
+                    <div style="background:#f8fafc;border-radius:10px;padding:8px 10px;">
+                        <p style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Nomor Meja</p>
+                        <p style="font-weight:900;color:#1e293b;font-size:14px;margin:0;">{{ $order->table_number ?? '-' }}</p>
+                    </div>
+                    <div style="background:#ecfdf5;border-radius:10px;padding:8px 10px;">
+                        <p style="font-size:9px;font-weight:700;color:#10b981;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Status</p>
+                        <p style="font-weight:800;color:#065f46;font-size:12px;margin:0;">✅ Lunas</p>
+                    </div>
+                </div>
+
+                @if($order->customer_name)
+                <div style="background:#eff6ff;border-radius:10px;padding:8px 10px;margin-bottom:8px;">
+                    <p style="font-size:9px;font-weight:700;color:#60a5fa;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Nama Pemesan</p>
+                    <p style="font-weight:900;color:#1e40af;font-size:14px;margin:0;">{{ $order->customer_name }}</p>
+                </div>
+                @endif
+
+                <div style="background:#f8fafc;border-radius:10px;padding:8px 10px;margin-bottom:8px;">
+                    <p style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Metode Pembayaran</p>
+                    <p style="font-weight:800;color:#1e293b;font-size:12px;margin:0;">{{ $mIcon }} {{ $mLabel }}</p>
+                </div>
+
+                <hr class="receipt-divider-modal">
+
+                <p style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin:8px 0 6px;">DETAIL PESANAN</p>
+                @php $subtotalModal = $order->items->sum(fn($i) => $i->price * $i->qty); $serviceModal = max(0, $order->total - $subtotalModal); @endphp
+                @foreach($order->items as $item)
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;{{ !$loop->last ? 'border-bottom:1px dashed #e0e7ff;' : '' }}">
+                    <div style="flex:1;">
+                        <p style="font-weight:700;color:#1e293b;font-size:13px;margin:0;">{{ $item->name }}</p>
+                        @if($item->notes)<p style="font-size:10px;color:#94a3b8;font-style:italic;margin:1px 0 0;">* {{ $item->notes }}</p>@endif
+                        <p style="font-size:10px;color:#64748b;margin:2px 0 0;">× {{ $item->qty }} @ Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                    </div>
+                    <p style="font-weight:800;color:#4f46e5;font-size:13px;margin:0;flex-shrink:0;padding-left:8px;">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</p>
+                </div>
+                @endforeach
+
+                <hr class="receipt-divider-modal" style="margin-top:10px;">
+
+                <div style="padding:4px 0;">
+                    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
+                        <span style="color:#64748b;">Subtotal</span>
+                        <span style="font-weight:700;color:#1e293b;">Rp {{ number_format($subtotalModal, 0, ',', '.') }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
+                        <span style="color:#64748b;">Biaya Layanan</span>
+                        <span style="font-weight:700;color:#1e293b;">Rp {{ number_format($serviceModal, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <hr class="receipt-divider-modal">
+
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+                    <span style="font-weight:900;color:#1e293b;font-size:14px;">TOTAL BAYAR</span>
+                    <span style="font-weight:900;color:#4f46e5;font-size:22px;">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                </div>
+
+                <div style="margin-top:4px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:8px 10px;text-align:center;">
+                    <span style="font-size:11px;font-weight:700;color:#3730a3;">✅ Lunas via Online Payment (Midtrans)</span>
+                </div>
+
+                <hr class="receipt-divider-modal" style="margin-top:12px;">
+
+                <div style="text-align:center;padding:12px 0 6px;">
+                    <div style="display:flex;align-items:flex-end;gap:2px;height:40px;justify-content:center;margin-bottom:6px;">
+                        @php $bh = [32,22,38,26,42,20,34,24,36,30,42,22,32,38,20,30,36,26,40,22,34,28,42,20,30,38,24,36,22,40]; @endphp
+                        @foreach($bh as $h)<span style="display:block;width:3px;height:{{ $h }}px;background:#1e293b;border-radius:1px;"></span>@endforeach
+                    </div>
+                    <p style="font-size:9px;font-family:monospace;color:#94a3b8;letter-spacing:2px;">{{ $order->queue_number }}-{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
+                </div>
+
+                <div style="text-align:center;padding:14px 0 4px;">
+                    <p style="font-size:11px;color:#94a3b8;margin:0;">Terima kasih telah memesan! 🙏</p>
+                    <p style="font-size:10px;color:#cbd5e1;margin:3px 0 0;">Simpan struk ini sebagai bukti pembayaran</p>
+                </div>
+
+            </div>
+        </div>{{-- /isiReceipt --}}
+
+        {{-- Tombol area --}}
+        <div style="padding:8px 16px 20px;position:sticky;bottom:0;background:#fff;border-top:1px solid #f1f5f9;">
+
+            <div id="previewHasil" style="display:none;background:#eef2ff;border:1.5px solid #c7d2fe;border-radius:14px;padding:12px;margin-bottom:10px;align-items:center;gap:12px;" class="preview-thumb-wrap">
+                <img id="previewImg" src="" alt="Preview"
+                     style="width:56px;height:56px;object-fit:cover;border-radius:10px;border:1.5px solid #a5b4fc;flex-shrink:0;cursor:pointer;"
+                     onclick="bukaGambarPenuh()" title="Tap untuk lihat penuh">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:800;color:#4f46e5;margin-bottom:2px;">✅ Struk berhasil diunduh!</div>
+                    <div id="previewNama" style="font-size:10px;color:#64748b;word-break:break-all;font-family:monospace;"></div>
+                    <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Tap gambar untuk lihat penuh</div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+                <button onclick="tutupModal()"
+                        style="flex:1;padding:14px;border-radius:50px;border:0;background:white;color:#64748b;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;box-shadow:rgb(0 0 0/5%) 0 0 8px;transition:all 0.5s ease;font-family:'Plus Jakarta Sans',sans-serif;"
+                        onmouseover="this.style.letterSpacing='3px';this.style.backgroundColor='hsl(261deg 80% 48%)';this.style.color='white';this.style.boxShadow='rgb(93 24 220) 0px 7px 29px 0px';"
+                        onmouseout="this.style.letterSpacing='1.5px';this.style.backgroundColor='white';this.style.color='#64748b';this.style.boxShadow='rgb(0 0 0/5%) 0 0 8px';">
+                    Tutup
+                </button>
+                <button id="btnDownload" onclick="downloadStruk()"
+                        style="flex:2.5;padding:14px;border-radius:50px;border:0;background:white;color:#6366f1;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:1.5px;text-transform:uppercase;box-shadow:rgb(0 0 0/5%) 0 0 8px;transition:all 0.5s ease;font-family:'Plus Jakarta Sans',sans-serif;"
+                        onmouseover="this.style.letterSpacing='3px';this.style.backgroundColor='#6366f1';this.style.color='white';this.style.boxShadow='rgb(99 102 241) 0px 7px 29px 0px';"
+                        onmouseout="this.style.letterSpacing='1.5px';this.style.backgroundColor='white';this.style.color='#6366f1';this.style.boxShadow='rgb(0 0 0/5%) 0 0 8px';">
+                    📥 Unduh Struk (PNG)
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+function bukaModal() {
+    document.getElementById('modalStruk').classList.add('active');
+    document.getElementById('modalSheet').classList.remove('closing');
+    document.body.style.overflow = 'hidden';
+}
+function tutupModal() {
+    const sheet = document.getElementById('modalSheet');
+    sheet.classList.add('closing');
+    setTimeout(function() {
+        document.getElementById('modalStruk').classList.remove('active');
+        document.body.style.overflow = '';
+        document.getElementById('previewHasil').style.display = 'none';
+    }, 240);
+}
+function downloadStruk() {
+    const btn = document.getElementById('btnDownload');
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<span style="display:inline-block;animation:spin2 0.8s linear infinite;">⏳</span>&nbsp;Memproses...';
+    btn.disabled = true; btn.style.opacity = '0.75';
+
+    const el = document.getElementById('isiReceipt');
+    const namaFile = 'struk-{{ $order->queue_number }}-{{ now()->format("YmdHis") }}.png';
+
+    html2canvas(el, { scale:3, backgroundColor:'#ffffff', useCORS:true, logging:false }).then(function(canvas) {
+        const dataUrl = canvas.toDataURL('image/png');
+        const a = document.createElement('a');
+        a.download = namaFile; a.href = dataUrl; a.click();
+
+        btn.innerHTML = '✅ Berhasil Diunduh!';
+        btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+        btn.style.color = 'white'; btn.style.opacity = '1'; btn.disabled = false;
+
+        const prev = document.getElementById('previewHasil');
+        document.getElementById('previewImg').src = dataUrl;
+        document.getElementById('previewNama').textContent = namaFile;
+        prev.style.display = 'flex';
+
+        setTimeout(function() {
+            btn.innerHTML = origHTML; btn.style.background = '';
+            btn.style.color = '#6366f1';
+        }, 3000);
+    }).catch(function() {
+        btn.innerHTML = '❌ Gagal, coba lagi';
+        btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        btn.style.color = 'white'; btn.style.opacity = '1'; btn.disabled = false;
+        setTimeout(function() { btn.innerHTML = origHTML; btn.style.background = ''; btn.style.color = '#6366f1'; }, 2500);
+    });
+}
+function bukaGambarPenuh() {
+    const img = document.getElementById('previewImg').src;
+    const w = window.open('');
+    w.document.write('<style>body{margin:0;background:#1e293b;display:flex;justify-content:center;padding:20px;}</style>');
+    w.document.write('<img src="' + img + '" style="max-width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.4);">');
 }
 </script>
+<style>@keyframes spin2 { to { transform:rotate(360deg); } }</style>
+@endif
+
 </body>
 </html>

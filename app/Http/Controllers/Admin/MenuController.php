@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Kategori;
+use App\Models\AddonGroup;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -38,7 +39,8 @@ class MenuController extends Controller
     public function create(): View
     {
         $kategoris = Kategori::orderBy('name')->get();
-        return view('admin.menu.create', compact('kategoris'));
+        $groups    = AddonGroup::with('addons')->orderBy('name')->get();
+        return view('admin.menu.create', compact('kategoris', 'groups'));
     }
 
     // ─────────────────────────────────────────
@@ -77,7 +79,14 @@ class MenuController extends Controller
             $data['image'] = $request->file('image')->store('menus', 'public');
         }
 
-        Menu::create($data);
+        $menu = Menu::create($data);
+
+        // Simpan relasi addon groups
+        if ($request->has('addon_groups')) {
+            $menu->addonGroups()->sync($request->addon_groups);
+        } else {
+            $menu->addonGroups()->detach();
+        }
 
         return redirect('/admin/menu')
                          ->with('success', 'Menu "' . $data['name'] . '" berhasil ditambahkan!');
@@ -88,9 +97,10 @@ class MenuController extends Controller
     // ─────────────────────────────────────────
     public function edit(int $id): View
     {
-        $menu      = Menu::findOrFail($id);
+        $menu      = Menu::with('addonGroups')->findOrFail($id);
         $kategoris = Kategori::orderBy('name')->get();
-        return view('admin.menu.edit', compact('menu', 'kategoris'));
+        $groups    = AddonGroup::with('addons')->orderBy('name')->get();
+        return view('admin.menu.edit', compact('menu', 'kategoris', 'groups'));
     }
 
     // ─────────────────────────────────────────
@@ -135,6 +145,13 @@ class MenuController extends Controller
         }
 
         $menu->update($data);
+
+        // Simpan relasi addon groups
+        if ($request->has('addon_groups')) {
+            $menu->addonGroups()->sync($request->addon_groups);
+        } else {
+            $menu->addonGroups()->detach();
+        }
 
         return redirect('/admin/menu')
                          ->with('success', 'Menu "' . $menu->name . '" berhasil diperbarui!');

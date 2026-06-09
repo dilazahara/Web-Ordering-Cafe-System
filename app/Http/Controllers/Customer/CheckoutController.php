@@ -34,6 +34,15 @@ class CheckoutController extends Controller
             }
         }
 
-        return view('customer.checkout', compact('paymentMethods', 'tableNumber'));
+        $midtransCodes  = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+        $kasirMethod    = $paymentMethods->firstWhere('kode', 'cash');
+        $midtransMethod = $paymentMethods->whereIn('kode', $midtransCodes)->first();
+        $hasCash        = $kasirMethod && $kasirMethod->aktif;
+        $hasMidtrans    = $midtransMethod && $midtransMethod->aktif;
+
+        return view('customer.checkout', compact(
+            'paymentMethods', 'tableNumber',
+            'hasCash', 'hasMidtrans', 'midtransMethod'
+        ));
     }
 }
