@@ -38,9 +38,7 @@ $midtransNames   = [
     'bca'=>'BCA VA','bni'=>'BNI VA','bri'=>'BRI VA','mandiri'=>'Mandiri',
     'permata'=>'Permata VA','credit_card'=>'Kartu Kredit','midtrans'=>'Online',
 ];
-$totalCash     = $orders->where('payment_method','cash')->sum('total');
-$totalQris     = $orders->where('payment_method','qris')->sum('total');
-$totalMidtrans = $orders->whereIn('payment_method',$midtransMethods)->sum('total');
+
 $totalSemua    = $orders->sum('total');
 @endphp
 
@@ -48,22 +46,6 @@ $totalSemua    = $orders->sum('total');
     <h2>LAPORAN PENJUALAN</h2>
     <p>Tanggal: {{ $tanggalLabel ?? now()->translatedFormat('d F Y') }} &nbsp;|&nbsp; Dicetak: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
 </div>
-
-<!-- Ringkasan -->
-<table style="margin-bottom:18px;font-size:11px;">
-    <tr>
-        <th width="25%">Total Transaksi</th>
-        <th width="25%">Pendapatan Cash</th>
-        <th width="25%">Pendapatan QRIS</th>
-        <th width="25%">Pendapatan Online</th>
-    </tr>
-    <tr>
-        <td class="text-center" style="font-weight:bold;font-size:14px;">{{ $orders->count() }}</td>
-        <td class="text-center" style="font-weight:bold;">Rp {{ number_format($totalCash,0,',','.') }}</td>
-        <td class="text-center" style="font-weight:bold;">Rp {{ number_format($totalQris,0,',','.') }}</td>
-        <td class="text-center" style="font-weight:bold;">Rp {{ number_format($totalMidtrans,0,',','.') }}</td>
-    </tr>
-</table>
 
 <!-- Detail -->
 <table>
