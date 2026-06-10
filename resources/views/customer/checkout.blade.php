@@ -530,7 +530,7 @@ function openConfirmPopup() {
     if(!nama) {
         document.getElementById('customerNameInput').focus();
         document.getElementById('customerNameInput').style.borderColor = '#ef4444';
-        toast('Nama pemesan wajib diisi!','error',2800); return;
+        toast('Nama pelanggan wajib diisi!','error',2800); return;
     }
     const tn = document.getElementById('tableNumberInput').value;
     if(!tn) { toast('Scan QR Code meja dulu!','warning',2800); return; }
