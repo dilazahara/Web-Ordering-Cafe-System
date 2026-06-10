@@ -99,29 +99,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 .page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; font-family: 'Inter', sans-serif; }
 
 /* ═══════════════════════════════════
-   STATUS OVERVIEW BAR
-═══════════════════════════════════ */
-.status-overview { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
-.stat-chip { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 12px; border: 1.5px solid; cursor: pointer; transition: all .18s; font-family: 'Inter', sans-serif; user-select: none; }
-.stat-chip:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.stat-chip.active { box-shadow: var(--shadow-md); }
-.stat-chip-icon { font-size: 16px; line-height: 1; }
-.stat-chip-body {}
-.stat-chip-count { font-size: 18px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
-.stat-chip-label { font-size: 10.5px; font-weight: 600; opacity: .8; margin-top: 1px; text-transform: uppercase; letter-spacing: .4px; }
-
-.chip-all   { background: #f8faff; border-color: var(--border-strong); color: var(--text-primary); }
-.chip-all.active   { background: var(--accent-bg); border-color: #93c5fd; color: var(--accent); }
-.chip-new   { background: #fff7ed; border-color: #fed7aa; color: var(--orange); }
-.chip-new.active   { background: #ffedd5; border-color: var(--orange); box-shadow: 0 4px 16px rgba(234,88,12,.18); }
-.chip-pending { background: var(--amber-bg); border-color: #fde68a; color: var(--amber); }
-.chip-pending.active { background: #fef3c7; border-color: var(--amber); box-shadow: 0 4px 16px rgba(217,119,6,.18); }
-.chip-process { background: var(--accent-bg); border-color: #bfdbfe; color: var(--accent); }
-.chip-process.active { background: #dbeafe; border-color: var(--accent); box-shadow: 0 4px 16px rgba(37,99,235,.18); }
-.chip-done  { background: var(--green-bg); border-color: #a7f3d0; color: var(--green); }
-.chip-done.active  { background: #d1fae5; border-color: var(--green); box-shadow: 0 4px 16px rgba(5,150,105,.18); }
-
-/* ═══════════════════════════════════
    TOOLBAR: SEARCH + SORT
 ═══════════════════════════════════ */
 .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
@@ -416,9 +393,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 ═══════════════════════════════════ */
 @media (max-width: 960px) { .order-grid { grid-template-columns: 1fr; } }
 @media (max-width: 720px) {
-  .status-overview { gap: 8px; }
-  .stat-chip { padding: 7px 11px; }
-  .stat-chip-count { font-size: 15px; }
   .search-wrap { max-width: 100%; }
   .toolbar { gap: 8px; }
 }
@@ -453,55 +427,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </div>
 </div>
 
-{{-- STATUS OVERVIEW CHIPS --}}
-@php
-  $cntAll     = $orders->count();
-  $cntUrgent  = $orders->where('payment_method','cash')->where('status','pending')->count();
-  $cntPending = $orders->whereIn('status',['pending','waiting_payment'])->count();
-  $cntProcess = $orders->where('status','process')->count();
-  $cntDone    = $orders->whereIn('status',['done','delivered'])->count();
-@endphp
-
-<div class="status-overview" id="statusOverview">
-  <div class="stat-chip chip-all active" data-filter="all" onclick="filterByChip(this,'all')">
-    <div class="stat-chip-icon">📋</div>
-    <div class="stat-chip-body">
-      <div class="stat-chip-count">{{ $cntAll }}</div>
-      <div class="stat-chip-label">Semua</div>
-    </div>
-  </div>
-  @if($cntUrgent > 0)
-  <div class="stat-chip chip-new" data-filter="urgent" onclick="filterByChip(this,'urgent')">
-    <div class="stat-chip-icon">🔥</div>
-    <div class="stat-chip-body">
-      <div class="stat-chip-count">{{ $cntUrgent }}</div>
-      <div class="stat-chip-label">Perlu Konfirmasi</div>
-    </div>
-  </div>
-  @endif
-  <div class="stat-chip chip-pending" data-filter="pending" onclick="filterByChip(this,'pending')">
-    <div class="stat-chip-icon">⏳</div>
-    <div class="stat-chip-body">
-      <div class="stat-chip-count">{{ $cntPending }}</div>
-      <div class="stat-chip-label">Menunggu</div>
-    </div>
-  </div>
-  <div class="stat-chip chip-process" data-filter="process" onclick="filterByChip(this,'process')">
-    <div class="stat-chip-icon">🍳</div>
-    <div class="stat-chip-body">
-      <div class="stat-chip-count">{{ $cntProcess }}</div>
-      <div class="stat-chip-label">Di Dapur</div>
-    </div>
-  </div>
-  <div class="stat-chip chip-done" data-filter="done" onclick="filterByChip(this,'done')">
-    <div class="stat-chip-icon">✅</div>
-    <div class="stat-chip-body">
-      <div class="stat-chip-count">{{ $cntDone }}</div>
-      <div class="stat-chip-label">Lunas</div>
-    </div>
-  </div>
-</div>
-
 {{-- TOOLBAR: SEARCH + SORT --}}
 <div class="toolbar">
   <div class="search-wrap">
@@ -525,9 +450,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   </select>
   <div class="section-count">
     <span class="pill pill-blue" id="countPill">{{ $orders->count() }} pesanan</span>
-    @if($cntUrgent > 0)
-      <span class="pill pill-orange">🔥 {{ $cntUrgent }} perlu aksi</span>
-    @endif
   </div>
 </div>
 
@@ -705,30 +627,22 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     {{-- ITEM LIST --}}
     <div class="order-items">
       @if($order->items && $order->items->count() > 0)
-     @foreach($order->items as $item)
-<div class="item-row">
-    <div class="item-row-left">
-
-        <div class="item-name">
-            {{ !empty($item->name) ? $item->name : ($item->menu->name ?? '-') }}
-            <span class="item-qty">
-                ×{{ $item->qty ?? 1 }}
-            </span>
-        </div>
-
-        @if(!empty($item->notes))
-            <div class="item-notes-small">
-                📝 {{ $item->notes }}
+        @foreach($order->items as $item)
+        <div class="item-row">
+          <div class="item-row-left">
+            <div class="item-name">
+              {{ !empty($item->name) ? $item->name : ($item->menu->name ?? '-') }}
+              <span class="item-qty">×{{ $item->qty ?? 1 }}</span>
             </div>
-        @endif
-
-    </div>
-
-    <span class="item-price">
-        Rp {{ number_format(($item->subtotal > 0 ? $item->subtotal : (($item->price ?? 0) * ($item->qty ?? 1))), 0, ',', '.') }}
-    </span>
-</div>
-@endforeach
+            @if(!empty($item->notes))
+              <div class="item-notes-small">📝 {{ $item->notes }}</div>
+            @endif
+          </div>
+          <span class="item-price">
+            Rp {{ number_format(($item->subtotal > 0 ? $item->subtotal : (($item->price ?? 0) * ($item->qty ?? 1))), 0, ',', '.') }}
+          </span>
+        </div>
+        @endforeach
       @else
         <div class="item-row">
           <div class="item-row-left"><div class="item-name">Total Pesanan</div></div>
@@ -874,7 +788,6 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       </div>
       <div class="action-btns">
         @if($order->payment_method === 'cash' && $order->status === 'pending')
-          {{-- Tombol buka modal cash --}}
           <button
             type="button"
             class="act-btn ab-orange"
@@ -883,14 +796,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
             💵 Bayar Sekarang
           </button>
         @elseif($order->status === 'done')
-          {{-- Pesanan sudah selesai dimasak, kasir bisa tandai selesai diantar --}}
           <form action="{{ url('/kasir/pesanan/' . $order->id . '/selesai') }}" method="POST" style="display:inline;" class="form-selesai">
             @csrf
             @method('PATCH')
             <button type="submit" class="act-btn ab-success">✅ Selesai Diantar</button>
           </form>
         @elseif($order->status === 'process')
-          {{-- Sedang dimasak dapur, kasir tidak bisa lakukan apa-apa --}}
           <span style="font-size:11px;color:var(--text-muted);font-family:'Inter',sans-serif;">🍳 Sedang dimasak...</span>
         @elseif($isMidtrans && $order->status === 'waiting_payment')
           <span style="font-size:11px;color:var(--text-muted);font-family:'Inter',sans-serif;">⏳ Menunggu pembayaran online</span>
@@ -906,11 +817,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
 </div>{{-- #cardPool --}}
 
-{{-- EMPTY STATE (shown by JS if no cards in a lane) --}}
-
-{{-- ══════════════════════════════════════
-     MODAL CASH PAYMENT
-══════════════════════════════════════ --}}
+{{-- MODAL CASH PAYMENT --}}
 <div class="modal-overlay" id="cashModal" onclick="handleOverlayClick(event)">
   <div class="modal-box">
 
@@ -978,7 +885,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 @push('scripts')
 <script>
 /* ═══════════════════════════════════════════════
-   TOAST SYSTEM — didefinisikan PERTAMA
+   TOAST SYSTEM
 ═══════════════════════════════════════════════ */
 function ksToast(msg, type, dur) {
   type = type || 'success';
@@ -1070,7 +977,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 /* ═══════════════════════════════════════════════
-   SESSION SUCCESS TOAST — dijalankan setelah DOM ready
+   DOM READY
 ═══════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
   @if(session('success'))
@@ -1100,7 +1007,6 @@ document.addEventListener('DOMContentLoaded', function() {
       lane = lanes.done;
       counts.done++;
     } else {
-      // pending / urgent / default → menunggu
       lane = lanes.pending;
       counts.pending++;
     }
@@ -1113,7 +1019,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('count-' + k);
     if (el) el.textContent = counts[k];
 
-    /* Show empty state if lane is empty */
     var laneEl = lanes[k];
     if (laneEl && counts[k] === 0) {
       var emptyLabels = { pending:'Tidak ada pesanan menunggu', process:'Tidak ada yang di dapur', done:'Belum ada yang siap diantar' };
@@ -1125,8 +1030,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  /* Update stat chips counts */
-  document.getElementById('count-pending') && (document.getElementById('count-pending').textContent = counts.pending);
+  /* Update count pill */
+  var pill = document.getElementById('countPill');
+  if (pill) pill.textContent = cards.length + ' pesanan';
 
   /* Feedback form "Selesai" */
   document.querySelectorAll('.form-selesai').forEach(function(form) {
@@ -1145,23 +1051,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /* ═══════════════════════════════════════════════
-   FILTER BY STATUS CHIP
-═══════════════════════════════════════════════ */
-var activeFilter = 'all';
-var activeSearch = '';
-
-function filterByChip(el, state) {
-  document.querySelectorAll('.stat-chip').forEach(function(c) { c.classList.remove('active'); });
-  el.classList.add('active');
-  activeFilter = state;
-  var labels = { all:'Semua pesanan', urgent:'Perlu konfirmasi', pending:'Menunggu', process:'Di dapur', done:'Lunas' };
-  ksToast('Filter: ' + (labels[state] || state), 'info', 1600);
-  applyFilters();
-}
-
-/* ═══════════════════════════════════════════════
    SEARCH
 ═══════════════════════════════════════════════ */
+var activeSearch = '';
+
 function handleSearch(val) {
   activeSearch = val.trim().toLowerCase();
   var clearBtn = document.getElementById('searchClear');
@@ -1183,29 +1076,34 @@ function clearSearch() {
    SORT
 ═══════════════════════════════════════════════ */
 function handleSort(val) {
-  var grid  = document.getElementById('orderGrid');
-  var cards = Array.from(grid.querySelectorAll('.order-card'));
+  var lanes = ['pending','process','done'];
 
-  cards.sort(function(a, b) {
-    if (val === 'newest')  return Number(b.dataset.created) - Number(a.dataset.created);
-    if (val === 'oldest')  return Number(a.dataset.created) - Number(b.dataset.created);
-    if (val === 'highest') return Number(b.dataset.total)   - Number(a.dataset.total);
-    if (val === 'lowest')  return Number(a.dataset.total)   - Number(b.dataset.total);
-    if (val === 'table') {
-      var ta = a.dataset.table || '999', tb = b.dataset.table || '999';
-      return ta.localeCompare(tb, undefined, { numeric: true });
-    }
-    return 0;
+  lanes.forEach(function(lane) {
+    var laneEl = document.getElementById('lane-' + lane);
+    if (!laneEl) return;
+    var cards = Array.from(laneEl.querySelectorAll('.order-card'));
+
+    cards.sort(function(a, b) {
+      if (val === 'newest')  return Number(b.dataset.created) - Number(a.dataset.created);
+      if (val === 'oldest')  return Number(a.dataset.created) - Number(b.dataset.created);
+      if (val === 'highest') return Number(b.dataset.total)   - Number(a.dataset.total);
+      if (val === 'lowest')  return Number(a.dataset.total)   - Number(b.dataset.total);
+      if (val === 'table') {
+        var ta = a.dataset.table || '999', tb = b.dataset.table || '999';
+        return ta.localeCompare(tb, undefined, { numeric: true });
+      }
+      return 0;
+    });
+
+    cards.forEach(function(c) { laneEl.appendChild(c); });
   });
-
-  cards.forEach(function(c) { grid.appendChild(c); });
 
   var sortLabels = { newest:'Terbaru', oldest:'Terlama', highest:'Total Terbesar', lowest:'Total Terkecil', table:'Nomor Meja' };
   ksToast('Urutan: ' + (sortLabels[val] || val), 'info', 1500);
 }
 
 /* ═══════════════════════════════════════════════
-   APPLY FILTERS (state + search digabung)
+   APPLY FILTERS (search only)
 ═══════════════════════════════════════════════ */
 function applyFilters() {
   var cards   = document.querySelectorAll('#lane-pending .order-card, #lane-process .order-card, #lane-done .order-card');
@@ -1231,11 +1129,11 @@ function applyFilters() {
   var pill = document.getElementById('countPill');
   if (pill) pill.textContent = visible + ' pesanan';
 
-  /* Update per-lane count badges & show empty msg per lane */
+  /* Update per-lane count badges */
   ['pending','process','done'].forEach(function(lane) {
-    var laneEl    = document.getElementById('lane-' + lane);
-    var countEl   = document.getElementById('count-' + lane);
-    var emptyEl   = laneEl ? laneEl.querySelector('.kanban-empty') : null;
+    var laneEl  = document.getElementById('lane-' + lane);
+    var countEl = document.getElementById('count-' + lane);
+    var emptyEl = laneEl ? laneEl.querySelector('.kanban-empty') : null;
     if (!laneEl) return;
 
     var laneCards   = laneEl.querySelectorAll('.order-card');
@@ -1246,13 +1144,11 @@ function applyFilters() {
 
     if (countEl) countEl.textContent = laneVisible;
 
-    /* Show/hide empty placeholder per lane */
     if (emptyEl) {
       emptyEl.style.display = (laneVisible === 0 && laneCards.length > 0) ? 'block' : '';
     }
   });
 }
-
 
 /* ═══════════════════════════════════════════════
    MODAL CASH
