@@ -312,7 +312,6 @@ tbody tr:hover { background: #f8fafc; }
             <button type="button" class="mh-btn-batal" onclick="closeDeleteKat()">Batal</button>
             <form id="deleteKatForm" action="" method="POST" style="margin:0;">
                 @csrf
-                @method('DELETE')
                 <button type="submit" class="mh-btn-hapus">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
