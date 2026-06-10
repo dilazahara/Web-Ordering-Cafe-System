@@ -52,126 +52,152 @@
         /* ── Horizontal scroll row ── */
         .menu-row {
             display: flex; gap: 12px;
-            overflow-x: auto; padding: 4px 16px 12px;
+            overflow-x: auto;
+            padding: 4px 16px 14px;
+            scroll-padding-left: 16px;
             scroll-snap-type: x mandatory;
-            align-items: stretch; /* ensure cards stretch to same height */
+            align-items: stretch;   /* semua card sama tinggi */
         }
+        /* Beri ruang ekstra di card pertama & terakhir agar tidak mepet */
+        .menu-row > *:first-child { margin-left: 0; }
+        .menu-row > *:last-child  { margin-right: 4px; }
         .menu-row::-webkit-scrollbar { display: none; }
         .menu-row { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* ── Product card — FIXED: flex column so button always at bottom ── */
+        /* ════════════════════════════════
+           PRODUCT CARD — fixed equal height
+        ════════════════════════════════ */
         .product-card {
             background: #fff;
-            border-radius: 18px;
-            width: 150px; flex-shrink: 0;
+            border-radius: 16px;
+            width: 140px;
+            min-width: 140px;
+            flex-shrink: 0;
             overflow: hidden;
             scroll-snap-align: start;
             transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 12px rgba(249,115,22,0.08);
-            border: 1px solid #fef0e6;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            border: 1px solid #f3e8dc;
             cursor: pointer;
             display: flex;
-            flex-direction: column; /* KEY FIX */
+            flex-direction: column;
+            height: 220px; /* fixed height agar semua card sejajar */
         }
         .product-card:active { transform: scale(0.97); }
 
-        .product-card img {
-            width: 100%; height: 115px; object-fit: cover; flex-shrink: 0;
+        /* Image wrapper */
+        .product-card .card-img-wrap {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            overflow: hidden;
+            flex-shrink: 0;
         }
+        .product-card .card-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .product-card:active .card-img-wrap img { transform: scale(1.03); }
+
         .product-card .card-body {
-            padding: 10px 10px 10px;
+            padding: 9px 10px 10px;
             display: flex;
             flex-direction: column;
-            flex: 1; /* KEY FIX: take remaining height */
+            flex: 1;
         }
         .product-card .card-name {
             font-size: 12px; font-weight: 700; color: #1f2937;
             line-height: 1.3; display: -webkit-box;
             -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-            min-height: 32px;
+            min-height: 30px;
+        }
+        /* Harga di bawah nama */
+        .card-price-text {
+            font-size: 12px; font-weight: 800; color: #f97316;
+            margin-top: 4px;
         }
         .product-card .card-desc {
-            font-size: 10px; color: #c4b5a5; margin-top: 3px;
+            font-size: 9px; color: #c4b5a5; margin-top: 1px;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            min-height: 15px; /* reserve space even when empty */
+            min-height: 12px;
         }
-        .product-card .card-price {
-            font-size: 13px; font-weight: 800; color: #f97316; margin-top: 4px;
-        }
-        /* Spacer to push button to bottom */
+
+        /* spacer mendorong tombol ke bawah */
         .card-spacer { flex: 1; }
 
-        /* ── Animated Add Button ── */
-        .btn-add-animated {
-            position: relative;
+        /* Add button */
+        .btn-add-sf {
             width: 100%;
-            height: 34px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            border: 1.5px solid #fdba74;
-            background-color: #fff7ed;
-            border-radius: 10px;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-            transition: all 0.3s;
-            margin-top: 8px;
-            flex-shrink: 0; /* don't shrink button */
-        }
-        .btn-add-animated .btn-text {
-            transform: translateX(20px);
-            color: #f97316;
-            font-weight: 700;
-            font-size: 11px;
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        .btn-add-animated .btn-icon {
-            position: absolute;
-            right: 0;
-            height: 100%;
-            width: 34px;
-            background-color: #f97316;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-            border-radius: 0 8px 8px 0;
-        }
-        .btn-add-animated .btn-icon svg {
-            width: 16px;
-            height: 16px;
-            stroke: #fff;
-        }
-        .btn-add-animated:hover {
+            height: 30px;
+            margin-top: 6px;
             background: #f97316;
-            border-color: #f97316;
+            border: none;
+            border-radius: 9px;
+            color: #fff;
+            font-size: 12px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            flex-shrink: 0;
         }
-        .btn-add-animated:hover .btn-text {
-            color: transparent;
-        }
-        .btn-add-animated:hover .btn-icon {
-            width: 100%;
-            border-radius: 8px;
-        }
-        .btn-add-animated:active .btn-icon {
-            background-color: #ea580c;
-        }
-        .btn-add-animated:active {
-            border-color: #ea580c;
-            transform: scale(0.97);
-        }
+        .btn-add-sf:active { background: #ea580c; transform: scale(0.96); }
+        .btn-add-sf svg { width: 14px; height: 14px; stroke: #fff; }
 
         /* ── Sold overlay ── */
         .sold-overlay {
             position: absolute; inset: 0;
-            background: rgba(0,0,0,0.22);
+            background: rgba(0,0,0,0.40);
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* ══════════════════════════════════════
-           FLOATING CART — ICON ONLY (toggle)
-        ══════════════════════════════════════ */
+        /* ════════════════════════════════
+           SMALL TOAST — pojok atas tengah
+        ════════════════════════════════ */
+        #toastContainer {
+            position: fixed;
+            top: max(env(safe-area-inset-top), 12px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(-8px) scale(0.95);
+            transition: opacity 0.22s, transform 0.22s;
+            max-width: 280px;
+            pointer-events: none;
+        }
+        .toast-item.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .toast-item.toast-success { background: #16a34a; color: #fff; }
+        .toast-item.toast-info    { background: #374151; color: #fff; }
+        .toast-item.toast-warning { background: #f59e0b; color: #fff; }
+        .toast-item.toast-error   { background: #ef4444; color: #fff; }
+        .toast-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.7);
+            flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════
+           FLOATING CART FAB — icon only
+        ═══════════════════════════════════════ */
         .cart-fab {
             position: fixed;
             bottom: max(env(safe-area-inset-bottom), 20px);
@@ -188,38 +214,84 @@
             pointer-events: auto;
         }
         .cart-fab-btn {
-            width: 60px;
-            height: 60px;
+            width: 60px; height: 60px;
             background: #f97316;
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             box-shadow: 0 8px 30px rgba(249,115,22,0.40);
-            cursor: pointer;
-            border: none;
+            cursor: pointer; border: none;
             transition: transform 0.15s, background 0.15s;
             position: relative;
         }
-        .cart-fab-btn:active {
-            transform: scale(0.93);
-            background: #ea580c;
-        }
-        .cart-fab-btn svg {
-            width: 26px; height: 26px; stroke: #fff;
-        }
+        .cart-fab-btn:active { transform: scale(0.93); background: #ea580c; }
+        .cart-fab-btn svg { width: 26px; height: 26px; stroke: #fff; }
         .cart-fab-badge {
-            position: absolute;
-            top: -6px; right: -6px;
-            background: #ef4444;
-            color: #fff;
+            position: absolute; top: -6px; right: -6px;
+            background: #ef4444; color: #fff;
             font-size: 10px; font-weight: 800;
-            min-width: 22px; height: 22px;
-            border-radius: 11px;
-            padding: 0 5px;
-            display: flex; align-items: center; justify-content: center;
+            min-width: 22px; height: 22px; border-radius: 11px;
+            padding: 0 5px; display: flex; align-items: center; justify-content: center;
             border: 2.5px solid #faf9f7;
         }
+
+        /* ══════════════════════════════════════════
+           CART BOTTOM BAR
+        ══════════════════════════════════════════ */
+        .cart-bottom-bar {
+            position: fixed;
+            bottom: max(env(safe-area-inset-bottom), 12px);
+            left: 14px; right: 14px;
+            background: linear-gradient(135deg, #fff4ec 0%, #fff0e4 100%);
+            border: 1.5px solid #fcd9bb;
+            border-radius: 20px;
+            display: flex; align-items: center;
+            padding: 9px 9px 9px 12px;
+            gap: 10px;
+            z-index: 199;
+            box-shadow: 0 8px 32px rgba(249,115,22,0.20), 0 2px 8px rgba(249,115,22,0.10);
+            transform: translateY(130%);
+            opacity: 0;
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+            pointer-events: none;
+        }
+        .cart-bottom-bar.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .cart-bottom-bar-icon {
+            position: relative;
+            width: 44px; height: 44px;
+            background: #f97316;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(249,115,22,0.30);
+        }
+        .cart-bottom-bar-icon svg { width: 22px; height: 22px; stroke: #fff; }
+        .cart-bottom-bar-badge {
+            position: absolute; top: -6px; right: -6px;
+            background: #ef4444; color: #fff;
+            font-size: 10px; font-weight: 800;
+            min-width: 20px; height: 20px; border-radius: 10px;
+            padding: 0 4px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #fff4ec;
+        }
+        .cart-bottom-bar-info { flex: 1; min-width: 0; }
+        .cart-bottom-bar-label { color: #c4956a; font-size: 10px; font-weight: 600; }
+        .cart-bottom-bar-total { color: #c2440a; font-size: 17px; font-weight: 800; line-height: 1.1; }
+        .cart-bottom-bar-btn {
+            background: #f97316; color: #fff; border: none;
+            padding: 12px 20px; border-radius: 14px;
+            font-size: 13px; font-weight: 800;
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; white-space: nowrap;
+            transition: background 0.15s, transform 0.12s;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(249,115,22,0.35);
+        }
+        .cart-bottom-bar-btn:active { background: #ea580c; transform: scale(0.96); }
+        .cart-bottom-bar-btn svg { width: 15px; height: 15px; stroke: #fff; }
 
         /* ── Bottom sheet ── */
         .sheet-overlay {
@@ -265,32 +337,51 @@
         .back-popup-overlay.show .back-popup-box { transform: translateY(0); }
         .back-popup-handle { width: 40px; height: 4px; background: #fde8d8; border-radius: 2px; margin: 0 auto 18px; }
 
-        /* ── Toast ── */
-        #toastWrap { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; width: max-content; max-width: calc(100vw - 32px); }
-        .toast { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 14px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,0.10); opacity: 0; transform: translateY(-8px) scale(0.95); transition: all 0.25s ease; }
-        .toast.show { opacity: 1; transform: translateY(0) scale(1); }
-        .toast-success { background: #1c1410; color: #fff; }
-        .toast-info    { background: #1c1410; color: #fff; }
-        .toast-warning { background: #f59e0b; color: #fff; }
-        .toast-error   { background: #ef4444; color: #fff; }
+        /* ── Empty cart bottom bar ── */
+        .cart-bottom-bar-empty {
+            position: fixed;
+            bottom: max(env(safe-area-inset-bottom), 12px);
+            left: 14px; right: 14px;
+            background: #f9fafb;
+            border: 1.5px dashed #e5e7eb;
+            border-radius: 20px;
+            display: flex; align-items: center;
+            padding: 9px 9px 9px 12px;
+            gap: 10px;
+            z-index: 199;
+            box-shadow: none;
+            pointer-events: none;
+            opacity: 0.75;
+        }
+        .cart-bottom-bar-empty-icon {
+            width: 44px; height: 44px;
+            background: #f3f4f6;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .cart-bottom-bar-empty-icon svg { width: 22px; height: 22px; stroke: #9ca3af; }
+        .cart-bottom-bar-empty-info { flex: 1; }
+        .cart-bottom-bar-empty-label { color: #9ca3af; font-size: 10px; font-weight: 600; }
+        .cart-bottom-bar-empty-text  { color: #d1d5db; font-size: 14px; font-weight: 700; }
+        .cart-bottom-bar-empty-btn {
+            background: #e5e7eb; color: #9ca3af; border: none;
+            padding: 12px 18px; border-radius: 14px;
+            font-size: 13px; font-weight: 800;
+            white-space: nowrap; flex-shrink: 0;
+        }
 
         body.no-scroll { overflow: hidden; }
 
         /* ── Header logo area ── */
         .header-logo-ring {
             background: linear-gradient(135deg, #f97316, #fb923c);
-            border-radius: 18px;
-            padding: 2px;
+            border-radius: 18px; padding: 2px;
         }
         .header-logo-inner {
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #fff; border-radius: 16px; overflow: hidden;
+            width: 44px; height: 44px;
+            display: flex; align-items: center; justify-content: center;
         }
 
         /* ── Table badge ── */
@@ -299,12 +390,6 @@
             border: 1.5px solid #fde8d8;
             border-radius: 16px;
             padding: 10px 14px;
-        }
-
-        /* Cart open indicator on FAB */
-        .cart-fab-btn.cart-open {
-            background: #1c1410;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
         }
 
         /* ── Note Modal ── */
@@ -341,6 +426,9 @@
 </head>
 
 <body class="pb-28">
+
+<!-- ═══════════ SMALL TOAST CONTAINER ═══════════ -->
+<div id="toastContainer"></div>
 
 <!-- ═══════════ APP HEADER ═══════════ -->
 <header class="app-header safe-top">
@@ -436,19 +524,15 @@
         </div>
         <div id="cartItems" class="min-h-[120px]"></div>
         <div class="sticky bottom-0 bg-white pt-4 pb-2 border-t border-orange-50 mt-2">
-            <div class="flex justify-between items-center mb-4">
+            <div class="flex justify-between items-center">
                 <span class="text-[#9a7a6a] font-semibold">Total</span>
                 <span id="cartTotal" class="font-extrabold text-2xl text-orange-500">Rp 0</span>
             </div>
-            <button onclick="goToCheckout()" class="w-full bg-orange-500 text-white py-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-2 active:bg-orange-600 active:scale-[0.98] transition-all">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-7-7l7 7-7 7"/></svg>
-                Lanjut ke Checkout
-            </button>
         </div>
     </div>
 </div>
 
-<!-- ═══════════ FLOATING CART FAB (icon only, toggle) ═══════════ -->
+<!-- ═══════════ FLOATING CART FAB ═══════════ -->
 <div id="cartFab" class="cart-fab">
     <button id="cartFabBtn" class="cart-fab-btn" onclick="toggleCart()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -457,6 +541,28 @@
             <path d="M16 10a4 4 0 01-8 0"/>
         </svg>
         <span id="cartFabBadge" class="cart-fab-badge">0</span>
+    </button>
+</div>
+
+<!-- ═══════════ CART BOTTOM BAR ═══════════ -->
+<div id="cartBottomBar" class="cart-bottom-bar">
+    <button onclick="toggleCart()" class="cart-bottom-bar-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <span id="cartBarBadge" class="cart-bottom-bar-badge">0</span>
+    </button>
+    <div class="cart-bottom-bar-info">
+        <p class="cart-bottom-bar-label">Total Pesanan</p>
+        <p id="cartBarTotal" class="cart-bottom-bar-total">Rp 0</p>
+    </div>
+    <button onclick="goToCheckout()" class="cart-bottom-bar-btn">
+        Lanjut checkout
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14m-7-7l7 7-7 7"/>
+        </svg>
     </button>
 </div>
 
@@ -506,8 +612,21 @@
     </div>
 </div>
 
-<!-- Toast container -->
-<div id="toastWrap"></div>
+<!-- ═══════════ EMPTY CART BOTTOM BAR ═══════════ -->
+<div id="cartEmptyBar" class="cart-bottom-bar-empty">
+    <div class="cart-bottom-bar-empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+    </div>
+    <div class="cart-bottom-bar-empty-info">
+        <p class="cart-bottom-bar-empty-label">Keranjang</p>
+        <p class="cart-bottom-bar-empty-text">Belum ada pesanan</p>
+    </div>
+    <div class="cart-bottom-bar-empty-btn">Pilih Menu</div>
+</div>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -523,16 +642,32 @@
         sessionStorage.removeItem('orderSuccess'); cart = [];
     }
 
-    // ── Toast ──
-    function toast(msg, type = 'info', ms = 2000) {
-        const w = document.getElementById('toastWrap');
+    /* ══════════════════════════════════════════
+       SMALL TOAST — ganti dari modal besar
+       Muncul di atas, kecil, hilang otomatis
+    ══════════════════════════════════════════ */
+    let _toastId = 0;
+    function toast(msg, type = 'success') {
+        const container = document.getElementById('toastContainer');
+        const id = ++_toastId;
         const el = document.createElement('div');
-        el.className = `toast toast-${type}`;
-        const icons = {success:'✓', info:'•', warning:'!', error:'✕'};
-        el.innerHTML = `<span style="font-size:14px">${icons[type]||'•'}</span><span>${msg}</span>`;
-        w.appendChild(el);
-        requestAnimationFrame(()=>{ el.classList.add('show'); });
-        setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),280); }, ms);
+        el.className = `toast-item toast-${type}`;
+        el.id = 'toast_' + id;
+
+        // icon dot + text
+        el.innerHTML = `<span class="toast-dot"></span>${msg}`;
+        container.appendChild(el);
+
+        // trigger animation
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => el.classList.add('show'));
+        });
+
+        // auto-remove after 2s
+        setTimeout(() => {
+            el.classList.remove('show');
+            setTimeout(() => el.remove(), 250);
+        }, 2000);
     }
 
     // ── Time ──
@@ -598,26 +733,25 @@
         const sold = item.status == 0;
         return `
         <div class="product-card" onclick="${sold ? '' : `goToAddon(${item.id})`}">
-            <div class="relative">
+            <div class="card-img-wrap">
                 <img src="/storage/${item.image}" alt="${item.name}" loading="lazy">
-                ${sold ? `<div class="sold-overlay rounded-t-[18px]">
+                ${sold ? `<div class="sold-overlay">
                     <span class="bg-red-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">HABIS</span>
                 </div>` : ''}
             </div>
             <div class="card-body">
                 <p class="card-name">${item.name}</p>
-                <p class="card-desc">${item.description || ''}</p>
-                <p class="card-price">Rp ${Number(item.price).toLocaleString('id-ID')}</p>
+                ${!sold
+                    ? `<p class="card-price-text">Rp ${Number(item.price).toLocaleString('id-ID')}</p>`
+                    : `<p class="card-price-text" style="color:#ef4444">Habis</p>`}
                 <div class="card-spacer"></div>
                 ${!sold ? `
-                <button onclick="event.stopPropagation(); goToAddon(${item.id})" class="btn-add-animated">
-                    <span class="btn-text">Tambah</span>
-                    <span class="btn-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                            <path d="M12 5v14M5 12h14"/>
-                        </svg>
-                    </span>
-                </button>` : `<span class="block text-center text-[10px] text-red-400 font-bold mt-2 py-1.5 bg-red-50 rounded-lg border border-red-100">Stok Habis</span>`}
+                <button onclick="event.stopPropagation(); goToAddon(${item.id})" class="btn-add-sf">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Tambah
+                </button>` : `<span class="block text-center text-[10px] text-red-400 font-bold py-1.5 bg-red-50 rounded-lg border border-red-100">Stok Habis</span>`}
             </div>
         </div>`;
     }
@@ -646,11 +780,20 @@
         const fmt = n => 'Rp ' + n.toLocaleString('id-ID');
         document.getElementById('cartTotal').textContent = fmt(total);
         document.getElementById('cartFabBadge').textContent = count;
+        document.getElementById('cartBarBadge').textContent = count;
+        document.getElementById('cartBarTotal').textContent = fmt(total);
 
         const fab = document.getElementById('cartFab');
-        if(count > 0) fab.classList.add('show');
-        else {
+        const bar = document.getElementById('cartBottomBar');
+        const emptyBar = document.getElementById('cartEmptyBar');
+        if(count > 0) {
             fab.classList.remove('show');
+            bar.classList.add('show');
+            emptyBar.style.display = 'none';
+        } else {
+            fab.classList.remove('show');
+            bar.classList.remove('show');
+            emptyBar.style.display = 'flex';
             if(cartSheetOpen) closeCart();
         }
         renderCartItems();
@@ -700,7 +843,7 @@
     function removeItem(idx) {
         cart.splice(idx,1);
         localStorage.setItem('cart', JSON.stringify(cart));
-        toast('Item dihapus','info');
+        toast('Item dihapus 🗑️','warning');
         updateCartUI();
     }
 
