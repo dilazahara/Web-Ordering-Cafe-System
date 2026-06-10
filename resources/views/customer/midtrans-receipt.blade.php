@@ -358,119 +358,87 @@ document.addEventListener('visibilitychange', () => {
             <div style="width:40px;height:4px;background:#e2e8f0;border-radius:99px;"></div>
         </div>
 
-        {{-- ISI RECEIPT (di-capture html2canvas) --}}
-        <div id="isiReceipt" style="margin:0 16px 8px;border-radius:24px;overflow:hidden;border:1px solid #c7d2fe;box-shadow:0 8px 32px rgba(99,102,241,0.12);">
+        {{-- ISI RECEIPT (di-capture html2canvas) — Format sama dengan struk kasir --}}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-            {{-- Header --}}
-            <div style="background:linear-gradient(135deg,#6366f1,#4338ca);padding:24px 20px 36px;position:relative;overflow:hidden;text-align:center;">
-                <div style="position:absolute;width:160px;height:160px;background:rgba(255,255,255,0.1);border-radius:50%;top:-50px;right:-30px;"></div>
-                <div style="width:52px;height:52px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:24px;">✅</div>
-                <p style="color:#fff;font-weight:900;font-size:18px;margin:0;">Struk Pembayaran</p>
-                <p style="color:rgba(255,255,255,0.75);font-size:11px;margin:4px 0 0;">
-                    @php
-                        $mIcons = ['gopay'=>'💚','ovo'=>'💜','dana'=>'💙','shopeepay'=>'🧡','bca'=>'🏦','bni'=>'🏦','bri'=>'🏦','mandiri'=>'🏦','permata'=>'🏦','credit_card'=>'💳','midtrans'=>'💳','qris'=>'📱'];
-                        $mLabels = ['gopay'=>'GoPay','ovo'=>'OVO','dana'=>'DANA','shopeepay'=>'ShopeePay','bca'=>'BCA VA','bni'=>'BNI VA','bri'=>'BRI VA','mandiri'=>'Mandiri','permata'=>'Permata VA','credit_card'=>'Kartu Kredit','midtrans'=>'Midtrans','qris'=>'QRIS'];
-                        $mIcon  = $mIcons[$order->payment_method]  ?? '💳';
-                        $mLabel = $mLabels[$order->payment_method] ?? strtoupper($order->payment_method);
-                    @endphp
-                    {{ $mIcon }} {{ $mLabel }}
-                </p>
-                <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);border-radius:14px;padding:8px 20px;">
-                    <p style="color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 3px;">NOMOR ANTRIAN</p>
-                    <p style="color:#fff;font-size:28px;font-weight:900;letter-spacing:3px;margin:0;line-height:1;">{{ $order->queue_number }}</p>
-                </div>
+        @php
+            $mIcons2  = ['gopay'=>'💚','ovo'=>'💜','dana'=>'💙','shopeepay'=>'🧡','bca'=>'🏦','bni'=>'🏦','bri'=>'🏦','mandiri'=>'🏦','permata'=>'🏦','credit_card'=>'💳','midtrans'=>'💳','qris'=>'📱'];
+            $mLabels2 = ['gopay'=>'GoPay (Midtrans)','ovo'=>'OVO (Midtrans)','dana'=>'DANA (Midtrans)','shopeepay'=>'ShopeePay (Midtrans)','bca'=>'BCA Virtual Account','bni'=>'BNI Virtual Account','bri'=>'BRI Virtual Account','mandiri'=>'Mandiri Virtual Account','permata'=>'Permata Virtual Account','credit_card'=>'Kartu Kredit (Midtrans)','midtrans'=>'Online (Midtrans)','qris'=>'QRIS'];
+            $mIcon2   = $mIcons2[$order->payment_method]  ?? '💳';
+            $mLabel2  = $mLabels2[$order->payment_method] ?? strtoupper($order->payment_method);
+            $subtotalStruk = $order->items->sum(fn($i) => $i->price * $i->qty);
+            $serviceStruk  = max(0, $order->total - $subtotalStruk);
+        @endphp
+
+        <div id="isiReceipt" style="margin:0 16px 8px;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e4e8f0;box-shadow:0 4px 16px rgba(0,0,0,0.08);font-family:'Poppins',sans-serif;font-size:12px;color:#111;">
+
+            {{-- ── Header sama persis dengan kasir ── --}}
+            <div style="text-align:center;padding:20px 16px 10px;">
+                <div style="font-size:16px;font-weight:700;letter-spacing:2px;font-family:'Poppins',sans-serif;">CAFE MOMOO</div>
+                <div style="font-size:11px;color:#555;margin-top:2px;font-family:'Poppins',sans-serif;">Terima kasih atas kunjungan Anda</div>
+                <div style="border-top:2px dashed #bbb;margin:10px 0 0;"></div>
             </div>
-            <div class="receipt-zigzag-modal"></div>
 
-            {{-- Body --}}
-            <div style="padding:4px 18px 18px;background:#fff;">
+            {{-- ── Info order ── --}}
+            <div style="padding:0 16px;">
+                <table style="width:100%;font-size:12px;border-collapse:collapse;margin-bottom:4px;font-family:'Poppins',sans-serif;">
+                    <tr><td style="padding:3px 0;">No. Order</td><td style="text-align:right;font-weight:700;">{{ $order->queue_number }}</td></tr>
+                    <tr><td style="padding:3px 0;">Nama</td><td style="text-align:right;">{{ $order->customer_name ?? '—' }}</td></tr>
+                    <tr><td style="padding:3px 0;">Meja</td><td style="text-align:right;">{{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}</td></tr>
+                    <tr><td style="padding:3px 0;">Waktu</td><td style="text-align:right;font-size:11px;">{{ now()->setTimezone('Asia/Jakarta')->format('d/m/Y H:i') }} WIB</td></tr>
+                    <tr><td style="padding:3px 0;">Metode</td><td style="text-align:right;">{{ $mIcon2 }} {{ $mLabel2 }}</td></tr>
+                </table>
 
-                <div style="text-align:center;padding:10px 0 8px;">
-                    <p style="font-weight:900;color:#1e293b;font-size:15px;margin:0;">Cafe Momoo</p>
-                    <p style="color:#94a3b8;font-size:10px;margin:2px 0 0;">Batam, Kepulauan Riau</p>
-                    <p style="color:#94a3b8;font-size:10px;margin:2px 0 0;">{{ now()->setTimezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB</p>
-                </div>
+                <div style="border-top:1px dashed #bbb;margin:8px 0;"></div>
 
-                <hr class="receipt-divider-modal">
-
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;">
-                    <div style="background:#f8fafc;border-radius:10px;padding:8px 10px;">
-                        <p style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Nomor Meja</p>
-                        <p style="font-weight:900;color:#1e293b;font-size:14px;margin:0;">{{ $order->table_number ?? '-' }}</p>
-                    </div>
-                    <div style="background:#ecfdf5;border-radius:10px;padding:8px 10px;">
-                        <p style="font-size:9px;font-weight:700;color:#10b981;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Status</p>
-                        <p style="font-weight:800;color:#065f46;font-size:12px;margin:0;">✅ Lunas</p>
-                    </div>
-                </div>
-
-                @if($order->customer_name)
-                <div style="background:#eff6ff;border-radius:10px;padding:8px 10px;margin-bottom:8px;">
-                    <p style="font-size:9px;font-weight:700;color:#60a5fa;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Nama Pemesan</p>
-                    <p style="font-weight:900;color:#1e40af;font-size:14px;margin:0;">{{ $order->customer_name }}</p>
-                </div>
-                @endif
-
-                <div style="background:#f8fafc;border-radius:10px;padding:8px 10px;margin-bottom:8px;">
-                    <p style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Metode Pembayaran</p>
-                    <p style="font-weight:800;color:#1e293b;font-size:12px;margin:0;">{{ $mIcon }} {{ $mLabel }}</p>
-                </div>
-
-                <hr class="receipt-divider-modal">
-
-                <p style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin:8px 0 6px;">DETAIL PESANAN</p>
-                @php $subtotalModal = $order->items->sum(fn($i) => $i->price * $i->qty); $serviceModal = max(0, $order->total - $subtotalModal); @endphp
+                {{-- ── Item Pesanan ── --}}
+                <div style="font-weight:700;margin-bottom:6px;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:#555;font-family:'Poppins',sans-serif;">Item Pesanan</div>
                 @foreach($order->items as $item)
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;{{ !$loop->last ? 'border-bottom:1px dashed #e0e7ff;' : '' }}">
-                    <div style="flex:1;">
-                        <p style="font-weight:700;color:#1e293b;font-size:13px;margin:0;">{{ $item->name }}</p>
-                        @if($item->notes)<p style="font-size:10px;color:#94a3b8;font-style:italic;margin:1px 0 0;">* {{ $item->notes }}</p>@endif
-                        <p style="font-size:10px;color:#64748b;margin:2px 0 0;">× {{ $item->qty }} @ Rp {{ number_format($item->price, 0, ',', '.') }}</p>
-                    </div>
-                    <p style="font-weight:800;color:#4f46e5;font-size:13px;margin:0;flex-shrink:0;padding-left:8px;">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</p>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-family:'Poppins',sans-serif;">
+                    <span style="flex:1;padding-right:8px;">{{ $item->qty }}x {{ $item->name }}</span>
+                    <span style="white-space:nowrap;font-weight:600;">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</span>
                 </div>
                 @endforeach
 
-                <hr class="receipt-divider-modal" style="margin-top:10px;">
+                <div style="border-top:1px dashed #bbb;margin:8px 0;"></div>
 
-                <div style="padding:4px 0;">
-                    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                        <span style="color:#64748b;">Subtotal</span>
-                        <span style="font-weight:700;color:#1e293b;">Rp {{ number_format($subtotalModal, 0, ',', '.') }}</span>
+                {{-- ── Subtotal & Biaya Layanan ── --}}
+                <table style="width:100%;font-size:12px;border-collapse:collapse;font-family:'Poppins',sans-serif;">
+                    <tr><td style="padding:3px 0;">Subtotal</td><td style="text-align:right;">Rp {{ number_format($subtotalStruk, 0, ',', '.') }}</td></tr>
+                    @if($serviceStruk > 0)
+                    <tr><td style="padding:3px 0;">Biaya Layanan</td><td style="text-align:right;">Rp {{ number_format($serviceStruk, 0, ',', '.') }}</td></tr>
+                    @endif
+                </table>
+
+                <div style="border-top:1px dashed #bbb;margin:8px 0;"></div>
+
+                {{-- ── TOTAL ── --}}
+                <table style="width:100%;font-size:13px;border-collapse:collapse;font-family:'Poppins',sans-serif;">
+                    <tr style="font-weight:700;">
+                        <td style="padding:3px 0;">TOTAL</td>
+                        <td style="text-align:right;">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                    </tr>
+                </table>
+
+                {{-- ── Info Lunas Online (meniru sMidtransBlock kasir) ── --}}
+                <div style="margin-top:6px;">
+                    <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px 10px;text-align:center;font-family:'Poppins',sans-serif;">
+                        <span style="font-size:11px;font-weight:700;color:#065f46;">✅ Lunas via Online Payment ({{ $mLabel2 }})</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                        <span style="color:#64748b;">Biaya Layanan</span>
-                        <span style="font-weight:700;color:#1e293b;">Rp {{ number_format($serviceModal, 0, ',', '.') }}</span>
-                    </div>
                 </div>
 
-                <hr class="receipt-divider-modal">
+                <div style="border-top:2px dashed #bbb;margin:10px 0 8px;"></div>
 
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
-                    <span style="font-weight:900;color:#1e293b;font-size:14px;">TOTAL BAYAR</span>
-                    <span style="font-weight:900;color:#4f46e5;font-size:22px;">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                {{-- ── Footer sama dengan kasir ── --}}
+                <div style="text-align:center;font-size:11px;color:#666;line-height:1.8;font-family:'Poppins',sans-serif;padding-bottom:16px;">
+                    Terima kasih telah memesan!<br>
+                    Semoga makanan Anda lezat 😊
+                    <div style="font-size:10px;margin-top:6px;color:#999;font-family:'Poppins',sans-serif;">Dicetak: {{ now()->setTimezone('Asia/Jakarta')->format('d/m/Y H:i:s') }}</div>
                 </div>
-
-                <div style="margin-top:4px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:8px 10px;text-align:center;">
-                    <span style="font-size:11px;font-weight:700;color:#3730a3;">✅ Lunas via Online Payment (Midtrans)</span>
-                </div>
-
-                <hr class="receipt-divider-modal" style="margin-top:12px;">
-
-                <div style="text-align:center;padding:12px 0 6px;">
-                    <div style="display:flex;align-items:flex-end;gap:2px;height:40px;justify-content:center;margin-bottom:6px;">
-                        @php $bh = [32,22,38,26,42,20,34,24,36,30,42,22,32,38,20,30,36,26,40,22,34,28,42,20,30,38,24,36,22,40]; @endphp
-                        @foreach($bh as $h)<span style="display:block;width:3px;height:{{ $h }}px;background:#1e293b;border-radius:1px;"></span>@endforeach
-                    </div>
-                    <p style="font-size:9px;font-family:monospace;color:#94a3b8;letter-spacing:2px;">{{ $order->queue_number }}-{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
-                </div>
-
-                <div style="text-align:center;padding:14px 0 4px;">
-                    <p style="font-size:11px;color:#94a3b8;margin:0;">Terima kasih telah memesan! 🙏</p>
-                    <p style="font-size:10px;color:#cbd5e1;margin:3px 0 0;">Simpan struk ini sebagai bukti pembayaran</p>
-                </div>
-
             </div>
+
         </div>{{-- /isiReceipt --}}
 
         {{-- Tombol area --}}

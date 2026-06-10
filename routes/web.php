@@ -137,7 +137,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/kategori/store',         [KategoriController::class, 'store'])->name('kategori.store');
     Route::get('/kategori/edit/{id}',      [KategoriController::class, 'edit'])->name('kategori.edit');
     Route::put('/kategori/update/{id}',    [KategoriController::class, 'update'])->name('kategori.update');
-    Route::delete('/kategori/delete/{id}', [KategoriController::class, 'destroy'])->name('kategori.delete');
+    Route::post('/kategori/delete/{id}', [KategoriController::class, 'destroy'])->name('kategori.delete');
 
     // ── ADDONS ────────────────────────────────────────
     Route::get('/addons',              [AddOnsController::class, 'index'])->name('addons.index');
