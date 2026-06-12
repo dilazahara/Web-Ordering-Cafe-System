@@ -95,7 +95,7 @@
         @keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
         .blink { animation: blink 1.4s ease-in-out infinite; }
 
-        /* ── UIverse Button ── */
+        /* ── Buttons ── */
         .btn-kasir, .btn-outline {
             padding: 17px 40px;
             border-radius: 50px;
@@ -175,10 +175,63 @@
         @keyframes slideDown { from { transform: translateY(0); opacity:1; } to { transform: translateY(100%); opacity:0; } }
         .modal-sheet.closing { animation: slideDown 0.25s ease forwards; }
 
-        /* ── RECEIPT INSIDE MODAL ── */
-        .receipt-inner {
-            background: #fff;
+        /* ── SPLIT MODAL ── */
+        .split-modal-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 10000;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            align-items: flex-end;
+            justify-content: center;
         }
+        .split-modal-overlay.active { display: flex; }
+
+        .split-modal-sheet {
+            background: #fff;
+            border-radius: 28px 28px 0 0;
+            width: 100%;
+            max-width: 420px;
+            padding: 0 0 env(safe-area-inset-bottom, 24px);
+            animation: slideUp 0.35s cubic-bezier(0.34,1.2,0.64,1) forwards;
+        }
+        .split-modal-sheet.closing { animation: slideDown 0.25s ease forwards; }
+
+        /* Input jumlah orang */
+        .split-input {
+            width: 100%;
+            border: 2px solid #fed7aa;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1e293b;
+            text-align: center;
+            outline: none;
+            background: #fff7ed;
+            transition: border-color 0.2s;
+            letter-spacing: 2px;
+        }
+        .split-input:focus { border-color: #f97316; background: #fff; }
+        .split-input::placeholder { color: #cbd5e1; font-weight: 500; letter-spacing: 0; font-size: 15px; }
+
+        /* Counter buttons */
+        .counter-btn {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 2px solid #fed7aa;
+            background: #fff7ed;
+            color: #f97316;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .counter-btn:active { background: #f97316; color: #fff; border-color: #f97316; transform: scale(0.92); }
+
+        /* ── RECEIPT INSIDE MODAL ── */
+        .receipt-inner { background: #fff; }
 
         .receipt-header-cash {
             background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
@@ -194,7 +247,6 @@
             border-radius:50%; top:-50px; right:-30px;
         }
 
-        /* Zigzag bottom of receipt header */
         .receipt-zigzag {
             width: 100%; height: 20px;
             background: #fff;
@@ -211,7 +263,6 @@
 
         .receipt-divider { border: none; border-top: 1.5px dashed #e2e8f0; margin: 10px 0; }
 
-        /* Preview thumbnail feedback */
         @keyframes thumbIn { from { opacity:0; transform:scale(0.8) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
         .preview-thumb-wrap { animation: thumbIn 0.3s ease forwards; }
 
@@ -378,11 +429,13 @@
     {{-- ════════ ACTION BUTTONS ════════ --}}
     <div class="mt-5 space-y-3 no-print fade-up-3">
 
-        {{-- LIHAT BILLS → buka modal --}}
-        <button onclick="bukaModal()"
+        {{-- SPLIT BILLS → buka modal input jumlah orang --}}
+        <button onclick="bukaSplitModal()"
                 class="btn-kasir w-full py-4 text-black font-black text-sm flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/></svg>
-            Lihat Tagihan
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+            </svg>
+            Split Bills
         </button>
 
         <button
@@ -394,14 +447,82 @@
     </div>
 
     <p class="text-center text-[11px] text-slate-400 mt-5 leading-relaxed no-print">
-        Tap <strong>Lihat Bills</strong> untuk melihat & download tagihan.<br>Tunjukkan ke kasir saat pembayaran.
+        Tap <strong>Split Bills</strong> untuk membagi tagihan.<br>Tunjukkan ke kasir saat pembayaran.
     </p>
 
 </div>
 
 
 {{-- ════════════════════════════════════════════════ --}}
-{{--  MODAL BOTTOM SHEET – BILLS RECEIPT              --}}
+{{--  MODAL 1 — INPUT JUMLAH ORANG (SPLIT)           --}}
+{{-- ════════════════════════════════════════════════ --}}
+<div id="modalSplit" class="split-modal-overlay" onclick="handleSplitOverlayClick(event)">
+    <div id="splitSheet" class="split-modal-sheet">
+
+        {{-- Handle bar --}}
+        <div class="flex justify-center pt-3 pb-2">
+            <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
+        </div>
+
+        <div style="padding: 8px 24px 24px;">
+
+            {{-- Ilustrasi & judul --}}
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="width:72px;height:72px;background:linear-gradient(135deg,#f97316,#ea580c);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 24px rgba(249,115,22,0.35);">
+                    <svg style="width:36px;height:36px;color:#fff;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/>
+                    </svg>
+                </div>
+                <p style="font-weight:900;color:#1e293b;font-size:18px;margin:0 0 4px;">Split Bills</p>
+                <p style="color:#94a3b8;font-size:13px;margin:0;line-height:1.5;">Masukkan jumlah orang yang akan melakukan<br>Split Bills pada pemesanan ini</p>
+            </div>
+
+            {{-- Total tagihan --}}
+            <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:16px;padding:12px 16px;text-align:center;margin-bottom:20px;">
+                <p style="font-size:11px;font-weight:700;color:#f97316;letter-spacing:1px;text-transform:uppercase;margin:0 0 4px;">Total Tagihan</p>
+                <p style="font-size:24px;font-weight:900;color:#ea580c;margin:0;">Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+            </div>
+
+            {{-- Label --}}
+            <p style="font-size:13px;font-weight:700;color:#475569;margin:0 0 10px;">Jumlah Orang</p>
+
+            {{-- Counter --}}
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+                <button class="counter-btn" onclick="ubahJumlah(-1)">−</button>
+                <input id="inputJumlahOrang" type="number" min="1" max="99"
+                       class="split-input" value="2" placeholder="Contoh: 4"
+                       oninput="hitungSplit()">
+                <button class="counter-btn" onclick="ubahJumlah(1)">+</button>
+            </div>
+
+            {{-- Preview hasil split --}}
+            <div id="previewSplit" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:16px;padding:14px 16px;text-align:center;margin-bottom:20px;">
+                <p style="font-size:11px;font-weight:700;color:#16a34a;letter-spacing:1px;text-transform:uppercase;margin:0 0 4px;">Per Orang Bayar</p>
+                <p id="hasilSplit" style="font-size:28px;font-weight:900;color:#15803d;margin:0;">Rp 0</p>
+                <p id="catatanSplit" style="font-size:10px;color:#86efac;margin:4px 0 0;"></p>
+            </div>
+
+            {{-- Tombol --}}
+            <div style="display:flex;gap:10px;">
+                <button onclick="tutupSplitModal()"
+                        style="flex:1;padding:15px;border-radius:50px;border:2px solid #e2e8f0;background:#fff;color:#64748b;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all 0.2s;">
+                    Batal
+                </button>
+                <button onclick="lanjutKeReceipt()"
+                        style="flex:2;padding:15px;border-radius:50px;border:0;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:800;font-size:13px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;box-shadow:0 6px 20px rgba(249,115,22,0.4);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;">
+                    <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"/>
+                    </svg>
+                    Lihat Tagihan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{-- ════════════════════════════════════════════════ --}}
+{{--  MODAL 2 — BILLS RECEIPT                         --}}
 {{-- ════════════════════════════════════════════════ --}}
 <div id="modalBills" class="modal-overlay" onclick="handleOverlayClick(event)">
     <div id="modalSheet" class="modal-sheet">
@@ -411,7 +532,7 @@
             <div class="w-10 h-1 bg-gray-200 rounded-full"></div>
         </div>
 
-        {{-- ════ ISI RECEIPT (yang di-capture html2canvas) ════ --}}
+        {{-- ISI RECEIPT --}}
         <div id="isiReceipt" class="receipt-inner mx-4 mb-2 rounded-3xl overflow-hidden border border-orange-100" style="box-shadow:0 8px 32px rgba(249,115,22,0.12);">
 
             {{-- RECEIPT HEADER --}}
@@ -421,8 +542,6 @@
                 </div>
                 <p style="color:#fff;font-weight:900;font-size:18px;margin:0;letter-spacing:-0.3px;">Tagihan Cash</p>
                 <p style="color:rgba(255,255,255,0.75);font-size:11px;margin:4px 0 0;">Bayar Tunai ke Kasir</p>
-
-                {{-- Queue number badge --}}
                 <div style="display:inline-block;margin-top:14px;background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);border-radius:14px;padding:8px 20px;">
                     <p style="color:rgba(255,255,255,0.7);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 3px;">NOMOR ANTRIAN</p>
                     <p style="color:#fff;font-size:28px;font-weight:900;letter-spacing:3px;margin:0;line-height:1;">{{ $order->queue_number }}</p>
@@ -433,7 +552,6 @@
             {{-- RECEIPT BODY --}}
             <div style="padding:4px 18px 18px; background:#fff;">
 
-                {{-- Nama cafe --}}
                 <div style="text-align:center;padding:10px 0 8px;">
                     <p style="font-weight:900;color:#1e293b;font-size:15px;margin:0;">Cafe Tugas Akhir</p>
                     <p style="color:#94a3b8;font-size:10px;margin:2px 0 0;">Batam, Kepulauan Riau</p>
@@ -442,7 +560,6 @@
 
                 <hr class="receipt-divider">
 
-                {{-- Meta: meja & nama --}}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 0;">
                     <div style="background:#f8fafc;border-radius:10px;padding:8px 10px;">
                         <p style="font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin:0 0 3px;">Nomor Meja</p>
@@ -463,7 +580,6 @@
 
                 <hr class="receipt-divider">
 
-                {{-- Detail item --}}
                 <p style="font-size:9px;font-weight:800;color:#94a3b8;letter-spacing:1.5px;text-transform:uppercase;margin:8px 0 6px;">DETAIL PESANAN</p>
                 @foreach($order->items as $item)
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;{{ !$loop->last ? 'border-bottom:1px dashed #fed7aa;' : '' }}">
@@ -480,7 +596,6 @@
 
                 <hr class="receipt-divider" style="margin-top:10px;">
 
-                {{-- Rincian biaya --}}
                 <div style="padding:4px 0;">
                     <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
                         <span style="color:#64748b;">Subtotal ({{ $order->items->sum('qty') }} item)</span>
@@ -494,15 +609,26 @@
 
                 <hr class="receipt-divider">
 
-                {{-- Total --}}
                 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
                     <span style="font-weight:900;color:#1e293b;font-size:14px;">TOTAL BAYAR</span>
                     <span style="font-weight:900;color:#f97316;font-size:22px;">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                 </div>
 
+                {{-- ── SPLIT BILLS INFO (muncul jika split aktif) ── --}}
+                <div id="receiptSplitInfo" style="display:none;">
+                    <hr class="receipt-divider">
+                    <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:10px 14px;">
+                        <p style="font-size:10px;font-weight:800;color:#16a34a;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;">👥 Split Bills</p>
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:12px;color:#15803d;">Dibagi <span id="receiptJumlahOrang" style="font-weight:800;"></span> orang</span>
+                            <span id="receiptPerOrang" style="font-size:18px;font-weight:900;color:#15803d;"></span>
+                        </div>
+                        <p id="receiptCatatanSplit" style="font-size:10px;color:#86efac;margin:4px 0 0;"></p>
+                    </div>
+                </div>
+
                 <hr class="receipt-divider">
 
-                {{-- Barcode dekoratif --}}
                 <div style="text-align:center;padding:12px 0 6px;">
                     <div style="display:flex;align-items:flex-end;gap:2px;height:40px;justify-content:center;margin-bottom:6px;">
                         @php $heights2 = [32,22,38,26,42,20,34,24,36,30,42,22,32,38,20,30,36,26,40,22,34,28,42,20,30,38,24,36,22,40]; @endphp
@@ -513,7 +639,6 @@
                     <p style="font-size:9px;font-family:monospace;color:#94a3b8;letter-spacing:2px;">{{ $order->queue_number }}-{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
                 </div>
 
-                {{-- Instruksi Cash --}}
                 <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px 14px;margin-top:10px;">
                     <p style="font-weight:800;color:#9a3412;font-size:12px;margin:0 0 6px;">💵 Cara Bayar ke Kasir</p>
                     <ol style="color:#c2410c;font-size:11px;padding-left:16px;margin:0;line-height:1.7;">
@@ -524,20 +649,18 @@
                     </ol>
                 </div>
 
-                {{-- Footer receipt --}}
                 <div style="text-align:center;padding:14px 0 4px;">
                     <p style="font-size:11px;color:#94a3b8;margin:0;">Terima kasih telah memesan! 🙏</p>
                     <p style="font-size:10px;color:#cbd5e1;margin:3px 0 0;">Simpan bills ini sebagai bukti tagihan</p>
                 </div>
 
-            </div>{{-- /receipt body --}}
-        </div>{{-- /isiReceipt --}}
+            </div>
+        </div>
 
 
-        {{-- ════ AREA FEEDBACK + TOMBOL ════ --}}
+        {{-- AREA TOMBOL MODAL RECEIPT --}}
         <div style="padding:8px 16px 20px; position:sticky; bottom:0; background:#fff; border-top:1px solid #f1f5f9;">
 
-            {{-- Preview thumbnail (muncul setelah download) --}}
             <div id="previewHasil" style="display:none; background:#fff7ed; border:1.5px solid #fed7aa; border-radius:14px; padding:12px; margin-bottom:10px; align-items:center; gap:12px;"
                  class="preview-thumb-wrap">
                 <img id="previewImg" src="" alt="Preview Bills"
@@ -550,7 +673,6 @@
                 </div>
             </div>
 
-            {{-- Tombol baris --}}
             <div style="display:flex; gap:10px;">
                 <button onclick="tutupModal()"
                         style="flex:1; padding:14px; border-radius:50px; border:0; background:white; color:#64748b; font-weight:700; font-size:13px; cursor:pointer; letter-spacing:1.5px; text-transform:uppercase; box-shadow:rgb(0 0 0 / 5%) 0 0 8px; transition:all 0.5s ease;"
@@ -567,8 +689,8 @@
             </div>
         </div>
 
-    </div>{{-- /modal-sheet --}}
-</div>{{-- /modal-overlay --}}
+    </div>
+</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -577,7 +699,89 @@
 localStorage.removeItem('cart');
 localStorage.removeItem('checkoutCart');
 
-// ── Modal ──
+const TOTAL_BAYAR = {{ $order->total }};
+
+// ══════════════════════════════════════
+// MODAL SPLIT
+// ══════════════════════════════════════
+function bukaSplitModal() {
+    document.getElementById('modalSplit').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    hitungSplit();
+}
+
+function tutupSplitModal() {
+    const sheet = document.getElementById('splitSheet');
+    sheet.classList.add('closing');
+    setTimeout(function() {
+        document.getElementById('modalSplit').classList.remove('active');
+        sheet.classList.remove('closing');
+        document.body.style.overflow = '';
+    }, 240);
+}
+
+function handleSplitOverlayClick(e) {
+    if (e.target === document.getElementById('modalSplit')) tutupSplitModal();
+}
+
+function ubahJumlah(delta) {
+    const input = document.getElementById('inputJumlahOrang');
+    let val = parseInt(input.value) || 1;
+    val = Math.max(1, Math.min(99, val + delta));
+    input.value = val;
+    hitungSplit();
+}
+
+function hitungSplit() {
+    const jumlah = parseInt(document.getElementById('inputJumlahOrang').value) || 1;
+    if (jumlah < 1) return;
+
+    const perOrang   = Math.ceil(TOTAL_BAYAR / jumlah);
+    const totalCetak = perOrang * jumlah;
+    const selisih    = totalCetak - TOTAL_BAYAR;
+
+    document.getElementById('hasilSplit').textContent =
+        'Rp ' + perOrang.toLocaleString('id-ID');
+
+    const catatan = document.getElementById('catatanSplit');
+    if (selisih > 0) {
+        catatan.textContent = '* Dibulatkan ke atas. Selisih Rp ' +
+            selisih.toLocaleString('id-ID') + ' untuk kemudahan.';
+    } else {
+        catatan.textContent = jumlah + ' orang × Rp ' +
+            perOrang.toLocaleString('id-ID') + ' = Rp ' +
+            totalCetak.toLocaleString('id-ID');
+    }
+}
+
+function lanjutKeReceipt() {
+    const jumlah  = parseInt(document.getElementById('inputJumlahOrang').value) || 1;
+    const perOrang = Math.ceil(TOTAL_BAYAR / jumlah);
+    const selisih  = (perOrang * jumlah) - TOTAL_BAYAR;
+
+    // Isi info split di dalam receipt
+    document.getElementById('receiptSplitInfo').style.display = 'block';
+    document.getElementById('receiptJumlahOrang').textContent = jumlah;
+    document.getElementById('receiptPerOrang').textContent =
+        'Rp ' + perOrang.toLocaleString('id-ID');
+
+    const catatanReceipt = document.getElementById('receiptCatatanSplit');
+    if (selisih > 0) {
+        catatanReceipt.textContent = '* Dibulatkan ke atas. Selisih Rp ' +
+            selisih.toLocaleString('id-ID');
+    } else {
+        catatanReceipt.textContent = jumlah + ' orang × Rp ' +
+            perOrang.toLocaleString('id-ID');
+    }
+
+    // Tutup split modal, buka receipt modal
+    tutupSplitModal();
+    setTimeout(bukaModal, 260);
+}
+
+// ══════════════════════════════════════
+// MODAL RECEIPT
+// ══════════════════════════════════════
 function bukaModal() {
     const overlay = document.getElementById('modalBills');
     const sheet   = document.getElementById('modalSheet');
@@ -601,7 +805,9 @@ function handleOverlayClick(e) {
     if (e.target === document.getElementById('modalBills')) tutupModal();
 }
 
-// ── Download PNG ──
+// ══════════════════════════════════════
+// DOWNLOAD PNG
+// ══════════════════════════════════════
 function downloadBills() {
     const btn = document.getElementById('btnDownload');
     const originalHTML = btn.innerHTML;
@@ -611,7 +817,7 @@ function downloadBills() {
     btn.disabled  = true;
     btn.style.opacity = '0.75';
 
-    const el      = document.getElementById('isiReceipt');
+    const el       = document.getElementById('isiReceipt');
     const namaFile = 'bills-cash-{{ $order->queue_number }}-{{ now()->format("YmdHis") }}.png';
 
     html2canvas(el, {
@@ -623,21 +829,17 @@ function downloadBills() {
         windowHeight: el.scrollHeight,
     }).then(function(canvas) {
         const dataUrl = canvas.toDataURL('image/png');
-
-        // Trigger download
         const link    = document.createElement('a');
         link.download = namaFile;
         link.href     = dataUrl;
         link.click();
 
-        // Feedback tombol berhasil
         btn.innerHTML = '✅ Berhasil Diunduh!';
         btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
         btn.style.boxShadow  = '0 6px 16px -4px rgba(34,197,94,0.4)';
         btn.style.opacity    = '1';
         btn.disabled = false;
 
-        // Tampilkan preview thumbnail
         const prev    = document.getElementById('previewHasil');
         const prevImg = document.getElementById('previewImg');
         const prevNama= document.getElementById('previewNama');
@@ -645,7 +847,6 @@ function downloadBills() {
         prevNama.textContent = namaFile;
         prev.style.display = 'flex';
 
-        // Reset tombol setelah 3 detik
         setTimeout(function() {
             btn.innerHTML    = originalHTML;
             btn.style.background = originalBg;
@@ -664,7 +865,6 @@ function downloadBills() {
     });
 }
 
-// Buka gambar penuh di tab baru
 function bukaGambarPenuh() {
     const img = document.getElementById('previewImg').src;
     const w   = window.open('');
@@ -672,7 +872,9 @@ function bukaGambarPenuh() {
     w.document.write('<img src="' + img + '" style="max-width:100%;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);">');
 }
 
-// ── Back popup di halaman bill ──
+// ══════════════════════════════════════
+// BACK POPUP
+// ══════════════════════════════════════
 let _billBackPopupOpen = false;
 function openBillBackPopup() {
     _billBackPopupOpen = true;

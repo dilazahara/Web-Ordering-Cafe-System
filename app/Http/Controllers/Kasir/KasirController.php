@@ -155,8 +155,17 @@ class KasirController extends Controller
         $order->update(['status' => 'delivered']);
 
         if ($order->table_number) {
-            Meja::where('nomor_meja', $order->table_number)
-                ->update(['status' => 'kosong']);
+            $meja = Meja::where('nomor_meja', $order->table_number)->first();
+
+            if ($meja) {
+                // Kosongkan status meja
+                $meja->update(['status' => 'kosong']);
+
+                // ✅ AUTO-REFRESH QR TOKEN saat transaksi selesai.
+                // Efek: QR lama yang dipegang tamu sebelumnya langsung tidak berlaku.
+                // Tamu baru di meja yang sama WAJIB scan QR fisik yang terpasang di meja.
+                $meja->refreshQrToken();
+            }
         }
 
         if (class_exists(Notification::class)) {

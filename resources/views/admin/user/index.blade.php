@@ -373,10 +373,17 @@ tbody tr:hover { background: #f8fafc; }
                         <a href="/admin/user/edit/{{ $item->id }}" class="act-btn act-edit" title="Edit">
                             <i data-lucide="pencil-line" style="width:15px;height:15px;"></i>
                         </a>
-                        <button type="button" class="act-btn act-delete" title="Hapus"
-                            onclick="openDeleteUser({{ $item->id }}, '{{ addslashes($item->name) }}')">
-                            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
-                        </button>
+                        @if($item->id === auth()->id())
+<span class="act-btn" title="Akun Anda sendiri"
+    style="background:#f1f5f9;color:#cbd5e1;cursor:default;border:1.5px solid #e2e8f0;">
+    <i data-lucide="shield" style="width:15px;height:15px;"></i>
+</span>
+@else
+<button type="button" class="act-btn act-delete" title="Hapus"
+    onclick="openDeleteUser({{ $item->id }}, '{{ addslashes($item->name) }}')">
+    <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+</button>
+@endif
                     </div>
                 </td>
             </tr>

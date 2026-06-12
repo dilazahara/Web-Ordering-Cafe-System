@@ -37,6 +37,8 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 }
 .form-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 .form-input::placeholder { color: #9ca3af; }
+.form-input.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
+.field-error { color: #ef4444; font-size: 12px; margin-top: 5px; display: none; }
 
 /* STATUS CARDS */
 .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
@@ -122,7 +124,7 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <div class="alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <form action="/admin/meja/store" method="POST" id="mejaForm">
+        <form action="/admin/meja/store" method="POST" id="mejaForm" novalidate>
         @csrf
 
         <div class="divider"><span>Informasi Meja</span></div>
@@ -130,12 +132,15 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <div class="form-group">
             <label class="form-label">Nomor Meja <span style="color:#ef4444;">*</span></label>
             <input type="text" name="nomor_meja" id="nomorMejaInput"
-                class="form-input"
-                placeholder="Contoh: A1, B2, VIP-01..."
-                value="{{ old('nomor_meja') }}"
-                oninput="updateQRPreview()"
-                required>
-            <p style="font-size:12px; color:#9ca3af; margin-top:6px;">QR code akan otomatis diperbarui saat nomor meja diisi.</p>
+    class="form-input {{ $errors->has('nomor_meja') ? 'is-invalid' : '' }}"
+    placeholder="Contoh: A1, B2, VIP-01..."
+    value="{{ old('nomor_meja') }}"
+    oninput="updateQRPreview()">
+@error('nomor_meja')
+    <p class="field-error" style="display:block;">{{ $message }}</p>
+@enderror
+<p class="field-error" id="errorNomorMeja"></p>
+<p style="font-size:12px; color:#9ca3af; margin-top:6px;">QR code akan otomatis diperbarui saat nomor meja diisi.</p>
         </div>
 
         <div class="divider"><span>Status Awal</span></div>
@@ -282,6 +287,28 @@ function updateQRPreview() {
 // Jika ada old value (setelah validation error)
 var oldVal = document.getElementById('nomorMejaInput').value;
 if (oldVal) updateQRPreview();
+// ── VALIDASI SUBMIT ──
+document.getElementById('mejaForm').addEventListener('submit', function(e) {
+    const input = document.getElementById('nomorMejaInput');
+    const error = document.getElementById('errorNomorMeja');
+    input.classList.remove('is-invalid');
+    error.style.display = 'none';
+
+    if (!input.value.trim()) {
+        e.preventDefault();
+        input.classList.add('is-invalid');
+        error.textContent   = 'Nomor meja wajib diisi.';
+        error.style.display = 'block';
+        input.focus();
+    }
+});
+
+document.getElementById('nomorMejaInput').addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        document.getElementById('errorNomorMeja').style.display = 'none';
+    }
+});
 </script>
 </body>
 </html>

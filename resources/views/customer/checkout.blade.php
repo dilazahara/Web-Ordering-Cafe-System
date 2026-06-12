@@ -175,6 +175,10 @@
             cursor: pointer; transition: background 0.15s;
         }
         .btn-confirm-no:active { background: #f9fafb; }
+        /* VALIDASI INLINE */
+        .inp.input-error { border-color: #ef4444 !important; }
+        .field-error-msg { font-size: 11px; color: #ef4444; margin-top: 4px; display: none; font-weight: 600; }
+        .field-error-msg.show { display: block; }
     </style>
 </head>
 <body class="pb-8">
@@ -250,6 +254,7 @@
             Nama Pelanggan
         </p>
         <input type="text" id="customerNameInput" maxlength="100" placeholder="Masukkan nama kamu" class="inp">
+        <span class="field-error-msg" id="errCustomerName">Nama wajib diisi sebelum memesan.</span>
     </div>
 
     <!-- Catatan -->
@@ -528,8 +533,10 @@ function openConfirmPopup() {
     if(!cart.length) { toast('Keranjang kosong! Tambah menu dulu 🛒','error',2800); return; }
     const nama = document.getElementById('customerNameInput').value.trim();
     if(!nama) {
-        document.getElementById('customerNameInput').focus();
-        document.getElementById('customerNameInput').style.borderColor = '#ef4444';
+        var inp = document.getElementById('customerNameInput');
+        inp.classList.add('input-error');
+        inp.focus();
+        document.getElementById('errCustomerName').classList.add('show');
         toast('Nama pelanggan wajib diisi!','error',2800); return;
     }
     const tn = document.getElementById('tableNumberInput').value;
@@ -565,6 +572,12 @@ function doSubmitOrder() {
     if(btn) { btn.disabled=true; btn.innerHTML=`<span class="spinner"></span> Memproses...`; }
     document.getElementById('orderForm').submit();
 }
+
+
+document.getElementById('customerNameInput').addEventListener('input', function() {
+    this.classList.remove('input-error');
+    document.getElementById('errCustomerName').classList.remove('show');
+});
 
 window.addEventListener('pageshow', e => {
     if(e.persisted) { const btn = document.getElementById('btnSubmitOrder'); if(btn){btn.disabled=false; updatePayUI(selType);} }

@@ -299,7 +299,7 @@ tbody tr:hover { background: #f8fafc; }
                             <button
                                 class="act-btn act-qr"
                                 title="Lihat QR Code"
-                                onclick="openQR('{{ $meja->nomor_meja }}', '{{ rtrim(config('app.url'), '/') }}/customer/scan/{{ $meja->nomor_meja }}')"
+                                onclick="openQR('{{ $meja->nomor_meja }}', '{{ rtrim(config('app.url'), '/') }}/customer/scan/{{ $meja->nomor_meja }}/{{ $meja->qr_token }}', '{{ $meja->id }}')"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -413,6 +413,22 @@ tbody tr:hover { background: #f8fafc; }
             </button>
         </div>
 
+        {{-- Form tersembunyi untuk Refresh QR --}}
+        <form id="refreshQrForm" method="POST" action="" style="display:none;">
+            @csrf
+        </form>
+
+        <div style="padding: 0 28px 20px; text-align:center;">
+            <button
+                onclick="confirmRefreshQR()"
+                style="background:none; border:none; color:#ef4444; font-size:12px; cursor:pointer;
+                       text-decoration:underline; padding:4px 8px;"
+                title="Buat token QR baru — QR lama dan semua sesi aktif meja ini akan langsung tidak berlaku"
+            >
+                &#x1F504; Refresh QR (invalidate QR lama)
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -498,11 +514,13 @@ function openDeleteModal(id, nomorMeja) {
 
 var currentQRUrl     = '';
 var currentMejaNomor = '';
+var currentMejaId    = '';
 var qrInstance       = null;
 
-function openQR(nomorMeja, url) {
+function openQR(nomorMeja, url, mejaId) {
     currentQRUrl     = url;
     currentMejaNomor = nomorMeja;
+    currentMejaId    = mejaId || '';
 
     document.getElementById('qrMejaLabel').textContent = 'Meja ' + nomorMeja;
     document.getElementById('qrUrlText').textContent   = url;
@@ -582,6 +600,27 @@ if (alertEl) {
         alertEl.style.opacity = '0';
         setTimeout(function() { alertEl.remove(); }, 400);
     }, 4000);
+}
+
+// ── Refresh QR Token ──────────────────────────────────────────────────────────
+// Membuat token QR baru — QR fisik lama dan semua sesi aktif meja ini
+// akan langsung tidak berlaku.
+function confirmRefreshQR() {
+    if (!currentMejaId) {
+        alert('ID meja tidak ditemukan. Tutup modal dan coba lagi.');
+        return;
+    }
+    var konfirmasi = confirm(
+        'Refresh QR Meja ' + currentMejaNomor + '?\n\n' +
+        'PERHATIAN: QR Code fisik yang sudah dicetak akan TIDAK BERLAKU.\n' +
+        'Semua tamu yang sedang aktif dengan QR lama akan diminta scan ulang.\n\n' +
+        'Lanjutkan?'
+    );
+    if (!konfirmasi) return;
+
+    var form   = document.getElementById('refreshQrForm');
+    form.action = '/admin/meja/refresh-qr/' + currentMejaId;
+    form.submit();
 }
 </script>
 @endpush

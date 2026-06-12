@@ -11,15 +11,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->prepend(\App\Http\Middleware\TrustProxies::class); // ← tambahkan ini
+        $middleware->prepend(\App\Http\Middleware\TrustProxies::class);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'           => \App\Http\Middleware\RoleMiddleware::class,
+            'table.session'  => \App\Http\Middleware\ValidateTableSession::class,
+            'cafe.open'     => \App\Http\Middleware\CheckCafeOpen::class,
         ]);
 
         $middleware->append(\App\Http\Middleware\NgrokSkipWarning::class);
 
-        // ✅ Exclude webhook Midtrans dari CSRF
+        // Exclude webhook Midtrans dari CSRF
         $middleware->validateCsrfTokens(except: [
             'midtrans/webhook',
         ]);

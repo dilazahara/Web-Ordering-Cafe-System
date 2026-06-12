@@ -281,6 +281,11 @@
 .prof-toast.error { background: #DC2626; }
 .prof-toast svg { width: 16px; height: 16px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
 
+/* VALIDASI */
+.form-input.is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important; }
+.field-error { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; font-weight: 500; }
+.field-error.show { display: block; }
+
 @media (max-width: 580px) {
     .form-grid-2 { grid-template-columns: 1fr; }
     .avatar-row { flex-direction: column; text-align: center; }
@@ -319,7 +324,7 @@
     @endif
 
     {{-- FORM UTAMA —  Data Diri + Password --}}
-    <form action="{{ route('dapur.account.update') }}" method="POST">
+    <form action="{{ route('dapur.account.update') }}" method="POST" id="formProfil" novalidate>
         @csrf
         @method('PUT')
 
@@ -406,22 +411,17 @@
             <div class="card-section">
                 <p class="card-section-title">Data Diri</p>
                 <div style="display:grid;gap:20px;">
-                    <div class="form-grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" name="name" class="form-input"
-                                   value="{{ old('name', auth()->user()->name) }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Username</label>
-                            <input type="text" name="username" class="form-input"
-                                   value="{{ old('username', auth()->user()->username ?? '') }}">
-                        </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" name="name" id="fieldName" class="form-input"
+                               value="{{ old('name', auth()->user()->name) }}">
+                        <span class="field-error" id="errName"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-input"
-                               value="{{ old('email', auth()->user()->email) }}" required>
+                        <input type="email" name="email" id="fieldEmail" class="form-input"
+                               value="{{ old('email', auth()->user()->email) }}">
+                        <span class="field-error" id="errEmail"></span>
                     </div>
                 </div>
             </div>
@@ -666,6 +666,59 @@
 
 @push('scripts')
 <script>
+/* ══ VALIDASI FORM PROFIL ══ */
+document.getElementById('formProfil').addEventListener('submit', function(e) {
+    var valid = true;
+    var name  = document.getElementById('fieldName');
+    var email = document.getElementById('fieldEmail');
+
+    [name, email].forEach(function(el) { el.classList.remove('is-invalid'); });
+    ['errName','errEmail'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.classList.remove('show'); }
+    });
+
+    if (!name.value.trim()) {
+        name.classList.add('is-invalid');
+        showProfilErr('errName', 'Nama lengkap wajib diisi.'); valid = false;
+    }
+    if (!email.value.trim()) {
+        email.classList.add('is-invalid');
+        showProfilErr('errEmail', 'Email wajib diisi.'); valid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+        email.classList.add('is-invalid');
+        showProfilErr('errEmail', 'Format email tidak valid.'); valid = false;
+    }
+
+    var pwUnlocked = document.getElementById('pwUnlockedState');
+    if (pwUnlocked && pwUnlocked.style.display !== 'none') {
+        var newPw  = document.getElementById('newPassword');
+        var confPw = document.getElementById('confirmPassword');
+        if (newPw && newPw.value && newPw.value.length < 8) {
+            newPw.classList.add('is-invalid'); valid = false;
+        }
+        if (newPw && confPw && newPw.value && newPw.value !== confPw.value) {
+            confPw.classList.add('is-invalid'); valid = false;
+        }
+    }
+
+    if (!valid) e.preventDefault();
+});
+
+function showProfilErr(id, msg) {
+    var el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.classList.add('show'); }
+}
+
+document.getElementById('fieldName').addEventListener('input', function() {
+    this.classList.remove('is-invalid');
+    var el = document.getElementById('errName'); if (el) el.classList.remove('show');
+});
+document.getElementById('fieldEmail').addEventListener('input', function() {
+    this.classList.remove('is-invalid');
+    var el = document.getElementById('errEmail'); if (el) el.classList.remove('show');
+});
+
 /* ── DATA AWAL ── */
 const AVATAR_URL      = "{{ $hasAvatar ? asset('storage/' . auth()->user()->avatar) : '' }}";
 const AVATAR_INITIAL  = "{{ $initial }}";

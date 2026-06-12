@@ -107,6 +107,11 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 .btn-save:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
 .btn-save:active { transform: scale(0.97); }
 
+/* VALIDASI */
+.form-input.is-invalid, .form-select.is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important; }
+.field-error { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; font-weight: 500; }
+.field-error.show { display: block; }
+
 /* TOAST */
 #t-wrap { position:fixed; top:24px; right:24px; z-index:99999; display:flex; flex-direction:column; gap:10px; pointer-events:none; }
 .t-box { display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:14px; min-width:280px; max-width:390px; font-size:13.5px; font-weight:600; pointer-events:all; box-shadow:0 8px 30px rgba(0,0,0,.13); transform:translateX(120%); transition:transform .35s cubic-bezier(.4,0,.2,1), opacity .35s ease; opacity:0; }
@@ -134,7 +139,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     </div>
     @endif
 
-    <form action="/admin/addons/store" method="POST">
+    <form action="/admin/addons/store" method="POST" id="formCreateAddon" novalidate>
     @csrf
     <div class="card">
 
@@ -145,12 +150,14 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label class="form-label">Nama Add-on <span style="color:#EF4444;">*</span></label>
-                        <input type="text" name="name" class="form-input"
+                        <input type="text" name="name" id="fieldName" class="form-input"
                             placeholder="Contoh: Extra Keju, Pedas Level 2..." required>
+                        <span class="field-error" id="errName"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Harga <span style="color:#EF4444;">*</span></label>
-                        <input type="number" name="price" class="form-input" placeholder="5000" required>
+                        <input type="number" name="price" id="fieldPrice" class="form-input" placeholder="5000" required>
+                        <span class="field-error" id="errPrice"></span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -178,6 +185,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
                             + Buat Group
                         </button>
                     </div>
+                    <span class="field-error" id="errGroup"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Status Add-on</label>
@@ -240,6 +248,48 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 
 @push('scripts')
 <script>
+/* ══ VALIDASI FORM ══ */
+document.getElementById('formCreateAddon').addEventListener('submit', function(e) {
+    var valid = true;
+    var name  = document.getElementById('fieldName');
+    var price = document.getElementById('fieldPrice');
+    var group = document.getElementById('selectGroup');
+
+    // Reset semua error
+    [name, price, group].forEach(function(el) { el.classList.remove('is-invalid'); });
+    ['errName','errPrice','errGroup'].forEach(function(id) {
+        var el = document.getElementById(id); el.textContent = ''; el.classList.remove('show');
+    });
+
+    if (!name.value.trim()) {
+        name.classList.add('is-invalid');
+        showFieldError('errName', 'Nama add-on wajib diisi.'); valid = false;
+    }
+    if (price.value === '' || Number(price.value) < 0) {
+        price.classList.add('is-invalid');
+        showFieldError('errPrice', 'Harga wajib diisi dan tidak boleh negatif.'); valid = false;
+    }
+    if (!group.value) {
+        group.classList.add('is-invalid');
+        showFieldError('errGroup', 'Group add-on wajib dipilih.'); valid = false;
+    }
+    if (!valid) e.preventDefault();
+});
+
+function showFieldError(id, msg) {
+    var el = document.getElementById(id); el.textContent = msg; el.classList.add('show');
+}
+
+document.getElementById('fieldName').addEventListener('input', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errName').classList.remove('show');
+});
+document.getElementById('fieldPrice').addEventListener('input', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errPrice').classList.remove('show');
+});
+document.getElementById('selectGroup').addEventListener('change', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errGroup').classList.remove('show');
+});
+
 /* ══ STATUS TOGGLE ══ */
 function setStatus(val) {
     document.getElementById('statusVal').value = val;

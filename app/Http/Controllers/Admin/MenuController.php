@@ -52,8 +52,8 @@ class MenuController extends Controller
             'name'        => 'required|string|max:255|unique:menus,name',
             'kategori_id' => 'required|exists:kategoris,id',
             'price'       => 'required|numeric|min:0|max:99999999',
-            'description' => 'nullable|string|max:500',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'description' => 'required|string|max:500',
+            'image'       => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'      => 'required|in:0,1',
         ], [
             'name.required'        => 'Nama menu wajib diisi.',
@@ -61,11 +61,13 @@ class MenuController extends Controller
             'name.unique'          => 'Nama menu sudah terdaftar, gunakan nama lain.',
             'kategori_id.required' => 'Kategori wajib dipilih.',
             'kategori_id.exists'   => 'Kategori yang dipilih tidak valid.',
-            'price.required'       => 'Harga wajib diisi.',
-            'price.numeric'        => 'Harga harus berupa angka.',
+            'price.required'       => 'Harga wajib diisi dengan angka yang valid.',
+            'price.numeric'        => 'Harga wajib diisi dengan angka yang valid.',
             'price.min'            => 'Harga tidak boleh negatif.',
             'price.max'            => 'Harga terlalu besar.',
+            'description.required' => 'Deskripsi wajib diisi.',
             'description.max'      => 'Deskripsi maksimal 500 karakter.',
+            'image.required'       => 'Gambar wajib diisi.',
             'image.image'          => 'File harus berupa gambar.',
             'image.mimes'          => 'Format gambar harus jpg, jpeg, png, atau webp.',
             'image.max'            => 'Ukuran gambar maksimal 2MB.',
@@ -114,7 +116,7 @@ class MenuController extends Controller
             'name'        => 'required|string|max:255|unique:menus,name,' . $id,
             'kategori_id' => 'required|exists:kategoris,id',
             'price'       => 'required|numeric|min:0|max:99999999',
-            'description' => 'nullable|string|max:500',
+            'description' => 'required|string|max:500',
             'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'status'      => 'required|in:0,1',
         ], [
@@ -123,10 +125,11 @@ class MenuController extends Controller
             'name.unique'          => 'Nama menu sudah digunakan menu lain.',
             'kategori_id.required' => 'Kategori wajib dipilih.',
             'kategori_id.exists'   => 'Kategori yang dipilih tidak valid.',
-            'price.required'       => 'Harga wajib diisi.',
-            'price.numeric'        => 'Harga harus berupa angka.',
+            'price.required'       => 'Harga wajib diisi dengan angka yang valid.',
+            'price.numeric'        => 'Harga wajib diisi dengan angka yang valid.',
             'price.min'            => 'Harga tidak boleh negatif.',
             'price.max'            => 'Harga terlalu besar.',
+            'description.required' => 'Deskripsi wajib diisi.',
             'description.max'      => 'Deskripsi maksimal 500 karakter.',
             'image.image'          => 'File harus berupa gambar.',
             'image.mimes'          => 'Format gambar harus jpg, jpeg, png, atau webp.',
@@ -154,7 +157,7 @@ class MenuController extends Controller
         }
 
         return redirect('/admin/menu')
-                         ->with('success', 'Menu "' . $menu->name . '" berhasil diperbarui!');
+                         ->with('success', 'Menu "' . $data['name'] . '" berhasil diperbarui!');
     }
 
     // ─────────────────────────────────────────
@@ -162,16 +165,16 @@ class MenuController extends Controller
     // ─────────────────────────────────────────
     public function destroy(int $id): RedirectResponse
     {
-        $menu     = Menu::findOrFail($id);
-        $namaMenu = $menu->name;
+        $menu = Menu::findOrFail($id);
 
         if ($menu->image && Storage::disk('public')->exists($menu->image)) {
             Storage::disk('public')->delete($menu->image);
         }
 
+        $menu->addonGroups()->detach();
         $menu->delete();
 
         return redirect('/admin/menu')
-                         ->with('success', 'Menu "' . $namaMenu . '" berhasil dihapus!');
+                         ->with('success', 'Menu berhasil dihapus.');
     }
 }

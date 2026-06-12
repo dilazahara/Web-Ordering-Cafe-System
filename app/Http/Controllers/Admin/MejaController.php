@@ -8,30 +8,25 @@ use Illuminate\Http\Request;
 
 class MejaController extends Controller
 {
-    // =========================================
-    // INDEX
-    // =========================================
     public function index()
     {
         $mejas = Meja::latest()->get();
+
+        // Pastikan semua meja sudah punya QR token
+        foreach ($mejas as $meja) {
+            $meja->getOrCreateQrToken();
+        }
+
         return view('admin.meja.index', compact('mejas'));
     }
 
-    // =========================================
-    // CREATE
-    // =========================================
     public function create()
     {
         return view('admin.meja.create');
     }
 
-    // =========================================
-    // STORE
-    // =========================================
     public function store(Request $request)
     {
-        // ✅ FIX: Tambah unique, max length, dan validasi status enum
-        // Sebelumnya nomor_meja tidak dicek unique — bisa ada nomor meja duplikat
         $request->validate([
             'nomor_meja' => 'required|string|max:10|unique:mejas,nomor_meja',
             'status'     => 'nullable|in:kosong,terisi,reserved',
@@ -39,35 +34,30 @@ class MejaController extends Controller
             'nomor_meja.required' => 'Nomor meja wajib diisi.',
             'nomor_meja.max'      => 'Nomor meja maksimal 10 karakter.',
             'nomor_meja.unique'   => 'Nomor meja sudah digunakan.',
-            'status.in'           => 'Status meja tidak valid. Pilih: kosong, terisi, atau reserved.',
+            'status.in'           => 'Status meja tidak valid.',
         ]);
 
-        Meja::create([
+        // Generate QR token langsung saat meja dibuat
+        $meja = Meja::create([
             'nomor_meja' => $request->nomor_meja,
             'status'     => $request->status ?? 'kosong',
         ]);
+        $meja->refreshQrToken();
 
         return redirect('/admin/meja')->with('success', 'Meja berhasil ditambahkan.');
     }
 
-    // =========================================
-    // EDIT
-    // =========================================
     public function edit($id)
     {
         $meja = Meja::findOrFail($id);
+        $meja->getOrCreateQrToken(); // pastikan token ada
         return view('admin.meja.edit', compact('meja'));
     }
 
-    // =========================================
-    // UPDATE
-    // =========================================
     public function update(Request $request, $id)
     {
         $meja = Meja::findOrFail($id);
 
-        // ✅ FIX: unique dikecualikan untuk ID saat ini agar tidak conflict
-        //         dengan dirinya sendiri saat edit
         $request->validate([
             'nomor_meja' => 'required|string|max:10|unique:mejas,nomor_meja,' . $id,
             'status'     => 'nullable|in:kosong,terisi,reserved',
@@ -86,14 +76,10 @@ class MejaController extends Controller
         return redirect('/admin/meja')->with('success', 'Meja berhasil diupdate.');
     }
 
-    // =========================================
-    // DESTROY
-    // =========================================
     public function destroy($id)
     {
         $meja = Meja::findOrFail($id);
 
-        // ✅ FIX: Jangan izinkan hapus meja yang sedang terisi (ada tamu)
         if ($meja->status === 'terisi') {
             return redirect('/admin/meja')
                 ->with('error', "Meja {$meja->nomor_meja} tidak dapat dihapus karena sedang dalam kondisi terisi.");
@@ -104,4 +90,16 @@ class MejaController extends Controller
         return redirect('/admin/meja')->with('success', 'Meja berhasil dihapus.');
     }
 
-   }
+    /**
+     * Refresh QR Token meja — membuat QR lama tidak berlaku.
+     * Berguna jika QR fisik hilang/dicuri atau admin ingin invalidate semua sesi aktif meja ini.
+     */
+    public function refreshQr($id)
+    {
+        $meja = Meja::findOrFail($id);
+        $meja->refreshQrToken();
+
+        return redirect('/admin/meja')
+            ->with('success', "QR Code Meja {$meja->nomor_meja} berhasil di-refresh. QR lama sudah tidak berlaku.");
+    }
+}

@@ -93,6 +93,11 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 }
 .btn-save:hover  { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
 .btn-save:active { transform: scale(0.97); }
+
+/* VALIDASI */
+.form-input.is-invalid, .form-select.is-invalid { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important; }
+.field-error { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; font-weight: 500; }
+.field-error.show { display: block; }
 </style>
 @endpush
 
@@ -112,7 +117,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
     </div>
     @endif
 
-    <form action="/admin/addons/update/{{ $addon->id }}" method="POST">
+    <form action="/admin/addons/update/{{ $addon->id }}" method="POST" id="formEditAddon" novalidate>
     @csrf
     @method('PUT')
     <div class="card">
@@ -124,14 +129,16 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
                 <div class="form-grid-2">
                     <div class="form-group">
                         <label class="form-label">Nama Add-on <span style="color:#EF4444;">*</span></label>
-                        <input type="text" name="name" class="form-input"
+                        <input type="text" name="name" id="fieldName" class="form-input"
                             value="{{ old('name', $addon->name) }}"
                             placeholder="Contoh: Keju Ekstra, Saus Pedas..." required>
+                        <span class="field-error" id="errName"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Harga <span style="color:#EF4444;">*</span></label>
-                        <input type="number" name="price" class="form-input"
+                        <input type="number" name="price" id="fieldPrice" class="form-input"
                             value="{{ old('price', $addon->price) }}" placeholder="0" required>
+                        <span class="field-error" id="errPrice"></span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -148,7 +155,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
             <div class="form-grid-2" style="align-items:start;">
                 <div class="form-group">
                     <label class="form-label">Group Add-on <span style="color:#EF4444;">*</span></label>
-                    <select name="addon_group_id" class="form-select" required>
+                    <select name="addon_group_id" id="fieldGroup" class="form-select" required>
                         @foreach($groups as $group)
                             <option value="{{ $group->id }}"
                                 {{ old('addon_group_id', $addon->addon_group_id) == $group->id ? 'selected' : '' }}>
@@ -156,6 +163,7 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
                             </option>
                         @endforeach
                     </select>
+                    <span class="field-error" id="errGroup"></span>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Status</label>
@@ -199,6 +207,47 @@ body { font-family: 'Inter', sans-serif; background: #F8F9FC; color: #1e293b; }
 
 @push('scripts')
 <script>
+/* ══ VALIDASI FORM ══ */
+document.getElementById('formEditAddon').addEventListener('submit', function(e) {
+    var valid = true;
+    var name  = document.getElementById('fieldName');
+    var price = document.getElementById('fieldPrice');
+    var group = document.getElementById('fieldGroup');
+
+    [name, price, group].forEach(function(el) { el.classList.remove('is-invalid'); });
+    ['errName','errPrice','errGroup'].forEach(function(id) {
+        var el = document.getElementById(id); el.textContent = ''; el.classList.remove('show');
+    });
+
+    if (!name.value.trim()) {
+        name.classList.add('is-invalid');
+        showErr('errName', 'Nama add-on wajib diisi.'); valid = false;
+    }
+    if (price.value === '' || Number(price.value) < 0) {
+        price.classList.add('is-invalid');
+        showErr('errPrice', 'Harga wajib diisi dan tidak boleh negatif.'); valid = false;
+    }
+    if (!group.value) {
+        group.classList.add('is-invalid');
+        showErr('errGroup', 'Group add-on wajib dipilih.'); valid = false;
+    }
+    if (!valid) e.preventDefault();
+});
+
+function showErr(id, msg) {
+    var el = document.getElementById(id); el.textContent = msg; el.classList.add('show');
+}
+
+document.getElementById('fieldName').addEventListener('input', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errName').classList.remove('show');
+});
+document.getElementById('fieldPrice').addEventListener('input', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errPrice').classList.remove('show');
+});
+document.getElementById('fieldGroup').addEventListener('change', function() {
+    this.classList.remove('is-invalid'); document.getElementById('errGroup').classList.remove('show');
+});
+
 /* ══ STATUS TOGGLE ══ */
 function setStatus(val) {
     document.getElementById('statusVal').value = val;

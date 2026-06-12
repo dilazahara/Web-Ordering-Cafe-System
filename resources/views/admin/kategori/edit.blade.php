@@ -30,6 +30,8 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 .form-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e5e7eb; background: #f9fafb; font-size: 14px; color: #111827; outline: none; transition: .2s; font-family: 'Plus Jakarta Sans', sans-serif; }
 .form-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 .form-input::placeholder { color: #9ca3af; }
+.form-input.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
+.field-error { color: #ef4444; font-size: 12px; margin-top: 5px; display: none; }
 
 /* INFO BOX */
 .info-box { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 14px 16px; margin-top: 4px; }
@@ -67,7 +69,7 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <div class="alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <form action="/admin/kategori/update/{{ $kategori->id }}" method="POST">
+        <form action="/admin/kategori/update/{{ $kategori->id }}" method="POST" id="kategoriEditForm" novalidate>
         @csrf
         @method('PUT')
 
@@ -75,9 +77,13 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 
         <div class="form-group">
             <label class="form-label">Nama Kategori <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="nama" class="form-input"
-                value="{{ old('nama', $kategori->name) }}"
-                placeholder="Contoh: Minuman, Makanan Utama..." required>
+            <input type="text" name="nama" id="fieldNama" class="form-input {{ $errors->has('nama') ? 'is-invalid' : '' }}"
+    value="{{ old('nama', $kategori->name) }}"
+    placeholder="Contoh: Minuman, Makanan Utama...">
+@error('nama')
+    <p class="field-error" style="display:block;">{{ $message }}</p>
+@enderror
+<p class="field-error" id="errorNama"></p>
         </div>
 
         <div class="divider"><span>Detail</span></div>
@@ -103,6 +109,27 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 <script>
 lucide.createIcons();
 
+document.getElementById('kategoriEditForm').addEventListener('submit', function(e) {
+    const nama  = document.getElementById('fieldNama');
+    const error = document.getElementById('errorNama');
+    nama.classList.remove('is-invalid');
+    error.style.display = 'none';
+
+    if (!nama.value.trim()) {
+        e.preventDefault();
+        nama.classList.add('is-invalid');
+        error.textContent   = 'Nama kategori wajib diisi.';
+        error.style.display = 'block';
+        nama.focus();
+    }
+});
+
+document.getElementById('fieldNama').addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        document.getElementById('errorNama').style.display = 'none';
+    }
+});
 </script>
 </body>
 </html>

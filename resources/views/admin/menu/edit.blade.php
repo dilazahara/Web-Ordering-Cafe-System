@@ -22,6 +22,27 @@
 .form-textarea { resize: none; }
 .form-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; color: #111827; }
 
+/* ── INPUT ERROR STATE ── */
+.form-input.is-invalid,
+.form-select.is-invalid,
+.form-textarea.is-invalid {
+    border-color: #ef4444 !important;
+    background: #fff5f5 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.08);
+}
+.field-error {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.field-error::before {
+    content: '⚠';
+    font-size: 11px;
+}
+
 /* ── IMAGE ── */
 .img-current {
     position: relative; border-radius: 14px; overflow: hidden;
@@ -151,7 +172,7 @@
     border: 1.5px solid #fee2e2; background: white; color: #dc2626;
     font-size: 14px; font-weight: 700; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    font-family: 'Plus Jakarta Sans', sans-serif; transition: all .18s;
+    font-family: 'Plus Jakarta Sans', sans-serif; transition: all .18px;
 }
 .btn-delete-full:hover { background: #fef2f2; border-color: #fca5a5; }
 .btn-delete-full svg { width: 15px; height: 15px; stroke: #dc2626; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -175,7 +196,7 @@
         </div>
     </div>
 
-    {{-- Alert error --}}
+    {{-- Alert error (backend) --}}
     @if($errors->any())
     <div class="alert alert-error" style="margin-bottom:20px;">
         <i data-lucide="alert-circle"></i>
@@ -189,7 +210,7 @@
 
     <div class="form-card">
 
-        <form action="/admin/menu/update/{{ $menu->id }}" method="POST" enctype="multipart/form-data">
+        <form action="/admin/menu/update/{{ $menu->id }}" method="POST" enctype="multipart/form-data" id="menuEditForm" novalidate>
             @csrf
             @method('PUT')
 
@@ -199,19 +220,29 @@
             <div class="form-grid-2" style="gap:14px; margin-bottom:16px;">
                 <div class="form-group" style="margin-bottom:0;">
                     <label class="form-label">Nama Menu <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="name" class="form-input"
-                           value="{{ old('name', $menu->name) }}" required>
+                    <input type="text" name="name" id="fieldName" class="form-input {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                           value="{{ old('name', $menu->name) }}">
+                    @error('name')
+                        <p class="field-error">{{ $message }}</p>
+                    @else
+                        <p class="field-error" id="errorName" style="display:none;"></p>
+                    @enderror
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label class="form-label">Harga <span style="color:#ef4444;">*</span></label>
-                    <input type="number" name="price" class="form-input"
-                           value="{{ old('price', $menu->price) }}" min="0" required>
+                    <input type="number" name="price" id="fieldPrice" class="form-input {{ $errors->has('price') ? 'is-invalid' : '' }}"
+                           value="{{ old('price', $menu->price) }}" min="0">
+                    @error('price')
+                        <p class="field-error">{{ $message }}</p>
+                    @else
+                        <p class="field-error" id="errorPrice" style="display:none;"></p>
+                    @enderror
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
-                <select name="kategori_id" class="form-select" required>
+                <select name="kategori_id" id="fieldKategori" class="form-select {{ $errors->has('kategori_id') ? 'is-invalid' : '' }}">
                     <option value="">-- Pilih Kategori --</option>
                     @foreach($kategoris as $kategori)
                         <option value="{{ $kategori->id }}"
@@ -220,18 +251,29 @@
                         </option>
                     @endforeach
                 </select>
+                @error('kategori_id')
+                    <p class="field-error">{{ $message }}</p>
+                @else
+                    <p class="field-error" id="errorKategori" style="display:none;"></p>
+                @enderror
             </div>
 
             <div class="form-group">
-                <label class="form-label">Deskripsi</label>
-                <textarea name="description" class="form-textarea"
+                <label class="form-label">Deskripsi <span style="color:#ef4444;">*</span></label>
+                <textarea name="description" id="fieldDescription" class="form-textarea {{ $errors->has('description') ? 'is-invalid' : '' }}"
                           rows="3">{{ old('description', $menu->description) }}</textarea>
+                @error('description')
+                    <p class="field-error">{{ $message }}</p>
+                @else
+                    <p class="field-error" id="errorDescription" style="display:none;"></p>
+                @enderror
             </div>
 
             {{-- ── FOTO MENU ── --}}
             <div class="divider"><span>Foto Menu</span></div>
 
             <div class="form-group">
+                <label class="form-label">Foto Menu <small style="font-weight:400; color:#9ca3af;">(opsional saat edit — biarkan kosong untuk tetap pakai foto lama)</small></label>
                 {{-- Gambar saat ini --}}
                 <div class="img-current" id="currentImgWrap">
                     <img id="currentImg"
@@ -252,16 +294,19 @@
                 </button>
                 {{-- Upload area baru --}}
                 <div class="img-upload-new" id="uploadNew">
-                    <input type="file" name="image" accept=".jpg,.jpeg,.png" onchange="previewNewImage(event)">
+                    <input type="file" name="image" id="fieldImage" accept=".jpg,.jpeg,.png,.webp" onchange="previewNewImage(event)">
                     <div style="color:#d1d5db; margin-bottom:8px;">
                         <svg viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px;">
                             <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
                         </svg>
                     </div>
                     <p class="upload-text">Klik untuk pilih foto baru</p>
-                    <p class="upload-hint">JPG, JPEG, PNG</p>
+                    <p class="upload-hint">JPG, JPEG, PNG, WEBP — Maks 2MB</p>
                 </div>
                 <img id="previewNew" class="img-preview-new" alt="Preview baru">
+                @error('image')
+                    <p class="field-error">{{ $message }}</p>
+                @enderror
             </div>
 
             {{-- ── STATUS MENU ── --}}
@@ -337,7 +382,7 @@
 
             {{-- ── TOMBOL ── --}}
             <div class="btn-group">
-                <button type="submit" class="btn-simpan">
+                <button type="submit" class="btn-simpan" id="btnSimpan">
                     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Update Menu
                 </button>
@@ -400,6 +445,82 @@ function toggleAddon(cb, id) {
     document.getElementById(id).classList.toggle('selected', cb.checked);
 }
 
+/* ── HELPER: TAMPILKAN / HAPUS ERROR ── */
+function showError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input)  input.classList.add('is-invalid');
+    if (error)  { error.textContent = message; error.style.display = 'flex'; }
+}
+
+function clearError(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input)  input.classList.remove('is-invalid');
+    if (error)  { error.textContent = ''; error.style.display = 'none'; }
+}
+
+/* ── VALIDASI FRONTEND ── */
+document.getElementById('menuEditForm').addEventListener('submit', function(e) {
+    let valid = true;
+
+    // Reset semua error frontend
+    clearError('fieldName',        'errorName');
+    clearError('fieldPrice',       'errorPrice');
+    clearError('fieldKategori',    'errorKategori');
+    clearError('fieldDescription', 'errorDescription');
+
+    // Validasi: Nama Menu
+    const name = document.getElementById('fieldName').value.trim();
+    if (!name) {
+        showError('fieldName', 'errorName', 'Nama menu wajib diisi.');
+        valid = false;
+    }
+
+    // Validasi: Harga
+    const price = document.getElementById('fieldPrice').value.trim();
+    if (!price || isNaN(price) || parseFloat(price) < 0) {
+        showError('fieldPrice', 'errorPrice', 'Harga wajib diisi dengan angka yang valid.');
+        valid = false;
+    }
+
+    // Validasi: Kategori
+    const kategori = document.getElementById('fieldKategori').value;
+    if (!kategori) {
+        showError('fieldKategori', 'errorKategori', 'Kategori wajib dipilih.');
+        valid = false;
+    }
+
+    // Validasi: Deskripsi
+    const description = document.getElementById('fieldDescription').value.trim();
+    if (!description) {
+        showError('fieldDescription', 'errorDescription', 'Deskripsi wajib diisi.');
+        valid = false;
+    }
+
+    // Catatan: Gambar pada form edit bersifat opsional (menu sudah memiliki gambar lama)
+
+    if (!valid) {
+        e.preventDefault();
+        const firstError = document.querySelector('.field-error[style*="flex"]');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+/* ── CLEAR ERROR SAAT INPUT DIISI ── */
+document.getElementById('fieldName').addEventListener('input', function() {
+    if (this.value.trim()) clearError('fieldName', 'errorName');
+});
+document.getElementById('fieldPrice').addEventListener('input', function() {
+    const v = this.value.trim();
+    if (v && !isNaN(v) && parseFloat(v) >= 0) clearError('fieldPrice', 'errorPrice');
+});
+document.getElementById('fieldKategori').addEventListener('change', function() {
+    if (this.value) clearError('fieldKategori', 'errorKategori');
+});
+document.getElementById('fieldDescription').addEventListener('input', function() {
+    if (this.value.trim()) clearError('fieldDescription', 'errorDescription');
+});
 
 lucide.createIcons();
 </script>

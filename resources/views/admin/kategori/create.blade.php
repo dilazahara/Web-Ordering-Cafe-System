@@ -38,6 +38,8 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 }
 .form-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 .form-input::placeholder { color: #9ca3af; }
+.form-input.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
+.field-error { color: #ef4444; font-size: 12px; margin-top: 5px; display: none; }
 
 /* TIPS BOX */
 .tips-box { background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: 14px; padding: 16px 18px; margin-bottom: 8px; }
@@ -76,16 +78,20 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <div class="alert-error">{{ $errors->first() }}</div>
         @endif
 
-        <form action="/admin/kategori/store" method="POST">
+        <form action="/admin/kategori/store" method="POST" id="kategoriForm" novalidate>
         @csrf
 
         <div class="divider"><span>Informasi Kategori</span></div>
 
         <div class="form-group">
             <label class="form-label">Nama Kategori <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="name" class="form-input"
-                placeholder="Contoh: Minuman, Makanan Utama..."
-                value="{{ old('name') }}" required>
+            <input type="text" name="name" id="fieldName" class="form-input {{ $errors->has('name') ? 'is-invalid' : '' }}"
+    placeholder="Contoh: Minuman, Makanan Utama..."
+    value="{{ old('name') }}">
+@error('name')
+    <p class="field-error" style="display:block;">{{ $message }}</p>
+@enderror
+<p class="field-error" id="errorName"></p>
         </div>
 
         <div class="tips-box">
@@ -112,6 +118,30 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
     </div>
 </div>
 
-<script>lucide.createIcons();</script>
+<script>
+lucide.createIcons();
+
+document.getElementById('kategoriForm').addEventListener('submit', function(e) {
+    const name  = document.getElementById('fieldName');
+    const error = document.getElementById('errorName');
+    name.classList.remove('is-invalid');
+    error.style.display = 'none';
+
+    if (!name.value.trim()) {
+        e.preventDefault();
+        name.classList.add('is-invalid');
+        error.textContent   = 'Nama kategori wajib diisi.';
+        error.style.display = 'block';
+        name.focus();
+    }
+});
+
+document.getElementById('fieldName').addEventListener('input', function() {
+    if (this.value.trim()) {
+        this.classList.remove('is-invalid');
+        document.getElementById('errorName').style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>

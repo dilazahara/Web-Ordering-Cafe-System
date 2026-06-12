@@ -22,6 +22,27 @@
 .form-textarea { resize: none; }
 .form-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; color: #111827; }
 
+/* ── INPUT ERROR STATE ── */
+.form-input.is-invalid,
+.form-select.is-invalid,
+.form-textarea.is-invalid {
+    border-color: #ef4444 !important;
+    background: #fff5f5 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.08);
+}
+.field-error {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.field-error::before {
+    content: '⚠';
+    font-size: 11px;
+}
+
 /* ── IMAGE UPLOAD ── */
 .img-upload-box {
     border: 2px dashed #e5e7eb; border-radius: 16px; background: #fafafa;
@@ -30,6 +51,7 @@
     display: flex; align-items: center; justify-content: center;
 }
 .img-upload-box:hover { border-color: #6366f1; background: #eef2ff; }
+.img-upload-box.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
 .img-upload-box input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
 .upload-icon { color: #d1d5db; margin-bottom: 10px; }
 .upload-text { font-size: 13px; font-weight: 700; color: #6b7280; }
@@ -142,7 +164,7 @@
         </div>
     </div>
 
-    {{-- Alert error --}}
+    {{-- Alert error (backend) --}}
     @if($errors->any())
     <div class="alert alert-error" style="margin-bottom:20px;">
         <i data-lucide="alert-circle"></i>
@@ -156,7 +178,7 @@
 
     <div class="form-card">
 
-        <form action="/admin/menu/store" method="POST" enctype="multipart/form-data">
+        <form action="/admin/menu/store" method="POST" enctype="multipart/form-data" id="menuForm" novalidate>
             @csrf
 
             {{-- ── INFORMASI MENU ── --}}
@@ -165,19 +187,29 @@
             <div class="form-grid-2" style="gap:14px; margin-bottom:16px;">
                 <div class="form-group" style="margin-bottom:0;">
                     <label class="form-label">Nama Menu <span style="color:#ef4444;">*</span></label>
-                    <input type="text" name="name" class="form-input"
-                           value="{{ old('name') }}" placeholder="Contoh: Es Teh Manis" required>
+                    <input type="text" name="name" id="fieldName" class="form-input {{ $errors->has('name') ? 'is-invalid' : '' }}"
+                           value="{{ old('name') }}" placeholder="Contoh: Es Teh Manis">
+                    @error('name')
+                        <p class="field-error">{{ $message }}</p>
+                    @else
+                        <p class="field-error" id="errorName" style="display:none;"></p>
+                    @enderror
                 </div>
                 <div class="form-group" style="margin-bottom:0;">
                     <label class="form-label">Harga <span style="color:#ef4444;">*</span></label>
-                    <input type="number" name="price" class="form-input"
-                           value="{{ old('price') }}" placeholder="15000" min="0" required>
+                    <input type="number" name="price" id="fieldPrice" class="form-input {{ $errors->has('price') ? 'is-invalid' : '' }}"
+                           value="{{ old('price') }}" placeholder="15000" min="0">
+                    @error('price')
+                        <p class="field-error">{{ $message }}</p>
+                    @else
+                        <p class="field-error" id="errorPrice" style="display:none;"></p>
+                    @enderror
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Kategori <span style="color:#ef4444;">*</span></label>
-                <select name="kategori_id" class="form-select" required>
+                <select name="kategori_id" id="fieldKategori" class="form-select {{ $errors->has('kategori_id') ? 'is-invalid' : '' }}">
                     <option value="">-- Pilih Kategori --</option>
                     @foreach($kategoris as $kategori)
                         <option value="{{ $kategori->id }}" {{ old('kategori_id') == $kategori->id ? 'selected' : '' }}>
@@ -185,20 +217,31 @@
                         </option>
                     @endforeach
                 </select>
+                @error('kategori_id')
+                    <p class="field-error">{{ $message }}</p>
+                @else
+                    <p class="field-error" id="errorKategori" style="display:none;"></p>
+                @enderror
             </div>
 
             <div class="form-group">
-                <label class="form-label">Deskripsi</label>
-                <textarea name="description" class="form-textarea" rows="3"
+                <label class="form-label">Deskripsi <span style="color:#ef4444;">*</span></label>
+                <textarea name="description" id="fieldDescription" class="form-textarea {{ $errors->has('description') ? 'is-invalid' : '' }}" rows="3"
                           placeholder="Deskripsi singkat menu ini...">{{ old('description') }}</textarea>
+                @error('description')
+                    <p class="field-error">{{ $message }}</p>
+                @else
+                    <p class="field-error" id="errorDescription" style="display:none;"></p>
+                @enderror
             </div>
 
             {{-- ── FOTO MENU ── --}}
             <div class="divider"><span>Foto Menu</span></div>
 
             <div class="form-group">
-                <div class="img-upload-box" id="uploadBox">
-                    <input type="file" name="image" accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
+                <label class="form-label">Foto Menu <span style="color:#ef4444;">*</span></label>
+                <div class="img-upload-box {{ $errors->has('image') ? 'is-invalid' : '' }}" id="uploadBox">
+                    <input type="file" name="image" id="fieldImage" accept=".jpg,.jpeg,.png,.webp" onchange="previewImage(event)">
                     <div id="uploadPlaceholder" style="padding: 28px 16px;">
                         <div class="upload-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;">
@@ -207,12 +250,14 @@
                             </svg>
                         </div>
                         <p class="upload-text" style="margin-top:10px;">Klik untuk upload foto menu</p>
-                        <p class="upload-hint">JPG, JPEG, PNG — Maks 2MB</p>
+                        <p class="upload-hint">JPG, JPEG, PNG, WEBP — Maks 2MB</p>
                     </div>
                     <img id="preview" class="img-preview" alt="Preview">
                 </div>
                 @error('image')
-                    <p style="color:#ef4444;font-size:12px;margin-top:5px;">{{ $message }}</p>
+                    <p class="field-error">{{ $message }}</p>
+                @else
+                    <p class="field-error" id="errorImage" style="display:none;"></p>
                 @enderror
             </div>
 
@@ -269,7 +314,7 @@
 
             {{-- ── TOMBOL ── --}}
             <div class="btn-group">
-                <button type="submit" class="btn-simpan">
+                <button type="submit" class="btn-simpan" id="btnSimpan">
                     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     Simpan Menu
                 </button>
@@ -288,6 +333,8 @@
 function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
+    // Hapus error saat file dipilih
+    clearError('fieldImage', 'errorImage', 'uploadBox');
     const reader = new FileReader();
     reader.onload = function(e) {
         const preview     = document.getElementById('preview');
@@ -327,6 +374,98 @@ function handleStatusToggle(cb) {
 function toggleAddon(cb, id) {
     document.getElementById(id).classList.toggle('selected', cb.checked);
 }
+
+/* ── HELPER: TAMPILKAN ERROR FRONTEND ── */
+function showError(inputId, errorId, message, uploadBoxId) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input)  input.classList.add('is-invalid');
+    if (error)  { error.textContent = message; error.style.display = 'flex'; }
+    if (uploadBoxId) {
+        const box = document.getElementById(uploadBoxId);
+        if (box) box.classList.add('is-invalid');
+    }
+}
+
+function clearError(inputId, errorId, uploadBoxId) {
+    const input = document.getElementById(inputId);
+    const error = document.getElementById(errorId);
+    if (input)  input.classList.remove('is-invalid');
+    if (error)  { error.textContent = ''; error.style.display = 'none'; }
+    if (uploadBoxId) {
+        const box = document.getElementById(uploadBoxId);
+        if (box) box.classList.remove('is-invalid');
+    }
+}
+
+/* ── VALIDASI FRONTEND ── */
+document.getElementById('menuForm').addEventListener('submit', function(e) {
+    let valid = true;
+
+    // Reset semua error frontend
+    clearError('fieldName',        'errorName');
+    clearError('fieldPrice',       'errorPrice');
+    clearError('fieldKategori',    'errorKategori');
+    clearError('fieldDescription', 'errorDescription');
+    clearError('fieldImage',       'errorImage', 'uploadBox');
+
+    // Validasi: Nama Menu
+    const name = document.getElementById('fieldName').value.trim();
+    if (!name) {
+        showError('fieldName', 'errorName', 'Nama menu wajib diisi.');
+        valid = false;
+    }
+
+    // Validasi: Harga
+    const price = document.getElementById('fieldPrice').value.trim();
+    if (!price || isNaN(price) || parseFloat(price) < 0) {
+        showError('fieldPrice', 'errorPrice', 'Harga wajib diisi dengan angka yang valid.');
+        valid = false;
+    }
+
+    // Validasi: Kategori
+    const kategori = document.getElementById('fieldKategori').value;
+    if (!kategori) {
+        showError('fieldKategori', 'errorKategori', 'Kategori wajib dipilih.');
+        valid = false;
+    }
+
+    // Validasi: Deskripsi
+    const description = document.getElementById('fieldDescription').value.trim();
+    if (!description) {
+        showError('fieldDescription', 'errorDescription', 'Deskripsi wajib diisi.');
+        valid = false;
+    }
+
+    // Validasi: Gambar
+    const image = document.getElementById('fieldImage');
+    if (!image.files || image.files.length === 0) {
+        showError('fieldImage', 'errorImage', 'Gambar wajib diisi.', 'uploadBox');
+        valid = false;
+    }
+
+    if (!valid) {
+        e.preventDefault();
+        // Scroll ke error pertama
+        const firstError = document.querySelector('.field-error[style*="flex"], .field-error:not([style])');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+/* ── CLEAR ERROR SAAT INPUT DIISI ── */
+document.getElementById('fieldName').addEventListener('input', function() {
+    if (this.value.trim()) clearError('fieldName', 'errorName');
+});
+document.getElementById('fieldPrice').addEventListener('input', function() {
+    const v = this.value.trim();
+    if (v && !isNaN(v) && parseFloat(v) >= 0) clearError('fieldPrice', 'errorPrice');
+});
+document.getElementById('fieldKategori').addEventListener('change', function() {
+    if (this.value) clearError('fieldKategori', 'errorKategori');
+});
+document.getElementById('fieldDescription').addEventListener('input', function() {
+    if (this.value.trim()) clearError('fieldDescription', 'errorDescription');
+});
 
 lucide.createIcons();
 </script>

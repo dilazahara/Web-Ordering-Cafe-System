@@ -211,7 +211,7 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         </div>
         @endif
 
-        <form action="/admin/user/store" method="POST">
+        <form action="/admin/user/store" method="POST" id="userCreateForm" novalidate>
         @csrf
 
         <div class="divider"><span>Data Akun</span></div>
@@ -219,29 +219,37 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
         <!-- NAMA -->
         <div class="form-group">
             <label class="form-label">Nama Lengkap <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="name"
-                class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
-                placeholder="Contoh: Budi Santoso"
-                value="{{ old('name') }}">
+            <input type="text" name="name" id="fieldName"
+    class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
+    placeholder="Contoh: Tegar"
+    value="{{ old('name') }}">
             @error('name')
                 <div class="field-error">
                     <i data-lucide="alert-circle"></i> {{ $message }}
                 </div>
             @enderror
+
+            <div class="field-error" id="errorName" style="display:none;">
+    <i data-lucide="alert-circle"></i> <span></span>
+</div>
         </div>
 
         <!-- EMAIL -->
         <div class="form-group">
             <label class="form-label">Email <span style="color:#ef4444;">*</span></label>
-            <input type="email" name="email"
-                class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
-                placeholder="Contoh: budi@example.com"
-                value="{{ old('email') }}">
+            <input type="email" name="email" id="fieldEmail"
+    class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
+    placeholder="Contoh: tegar@example.com"
+    value="{{ old('email') }}">
             @error('email')
                 <div class="field-error">
                     <i data-lucide="alert-circle"></i> {{ $message }}
                 </div>
             @enderror
+
+            <div class="field-error" id="errorEmail" style="display:none;">
+    <i data-lucide="alert-circle"></i> <span></span>
+</div>
         </div>
 
         <!-- PASSWORD -->
@@ -261,6 +269,11 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
                     <i data-lucide="alert-circle"></i> {{ $message }}
                 </div>
             @enderror
+
+            <div class="field-error" id="errorPassword" style="display:none;">
+    <i data-lucide="alert-circle"></i> <span></span>
+</div>
+
         </div>
 
         <div class="divider"><span>Pilih Role</span></div>
@@ -351,6 +364,69 @@ function togglePw() {
     }
     lucide.createIcons();
 }
+
+/* ── VALIDASI SUBMIT ── */
+document.getElementById('userCreateForm').addEventListener('submit', function(e) {
+    let valid = true;
+
+    function setError(inputId, errorId, msg) {
+        const input = document.getElementById(inputId);
+        const error = document.getElementById(errorId);
+        // Hanya tampilkan error JS jika belum ada error backend
+        if (error && error.style.display === 'none') {
+            if (msg) {
+                input.classList.add('is-error');
+                error.querySelector('span').textContent = msg;
+                error.style.display = 'flex';
+                valid = false;
+            } else {
+                input.classList.remove('is-error');
+                error.style.display = 'none';
+            }
+        }
+    }
+
+    // Reset error JS (jangan sentuh yg dari backend)
+    ['errorName','errorEmail','errorPassword'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    ['fieldName','fieldEmail','pwInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('is-error')) el.classList.remove('is-error');
+    });
+
+    const name  = document.getElementById('fieldName').value.trim();
+    const email = document.getElementById('fieldEmail').value.trim();
+    const pw    = document.getElementById('pwInput').value;
+
+    if (!name)  setError('fieldName',  'errorName',     'Nama lengkap wajib diisi.');
+    if (!email) setError('fieldEmail', 'errorEmail',    'Email wajib diisi.');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+                setError('fieldEmail', 'errorEmail',    'Format email tidak valid.');
+    if (!pw)    setError('pwInput',    'errorPassword', 'Password wajib diisi.');
+    else if (pw.length < 6)
+                setError('pwInput',    'errorPassword', 'Password minimal 6 karakter.');
+
+    if (!valid) {
+        e.preventDefault();
+        lucide.createIcons();
+    }
+});
+
+/* ── CLEAR ERROR SAAT INPUT ── */
+['fieldName','fieldEmail','pwInput'].forEach(function(id) {
+    const errorMap = { fieldName: 'errorName', fieldEmail: 'errorEmail', pwInput: 'errorPassword' };
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-error');
+            const err = document.getElementById(errorMap[id]);
+            if (err) err.style.display = 'none';
+        }
+    });
+});
+
 </script>
 </body>
 </html>

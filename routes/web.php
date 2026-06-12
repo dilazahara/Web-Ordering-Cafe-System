@@ -44,8 +44,8 @@ use App\Http\Controllers\Customer\CustomerOrderController;
 // ══════════════════════════════════════════════════════
 
 Route::get('/', function () {
-    return redirect('/login');
-});
+    return view('customer.scan-required');
+})->name('customer.scan.required');
 
 // ══════════════════════════════════════════════════════
 // AUTH
@@ -72,7 +72,6 @@ Route::middleware('auth')->group(function () {
 
 // ══════════════════════════════════════════════════════
 // MIDTRANS WEBHOOK — di luar middleware, tanpa CSRF
-// Satu-satunya sumber kebenaran status pembayaran Midtrans
 // ══════════════════════════════════════════════════════
 
 Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])
@@ -84,30 +83,40 @@ Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])
 
 Route::prefix('customer')->name('customer.')->group(function () {
 
-    Route::get('/home',              [HomeController::class, 'index'])->name('home');
-    Route::get('/scan/{nomor_meja}', [HomeController::class, 'scanMeja'])->name('scan');
-    Route::get('/addons',            [AddonController::class, 'index'])->name('addons');
-    Route::get('/cart',              [CartController::class, 'index'])->name('cart');
-    Route::get('/checkout',          [CheckoutController::class, 'index'])->name('checkout');
-    Route::post('/order',            [CustomerOrderController::class, 'store'])->name('order.store');
+    // ── Scan QR — diblokir saat cafe tutup ───────────────────────────
+    Route::middleware('cafe.open')->group(function () {
+        Route::get('/scan/{nomor_meja}/{token}', [HomeController::class, 'scanMeja'])->name('scan');
+    });
 
-    // ── Cash ──────────────────────────────────────────────────────────
-    Route::get('/order/bill/{id}', [CustomerOrderController::class, 'cashBill'])->name('order.bill');
+    // ── Semua halaman & pesanan customer — butuh cafe buka + session ──
+    Route::middleware(['cafe.open', 'table.session'])->group(function () {
 
-    // ── QRIS manual ───────────────────────────────────────────────────
-    Route::get('/order/qris/{id}',          [CustomerOrderController::class, 'qrisPayment'])->name('order.qris');
-    Route::post('/order/qris/{id}/confirm', [CustomerOrderController::class, 'qrisConfirm'])->name('order.qris.confirm');
-    Route::get('/order/qris/{id}/receipt',  [CustomerOrderController::class, 'qrisReceipt'])->name('order.qris.receipt');
+        Route::get('/home',     [HomeController::class, 'index'])->name('home');
+        Route::get('/addons',   [AddonController::class, 'index'])->name('addons');
+        Route::get('/cart',     [CartController::class, 'index'])->name('cart');
+        Route::post('/cart/validate', [CartController::class, 'validateCart'])->name('cart.validate');
+        Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+        Route::post('/order',   [CustomerOrderController::class, 'store'])->name('order.store');
 
-    // ── Midtrans Snap ─────────────────────────────────────────────────
-    Route::get('/order/midtrans/{id}',         [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
-    Route::post('/order/midtrans/{id}/confirm',[CustomerOrderController::class, 'midtransCheckStatus'])->name('order.midtrans.confirm');
-    Route::get('/order/midtrans/{id}/receipt', [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
+        // ── Cash ──────────────────────────────────────────────────────────
+        Route::get('/order/bill/{id}', [CustomerOrderController::class, 'cashBill'])->name('order.bill');
 
-    // ── Success (fallback cash) ───────────────────────────────────────
-    Route::get('/order/success/{id}', [CustomerOrderController::class, 'success'])->name('order.success');
+        // ── QRIS manual ───────────────────────────────────────────────────
+        Route::get('/order/qris/{id}',          [CustomerOrderController::class, 'qrisPayment'])->name('order.qris');
+        Route::post('/order/qris/{id}/confirm', [CustomerOrderController::class, 'qrisConfirm'])->name('order.qris.confirm');
+        Route::get('/order/qris/{id}/receipt',  [CustomerOrderController::class, 'qrisReceipt'])->name('order.qris.receipt');
 
-});
+        // ── Midtrans Snap ─────────────────────────────────────────────────
+        Route::get('/order/midtrans/{id}',          [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
+        Route::post('/order/midtrans/{id}/confirm', [CustomerOrderController::class, 'midtransCheckStatus'])->name('order.midtrans.confirm');
+        Route::get('/order/midtrans/{id}/receipt',  [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
+
+        // ── Success (fallback cash) ───────────────────────────────────────
+        Route::get('/order/success/{id}', [CustomerOrderController::class, 'success'])->name('order.success');
+
+    }); // end middleware cafe.open + table.session
+
+}); // end prefix customer
 
 // ══════════════════════════════════════════════════════
 // ADMIN
@@ -132,11 +141,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/menu/delete/{id}', [MenuController::class, 'destroy'])->name('menu.delete');
 
     // ── KATEGORI ──────────────────────────────────────
-    Route::get('/kategori',                [KategoriController::class, 'index'])->name('kategori.index');
-    Route::get('/kategori/create',         [KategoriController::class, 'create'])->name('kategori.create');
-    Route::post('/kategori/store',         [KategoriController::class, 'store'])->name('kategori.store');
-    Route::get('/kategori/edit/{id}',      [KategoriController::class, 'edit'])->name('kategori.edit');
-    Route::put('/kategori/update/{id}',    [KategoriController::class, 'update'])->name('kategori.update');
+    Route::get('/kategori',              [KategoriController::class, 'index'])->name('kategori.index');
+    Route::get('/kategori/create',       [KategoriController::class, 'create'])->name('kategori.create');
+    Route::post('/kategori/store',       [KategoriController::class, 'store'])->name('kategori.store');
+    Route::get('/kategori/edit/{id}',    [KategoriController::class, 'edit'])->name('kategori.edit');
+    Route::put('/kategori/update/{id}',  [KategoriController::class, 'update'])->name('kategori.update');
     Route::post('/kategori/delete/{id}', [KategoriController::class, 'destroy'])->name('kategori.delete');
 
     // ── ADDONS ────────────────────────────────────────
@@ -155,6 +164,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/meja/edit/{id}',      [MejaController::class, 'edit'])->name('meja.edit');
     Route::put('/meja/update/{id}',    [MejaController::class, 'update'])->name('meja.update');
     Route::delete('/meja/delete/{id}', [MejaController::class, 'destroy'])->name('meja.delete');
+    Route::post('/meja/refresh-qr/{id}', [MejaController::class, 'refreshQr'])->name('meja.refresh-qr');
 
     // ── PEMBAYARAN ────────────────────────────────────
     Route::get('/pembayaran',              [PaymentMethodController::class, 'index'])->name('pembayaran.index');
@@ -198,15 +208,12 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
     Route::get('/transaksi',   [KasirController::class, 'transaksi'])->name('transaksi');
     Route::get('/detail/{id}', [KasirController::class, 'detail'])->name('detail');
 
-    // ── LAPORAN ───────────────────────────────────────
     Route::get('/laporan',     [KasirController::class, 'laporan'])->name('laporan');
     Route::get('/laporan/pdf', [KasirController::class, 'laporanPdf'])->name('laporan.pdf');
 
-    // ── KONFIRMASI PESANAN ────────────────────────────
     Route::patch('/pesanan/{id}/konfirmasi', [KasirController::class, 'konfirmasi'])->name('konfirmasi');
     Route::patch('/pesanan/{id}/selesai',    [KasirController::class, 'selesai'])->name('selesai');
 
-    // ── ACCOUNT ───────────────────────────────────────
     Route::get('/account/profil',           [AccountKasirController::class, 'profil'])->name('account.profil');
     Route::put('/account/update',           [AccountKasirController::class, 'updateProfil'])->name('account.update');
     Route::get('/account/ganti-sandi',      [AccountKasirController::class, 'gantiSandi'])->name('account.ganti-sandi');
@@ -226,7 +233,6 @@ Route::middleware(['auth', 'role:dapur'])->prefix('dapur')->name('dapur.')->grou
     Route::get('/poll-orders',   [DapurController::class, 'pollOrders'])->name('pollOrders');
     Route::post('/selesai/{id}', [DapurController::class, 'selesai'])->name('tandaiSelesai');
 
-    // ── ACCOUNT ───────────────────────────────────────
     Route::get('/account/profil',           [AccountDapurController::class, 'profil'])->name('account.profil');
     Route::put('/account/update',           [AccountDapurController::class, 'updateProfil'])->name('account.update');
     Route::get('/account/ganti-sandi',      [AccountDapurController::class, 'gantiSandi'])->name('account.ganti-sandi');
@@ -246,7 +252,6 @@ Route::middleware(['auth', 'role:pelayan'])->prefix('pelayan')->name('pelayan.')
     Route::get('/poll',                 [PelayanController::class, 'poll'])->name('poll');
     Route::patch('/antar/{id}/diantar', [PelayanController::class, 'tandaiDiantar'])->name('antar.selesai');
 
-    // ── ACCOUNT ───────────────────────────────────────
     Route::get('/account/profil',           [AccountPelayanController::class, 'profil'])->name('account.profil');
     Route::put('/account/update',           [AccountPelayanController::class, 'updateProfil'])->name('account.update');
     Route::get('/account/ganti-sandi',      [AccountPelayanController::class, 'gantiSandi'])->name('account.ganti-sandi');

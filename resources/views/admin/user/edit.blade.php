@@ -145,6 +145,8 @@
 }
 .eu-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 .eu-input::placeholder { color: #9ca3af; }
+.eu-input.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
+.eu-field-error { font-size: 12px; font-weight: 600; color: #dc2626; margin-top: 5px; display: none; }
 .eu-eye {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
     background: none; border: none; cursor: pointer; color: #9ca3af;
@@ -243,7 +245,7 @@
             </div>
         </div>
 
-        <form action="/admin/user/update/{{ $item->id }}" method="POST">
+        <form action="/admin/user/update/{{ $item->id }}" method="POST" id="userEditForm" novalidate>
             @csrf
 
             {{-- ── ROLE ── --}}
@@ -342,6 +344,10 @@
                                    class="eu-input" placeholder="Min. 6 karakter"
                                    autocomplete="new-password"
                                    oninput="checkPwStrength(this.value)">
+                                   @error('password')
+    <p class="eu-field-error" style="display:block;">{{ $message }}</p>
+@enderror
+<p class="eu-field-error" id="errorPwNew"></p>
                             <button type="button" class="eu-eye"
                                     onclick="toggleEye('pwNew','eyePwNew')">
                                 <i data-lucide="eye" id="eyePwNew"></i>
@@ -372,6 +378,12 @@
                             </button>
                         </div>
                         <span class="pw-match-note" id="pwMatchNote"></span>
+
+                        @error('password_confirmation')
+    <p class="eu-field-error" style="display:block;">{{ $message }}</p>
+@enderror
+<p class="eu-field-error" id="errorPwConfirm"></p>
+
                     </div>
 
                 </div>
@@ -475,5 +487,64 @@ function checkPwMatch() {
         btn.classList.add('open');
     });
 @endif
+
+/* ── VALIDASI SUBMIT ── */
+document.getElementById('userEditForm').addEventListener('submit', function(e) {
+    const isOpen = document.getElementById('pwFields').classList.contains('open');
+    if (!isOpen) return; // section password tertutup = tidak perlu validasi
+
+    let valid = true;
+    const pwNew     = document.getElementById('pwNew');
+    const pwConfirm = document.getElementById('pwConfirm');
+    const errNew    = document.getElementById('errorPwNew');
+    const errConfirm= document.getElementById('errorPwConfirm');
+
+    // Reset
+    pwNew.classList.remove('is-invalid');
+    pwConfirm.classList.remove('is-invalid');
+    errNew.style.display     = 'none';
+    errConfirm.style.display = 'none';
+
+    if (!pwNew.value) {
+        pwNew.classList.add('is-invalid');
+        errNew.textContent   = 'Password baru wajib diisi.';
+        errNew.style.display = 'block';
+        valid = false;
+    } else if (pwNew.value.length < 6) {
+        pwNew.classList.add('is-invalid');
+        errNew.textContent   = 'Password minimal 6 karakter.';
+        errNew.style.display = 'block';
+        valid = false;
+    }
+
+    if (!pwConfirm.value) {
+        pwConfirm.classList.add('is-invalid');
+        errConfirm.textContent   = 'Konfirmasi password wajib diisi.';
+        errConfirm.style.display = 'block';
+        valid = false;
+    } else if (pwNew.value !== pwConfirm.value) {
+        pwConfirm.classList.add('is-invalid');
+        errConfirm.textContent   = 'Konfirmasi password tidak cocok.';
+        errConfirm.style.display = 'block';
+        valid = false;
+    }
+
+    if (!valid) e.preventDefault();
+});
+
+/* ── CLEAR ERROR SAAT INPUT ── */
+document.getElementById('pwNew').addEventListener('input', function() {
+    if (this.value) {
+        this.classList.remove('is-invalid');
+        document.getElementById('errorPwNew').style.display = 'none';
+    }
+});
+document.getElementById('pwConfirm').addEventListener('input', function() {
+    if (this.value) {
+        this.classList.remove('is-invalid');
+        document.getElementById('errorPwConfirm').style.display = 'none';
+    }
+});
+
 </script>
 @endpush
