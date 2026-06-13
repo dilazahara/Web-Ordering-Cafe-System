@@ -371,178 +371,131 @@
 
 @section('content')
 <div class="page-title">
-        <h1>Selamat datang, {{ auth()->user()->name }}! 👋</h1>
-        <p>Berikut ringkasan aktivitas cafe hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
-    </div>
+    <h1>Selamat datang, {{ auth()->user()->name }}! 👋</h1>
+    <p>Berikut ringkasan aktivitas cafe hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
+</div>
 
-    {{-- Stats Grid --}}
-    <div class="stats-grid">
-        <div class="stat-card orange">
-            <div class="stat-icon orange"><i data-lucide="banknote"></i></div>
-            <div>
-                <div class="stat-val">Rp {{ number_format($totalPenjualan,0,',','.') }}</div>
-                <div class="stat-lbl">Total Penjualan</div>
-                <div class="stat-trend neutral">💰 Kumulatif transaksi selesai</div>
-            </div>
-        </div>
-        <div class="stat-card blue">
-            <div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalOrder }}</div>
-                <div class="stat-lbl">Total Order</div>
-                <div class="stat-trend up">📦 Semua status</div>
-            </div>
-        </div>
-        <div class="stat-card cyan">
-            <div class="stat-icon cyan"><i data-lucide="chef-hat"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalDiproses }}</div>
-                <div class="stat-lbl">Sedang Diproses</div>
-                <div class="stat-trend neutral">🔥 Di dapur sekarang</div>
-            </div>
-        </div>
-        <div class="stat-card green">
-            <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalSelesai }}</div>
-                <div class="stat-lbl">Order Selesai</div>
-                <div class="stat-trend up">✅ Berhasil diantar</div>
-            </div>
-        </div>
-        <div class="stat-card purple">
-            <div class="stat-icon purple"><i data-lucide="armchair"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalMeja }}</div>
-                <div class="stat-lbl">Total Meja</div>
-                <div class="stat-trend neutral">🪑 Meja tersedia</div>
-            </div>
-        </div>
-        <div class="stat-card red">
-            <div class="stat-icon red"><i data-lucide="receipt"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalTransaksi }}</div>
-                <div class="stat-lbl">Total Transaksi</div>
-                <div class="stat-trend up">💳 Semua transaksi</div>
-            </div>
-        </div>
-        <div class="stat-card dark">
-            <div class="stat-icon dark"><i data-lucide="users"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalUser }}</div>
-                <div class="stat-lbl">Total User</div>
-                <div class="stat-trend neutral">👤 Pengguna sistem</div>
-            </div>
-        </div>
-        <div class="stat-card pink">
-            <div class="stat-icon pink"><i data-lucide="utensils"></i></div>
-            <div>
-                <div class="stat-val">{{ $totalMenu }}</div>
-                <div class="stat-lbl">Total Menu</div>
-                <div class="stat-trend up">🍔 Menu tersedia</div>
-            </div>
+{{-- Stats Grid --}}
+<div class="stats-grid">
+    <div class="stat-card orange">
+        <div class="stat-icon orange"><i data-lucide="banknote"></i></div>
+        <div>
+            <div class="stat-val">Rp {{ number_format($totalPenjualan,0,',','.') }}</div>
+            <div class="stat-lbl">Total Penjualan</div>
+            <div class="stat-trend neutral">💰 Kumulatif transaksi selesai</div>
         </div>
     </div>
+    <div class="stat-card blue">
+        <div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalOrder }}</div>
+            <div class="stat-lbl">Total Order</div>
+            <div class="stat-trend up">📦 Semua status</div>
+        </div>
+    </div>
+    <div class="stat-card cyan">
+        <div class="stat-icon cyan"><i data-lucide="chef-hat"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalDiproses }}</div>
+            <div class="stat-lbl">Sedang Diproses</div>
+            <div class="stat-trend neutral">🔥 Di dapur sekarang</div>
+        </div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalSelesai }}</div>
+            <div class="stat-lbl">Order Selesai</div>
+            <div class="stat-trend up">✅ Berhasil diantar</div>
+        </div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon purple"><i data-lucide="armchair"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalMeja }}</div>
+            <div class="stat-lbl">Total Meja</div>
+            <div class="stat-trend neutral">🪑 Meja tersedia</div>
+        </div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-icon red"><i data-lucide="receipt"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalTransaksi }}</div>
+            <div class="stat-lbl">Total Transaksi</div>
+            <div class="stat-trend up">💳 Semua transaksi</div>
+        </div>
+    </div>
+    <div class="stat-card dark">
+        <div class="stat-icon dark"><i data-lucide="users"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalUser }}</div>
+            <div class="stat-lbl">Total User</div>
+            <div class="stat-trend neutral">👤 Pengguna sistem</div>
+        </div>
+    </div>
+    <div class="stat-card pink">
+        <div class="stat-icon pink"><i data-lucide="utensils"></i></div>
+        <div>
+            <div class="stat-val">{{ $totalMenu }}</div>
+            <div class="stat-lbl">Total Menu</div>
+            <div class="stat-trend up">🍔 Menu tersedia</div>
+        </div>
+    </div>
+</div>
 
-    {{-- Content Grid --}}
-    <div class="content-grid">
-        <div class="box">
-            <div class="box-header">
-                <div><h3>Grafik Penjualan 7 Hari Terakhir</h3></div>
-                <div style="font-size:var(--text-sm);color:var(--text-muted);font-weight:600;">
-                    Hari ini: Rp {{ number_format($totalPenjualan,0,',','.') }}
-                </div>
+{{-- Content Grid --}}
+<div class="content-grid">
+    <div class="box">
+        <div class="box-header">
+            <div>
+                <h3>Grafik Penjualan 7 Hari Terakhir</h3>
             </div>
-            <div class="box-body">
-                <div class="chart-wrap">
-                    <canvas id="chartPenjualan"></canvas>
+            <div style="font-size:var(--text-sm);color:var(--text-muted);font-weight:600;">
+                Hari ini: Rp {{ number_format($totalPenjualan,0,',','.') }}
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="chart-wrap">
+                <canvas id="chartPenjualan"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="box">
+        {{-- ✅ HEADER MENU TERLARIS — DIUBAH DI SINI --}}
+        <div class="box-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#f59e0b,#f97316); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <i data-lucide="trophy" style="width:17px; height:17px; stroke:white; stroke-width:2.2;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size:var(--text-lg); font-weight:700; color:var(--text-dark); line-height:1.2;">Menu Terlaris</h3>
+                    <p style="font-size:var(--text-xs); color:var(--text-muted); font-weight:500; margin-top:1px;">Minggu ini</p>
                 </div>
             </div>
         </div>
-
-        <div class="box">
-            <div class="box-header">
-                <h3>🏆 Menu Terlaris</h3>
-            </div>
-            <div class="box-body">
-                @if($menuTerlaris->isEmpty())
-                    <p style="color:var(--text-muted);font-size:var(--text-base);text-align:center;padding:20px 0;">Belum ada data hari ini</p>
-                @else
-                    <div class="menu-rank">
-                        @foreach($menuTerlaris as $i => $item)
-                        <div class="menu-rank-item">
-                            <div class="rank-num {{ $i===0?'r1':($i===1?'r2':($i===2?'r3':'rn')) }}">{{ $i+1 }}</div>
-                            <img src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}" alt="{{ $item->menu->name ?? 'Menu' }}" class="rank-img">
-                            <div class="rank-info">
-                                <div class="rank-name">{{ $item->menu->name ?? 'Menu Tidak Ditemukan' }}</div>
-                                <div class="rank-sub">Menu paling sering dipesan</div>
-                            </div>
-                            <div class="rank-qty">{{ $item->total_qty }}x</div>
+        <div class="box-body">
+            @if($menuTerlaris->isEmpty())
+                <p style="color:var(--text-muted);font-size:var(--text-base);text-align:center;padding:20px 0;">Belum ada data minggu ini</p>
+            @else
+                <div class="menu-rank">
+                    @foreach($menuTerlaris as $i => $item)
+                    <div class="menu-rank-item">
+                        <div class="rank-num {{ $i===0?'r1':($i===1?'r2':($i===2?'r3':'rn')) }}">{{ $i+1 }}</div>
+                        <img src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}" alt="{{ $item->menu->name ?? 'Menu' }}" class="rank-img">
+                        <div class="rank-info">
+                            <div class="rank-name">{{ $item->menu->name ?? 'Menu Tidak Ditemukan' }}</div>
+                            <div class="rank-sub">Terlaris minggu ini</div>
                         </div>
-                        @endforeach
+                        <div class="rank-qty">{{ $item->total_qty }}x</div>
                     </div>
-                @endif
-            </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
+</div>
 
-
-
-<script>
-const ctx = document.getElementById('chartPenjualan').getContext('2d');
-new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {!! json_encode($chartLabels) !!},
-        datasets: [{
-            label: 'Penjualan',
-            data: {!! json_encode($chartData) !!},
-            borderColor: '#7c3aed',
-            backgroundColor: 'rgba(124,58,237,0.08)',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#7c3aed',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-            fill: true,
-            tension: 0.4,
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: { color: '#f1f5f9' },
-                ticks: {
-                    color: '#94a3b8', font: { size: 11, family: 'Inter' },
-                    callback: v => 'Rp ' + (v/1000).toFixed(0) + 'rb'
-                }
-            },
-            x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
-            }
-        }
-    }
-});
-</script>
-
-<script>
-$(document).ready(function () {
-    $('#recentOrdersTable').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        searching: false,
-        ordering: false,
-        language: {
-            info:     "Showing _START_ to _END_ of _TOTAL_ entries",
-            paginate: { previous: "Previous", next: "Next" },
-            emptyTable: "Belum ada pesanan hari ini"
-        }
-    });
-});
-</script>
 @endsection
 
 @push('scripts')
