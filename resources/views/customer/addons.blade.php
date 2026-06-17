@@ -288,13 +288,31 @@ function addToCart() {
         addons.push({ id: Number(el.value), name: el.dataset.name, price: Number(el.dataset.price) });
     });
 
+    const addonPrice = addons.reduce((s,a)=>s+a.price, 0);
+    const itemPrice  = Number(menu.price) + addonPrice;
+
+    // Buat cartKey unik berdasarkan menu id + kombinasi addon ids
+    const addonIds = addons.map(a=>a.id).sort().join('-');
+    const cartKey  = `${menu.id}_${addonIds}`;
+
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    cart.push({
-        id: menu.id, name: menu.name,
-        price: Number(menu.price) + addons.reduce((s,a)=>s+a.price,0),
-        image: menu.image, quantity: qty,
-        notes: document.getElementById('notes').value, addons
-    });
+
+    // Kalau item dengan kombinasi addon yang sama sudah ada, tambah qty-nya saja
+    const existing = cart.find(i => i.cartKey === cartKey);
+    if (existing) {
+        existing.quantity += qty;
+    } else {
+        cart.push({
+            id: menu.id,
+            cartKey: cartKey,
+            name: menu.name,
+            price: itemPrice,
+            image: menu.image,
+            quantity: qty,
+            notes: document.getElementById('notes').value,
+            addons
+        });
+    }
     localStorage.setItem('cart', JSON.stringify(cart));
 
     const btn = document.getElementById('btnAddCart');

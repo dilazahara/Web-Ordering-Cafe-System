@@ -48,28 +48,36 @@ class KasirController extends Controller
 
     public function pesanan()
     {
-        $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
+        $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans','qris'];
 
         $orders = Order::with('items.menu')
             ->whereDate('created_at', today())
             ->where(function ($q) use ($midtransMethods) {
-                // Cash — tampil dari pending (belum bayar) hingga selesai
                 $q->where('payment_method', 'cash')
-                  // QRIS manual — tampil dari pending (belum konfirmasi) hingga selesai
                   ->orWhere('payment_method', 'qris')
-                  // Midtrans — tampil dari waiting_payment (belum bayar) hingga selesai
                   ->orWhere(function ($q3) use ($midtransMethods) {
                       $q3->whereIn('payment_method', $midtransMethods);
                   });
             })
-            // Hanya tampilkan status yang relevan (tidak tampilkan yang cancelled)
-            ->whereIn('status', ['pending','waiting_payment','process','paid','done','delivered'])
+            ->whereIn('status', [
+                'pending',
+                'waiting_payment',
+                'paid',
+                'process',
+                'done',
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ])
             ->latest()
             ->get();
 
         $mejas = Meja::all();
 
-        return view('kasir.pesanan', compact('orders', 'mejas'));
+        $paymentMethodMap = \App\Models\PaymentMethod::all()->keyBy('kode');
+
+        return view('kasir.pesanan', compact('orders', 'mejas', 'paymentMethodMap'));
     }
 
 
@@ -87,16 +95,14 @@ class KasirController extends Controller
             'Hanya untuk pembayaran cash.'
         );
 
-        // Boleh konfirmasi dari status 'pending' saja
         abort_if(
-            $order->status !== 'pending',
+            !in_array($order->status, ['pending', 'waiting_payment']),
             422,
             'Status pesanan tidak valid untuk dikonfirmasi.'
         );
 
         $uangDiterima = (float) $request->input('uang_diterima', 0);
 
-        // Validasi uang tidak kurang dari total
         if ($uangDiterima > 0 && $uangDiterima < $order->total) {
             return back()->with(
                 'error',
@@ -105,7 +111,6 @@ class KasirController extends Controller
             );
         }
 
-        // Cash: setelah kasir konfirmasi & terima uang → langsung status 'process' (masuk dapur)
         $updateData = ['status' => 'process'];
 
         if (Schema::hasColumn('orders', 'uang_diterima')) {
@@ -137,33 +142,30 @@ class KasirController extends Controller
 
 
     // ═══════════════════════════════
-    // SELESAI DIANTAR
+    // SELESAI DIANTAR  (Dine In)
     // ═══════════════════════════════
 
     public function selesai(int $id)
     {
         $order = Order::findOrFail($id);
 
-        // Kasir tandai selesai hanya jika pesanan sudah done (selesai dimasak)
-        // atau sudah delivered (sudah diantar pelayan)
+        // ✅ FIX: terima 'done' (legacy) ATAU 'ready_delivery' (status flow
+        // final saat ini untuk Dine In) ATAU 'delivered' (sudah selesai
+        // sebelumnya, idempotent).
         abort_if(
-            !in_array($order->status, ['done', 'delivered']),
+            !in_array($order->status, ['done', 'ready_delivery', 'delivered']),
             422,
             'Pesanan belum selesai dimasak atau diantar.'
         );
 
         $order->update(['status' => 'delivered']);
 
-        if ($order->table_number) {
+        // Hanya kosongkan meja untuk Dine In
+        if (($order->order_type ?? 'dine_in') === 'dine_in' && $order->table_number) {
             $meja = Meja::where('nomor_meja', $order->table_number)->first();
 
             if ($meja) {
-                // Kosongkan status meja
                 $meja->update(['status' => 'kosong']);
-
-                // ✅ AUTO-REFRESH QR TOKEN saat transaksi selesai.
-                // Efek: QR lama yang dipegang tamu sebelumnya langsung tidak berlaku.
-                // Tamu baru di meja yang sama WAJIB scan QR fisik yang terpasang di meja.
                 $meja->refreshQrToken();
             }
         }
@@ -184,6 +186,54 @@ class KasirController extends Controller
     }
 
 
+    // ═══════════════════════════════════════════════════
+    // SUDAH DIAMBIL  (Take Away only)
+    // Kasir menekan tombol ini saat customer mengambil
+    // pesanan Take Away di kasir → status: completed
+    // ═══════════════════════════════════════════════════
+
+    public function tandaiDiambil(int $id)
+    {
+        $order = Order::findOrFail($id);
+
+        abort_if(
+            ($order->order_type ?? 'dine_in') !== 'take_away',
+            403,
+            'Aksi ini hanya untuk pesanan Take Away.'
+        );
+
+        // ✅ FIX: terima 'done' ATAU 'ready_pickup' karena keduanya adalah
+        // status valid "siap diambil" sesuai flow nyata di database.
+        abort_if(
+            !in_array($order->status, ['done', 'ready_pickup']),
+            422,
+            'Pesanan belum siap untuk diambil.'
+        );
+
+        $updateData = ['status' => 'completed'];
+
+        if (Schema::hasColumn('orders', 'completed_at')) {
+            $updateData['completed_at'] = now();
+        }
+
+        $order->update($updateData);
+
+        if (class_exists(Notification::class)) {
+            try {
+                Notification::kirim(
+                    'admin',
+                    'order_completed',
+                    '✅ Pesanan Take Away Diambil',
+                    "Pesanan {$order->queue_number} sudah diambil customer.",
+                    $order
+                );
+            } catch (\Throwable $e) {}
+        }
+
+        return back()->with('success', "Pesanan {$order->queue_number} sudah diambil customer ✅");
+    }
+
+
     // ═══════════════════════════════
     // TRANSAKSI
     // ═══════════════════════════════
@@ -191,7 +241,15 @@ class KasirController extends Controller
     public function transaksi(Request $request)
     {
         $query = Order::with('items.menu')
-            ->whereIn('status', ['process', 'done', 'delivered']);
+            ->whereIn('status', [
+                'paid',
+                'process',
+                'done',
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ]);
 
         if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
@@ -224,7 +282,15 @@ class KasirController extends Controller
     public function laporan(Request $request)
     {
         $query = Order::with('items.menu')
-            ->whereIn('status', ['process', 'done', 'delivered']);
+            ->whereIn('status', [
+                'paid',
+                'process',
+                'done',
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ]);
 
         if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
@@ -241,13 +307,20 @@ class KasirController extends Controller
 
     // ═══════════════════════════════
     // EXPORT PDF
-    // ✅ PERBAIKAN: nama file & judul PDF kini menyertakan tanggal laporan
     // ═══════════════════════════════
 
     public function laporanPdf(Request $request)
     {
         $query = Order::with('items.menu')
-            ->whereIn('status', ['process', 'done', 'delivered']);
+            ->whereIn('status', [
+                'paid',
+                'process',
+                'done',
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ]);
 
         if ($request->filled('tanggal')) {
             $query->whereDate('created_at', $request->tanggal);
@@ -259,12 +332,8 @@ class KasirController extends Controller
 
         $orders       = $query->latest()->get();
         $totalOmset   = $orders->sum('total');
-
-        // Format tanggal untuk ditampilkan di dalam PDF, misal: "04 Juni 2026"
         $tanggalLabel = \Carbon\Carbon::parse($label)->translatedFormat('d F Y');
-
-        // Nama file download, misal: "laporan-penjualan-2026-06-04.pdf"
-        $namaFile = 'laporan-kasir-' . $label . '.pdf';
+        $namaFile     = 'laporan-kasir-' . $label . '.pdf';
 
         $pdf = Pdf::loadView('kasir.laporan_pdf', compact('orders', 'totalOmset', 'tanggalLabel'));
 

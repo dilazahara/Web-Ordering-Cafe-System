@@ -27,6 +27,7 @@
         .s-process  { background: #dbeafe; color: #1e40af; font-weight: bold; font-size: 10px; padding: 2px 8px; border-radius: 20px; display:inline-block; }
         .s-paid     { background: #fef9c3; color: #854d0e; font-weight: bold; font-size: 10px; padding: 2px 8px; border-radius: 20px; display:inline-block; }
         .s-done     { background: #dcfce7; color: #166534; font-weight: bold; font-size: 10px; padding: 2px 8px; border-radius: 20px; display:inline-block; }
+        .s-completed { background: #dcfce7; color: #166534; font-weight: bold; font-size: 10px; padding: 2px 8px; border-radius: 20px; display:inline-block; }
     </style>
 </head>
 <body>
@@ -55,7 +56,7 @@ $totalSemua    = $orders->sum('total');
             <th width="11%">Waktu</th>
             <th width="8%">ID Order</th>
             <th width="12%">Nama Pemesan</th>
-            <th width="8%">Meja</th>
+            <th width="10%">Tipe &amp; Meja</th>
             <th width="25%">Detail Pesanan</th>
             <th width="11%">Metode Bayar</th>
             <th width="9%">Status</th>
@@ -90,6 +91,9 @@ $totalSemua    = $orders->sum('total');
             } elseif (in_array($order->status, ['done','delivered'])) {
                 $statusLabel = 'Selesai';
                 $statusClass = 's-done';
+            } elseif ($order->status === 'completed') {
+                $statusLabel = 'Selesai Diambil';
+                $statusClass = 's-completed';
             } else {
                 $statusLabel = ucfirst($order->status ?? '-');
                 $statusClass = 's-done';
@@ -106,13 +110,23 @@ $totalSemua    = $orders->sum('total');
             </td>
             <td>{{ $order->customer_name ?: '—' }}</td>
             <td class="text-center">
-                {{ $order->table_number ? 'Meja ' . $order->table_number : 'Take Away' }}
+                @if($order->isTakeAway())
+                    Take Away
+                @else
+                    Dine In{{ $order->table_number ? ' / Meja ' . $order->table_number : '' }}
+                @endif
             </td>
             <td>
                 @if($order->items && $order->items->count() > 0)
                     <ul class="item-list">
                         @foreach($order->items as $item)
-                            <li>{{ $item->qty ?? $item->quantity ?? 1 }}x {{ $item->menu->name ?? $item->name ?? '-' }}</li>
+                            <li>
+                                {{ $item->qty ?? $item->quantity ?? 1 }}x {{ $item->menu->name ?? $item->name ?? '-' }}
+                                {{-- ✅ FIX: tampilkan add-on di laporan PDF admin --}}
+                                @if(!empty($item->addon_details))
+                                <span style="color:#f97316;font-size:9px;"> ({{ collect($item->addon_details)->pluck('name')->join(', ') }})</span>
+                                @endif
+                            </li>
                         @endforeach
                     </ul>
                 @else

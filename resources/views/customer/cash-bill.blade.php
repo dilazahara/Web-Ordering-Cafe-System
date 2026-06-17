@@ -328,8 +328,13 @@
 
             <div class="grid grid-cols-2 gap-3 mt-2 fade-up-2">
                 <div class="bg-slate-50 rounded-2xl p-3">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Nomor Meja</p>
-                    <p class="font-black text-slate-800 text-base leading-none">{{ $order->table_number ?? '-' }}</p>
+                    @if(($order->order_type ?? 'dine_in') === 'take_away')
+                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-wider leading-none mb-1">Jenis Pesanan</p>
+                        <p class="font-black text-blue-600 text-base leading-none">🛍️ Take Away</p>
+                    @else
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Nomor Meja</p>
+                        <p class="font-black text-slate-800 text-base leading-none">{{ $order->table_number ?? '-' }}</p>
+                    @endif
                 </div>
                 <div class="bg-orange-50 rounded-2xl p-3">
                     <p class="text-[10px] font-bold text-orange-400 uppercase tracking-wider leading-none mb-1">Status</p>
@@ -363,11 +368,21 @@
                          onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($item->name) }}&background=ffecd2&color=f97316&bold=true&size=44'">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-slate-800 truncate leading-tight">{{ $item->name }}</p>
+                        {{-- ✅ FIX: tampilkan nama add-on yang dipilih --}}
+                        @if(!empty($item->addon_details))
+                        <p class="text-[10px] text-orange-400 font-semibold leading-none mt-0.5">
+                            {{ collect($item->addon_details)->pluck('name')->join(', ') }}
+                        </p>
+                        @endif
                         @if($item->notes)
                         <p class="text-[10px] text-slate-400 italic leading-none mt-0.5">{{ $item->notes }}</p>
                         @endif
+                        {{-- ✅ FIX: tampilkan harga dasar + addon price secara terpisah --}}
                         <p class="text-xs text-slate-500 mt-0.5">× {{ $item->qty }}
-                            <span class="text-slate-400 ml-1">@ Rp {{ number_format($item->price, 0, ',', '.') }}</span>
+                            <span class="text-slate-400 ml-1">@ Rp {{ number_format($item->base_price ?? $item->price, 0, ',', '.') }}</span>
+                            @if(!empty($item->addon_details) && $item->addon_price > 0)
+                            <span class="text-orange-400 ml-1">+Rp {{ number_format($item->addon_price, 0, ',', '.') }}</span>
+                            @endif
                         </p>
                     </div>
                     <p class="text-sm font-extrabold text-orange-500 flex-shrink-0">
@@ -585,10 +600,22 @@
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;{{ !$loop->last ? 'border-bottom:1px dashed #fed7aa;' : '' }}">
                     <div style="flex:1;">
                         <p style="font-weight:700;color:#1e293b;font-size:13px;margin:0;">{{ $item->name }}</p>
+                        {{-- ✅ FIX: tampilkan nama add-on di struk cetak --}}
+                        @if(!empty($item->addon_details))
+                        <p style="font-size:10px;color:#f97316;font-weight:600;margin:1px 0 0;">
+                            {{ collect($item->addon_details)->pluck('name')->join(', ') }}
+                        </p>
+                        @endif
                         @if($item->notes)
                         <p style="font-size:10px;color:#94a3b8;font-style:italic;margin:1px 0 0;">* {{ $item->notes }}</p>
                         @endif
-                        <p style="font-size:10px;color:#64748b;margin:2px 0 0;">× {{ $item->qty }} @ Rp {{ number_format($item->price, 0, ',', '.') }}</p>
+                        {{-- ✅ FIX: tampilkan harga dasar + addon price di struk --}}
+                        <p style="font-size:10px;color:#64748b;margin:2px 0 0;">
+                            × {{ $item->qty }} @ Rp {{ number_format($item->base_price ?? $item->price, 0, ',', '.') }}
+                            @if(!empty($item->addon_details) && $item->addon_price > 0)
+                            +Rp {{ number_format($item->addon_price, 0, ',', '.') }}
+                            @endif
+                        </p>
                     </div>
                     <p style="font-weight:800;color:#f97316;font-size:13px;margin:0;flex-shrink:0;padding-left:8px;">Rp {{ number_format($item->price * $item->qty, 0, ',', '.') }}</p>
                 </div>

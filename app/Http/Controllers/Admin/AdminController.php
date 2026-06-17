@@ -13,20 +13,24 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
-    public function index()
+    // ─── UPDATE: Menambahkan parameter Request $request ───
+    public function index(Request $request)
     {
         // ─────────────────────────────────────
         // CARDS DASHBOARD
         // ─────────────────────────────────────
 
+        // SINKRONISASI: Menambahkan status 'paid' agar sesuai dengan logika laporan keuangan
         $totalPenjualan = Order::whereDate(
                 'created_at',
                 today()
             )
             ->whereIn('status', [
+                'paid',
                 'process',
                 'done',
-                'delivered'
+                'delivered',
+                'completed'
             ])
             ->sum('total');
 
@@ -49,7 +53,8 @@ class AdminController extends Controller
             )
             ->whereIn('status', [
                 'done',
-                'delivered'
+                'delivered',
+                'completed'
             ])
             ->count();
 
@@ -97,21 +102,49 @@ class AdminController extends Controller
 
 
         // ─────────────────────────────────────
-        // GRAFIK 7 HARI TERAKHIR
+        // ─── UPDATE: GRAFIK PENJUALAN DENGAN FILTER PERIODE ───
         // ─────────────────────────────────────
 
-        $grafik = Order::select(
-                DB::raw("DATE_FORMAT(created_at, '%d %b') as hari"),
+        $periode = $request->query('periode', '7_days');
+        
+        $queryGrafik = Order::whereIn('status', [
+            'paid',
+            'process',
+            'done',
+            'delivered',
+            'completed'
+        ]);
+
+        switch ($periode) {
+            case '30_days':
+                $queryGrafik->where('created_at', '>=', now()->subDays(29)->startOfDay());
+                $dateFormat = "%d %b";
+                break;
+            case 'this_month':
+                $queryGrafik->where('created_at', '>=', now()->startOfMonth());
+                $dateFormat = "%d %b";
+                break;
+            case 'this_year':
+                $queryGrafik->where('created_at', '>=', now()->startOfYear());
+                $dateFormat = "%b %Y";
+                break;
+            case 'all':
+                // Tidak ada batas waktu (Semua Data)
+                $dateFormat = "%b %Y";
+                break;
+            case '7_days':
+            default:
+                $queryGrafik->where('created_at', '>=', now()->subDays(6)->startOfDay());
+                $dateFormat = "%d %b";
+                break;
+        }
+
+        $grafik = $queryGrafik->select(
+                DB::raw("DATE_FORMAT(created_at, '{$dateFormat}') as hari"),
                 DB::raw('SUM(total) as total')
             )
-            ->whereIn('status', [
-                'process',
-                'done',
-                'delivered'
-            ])
-            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
-            ->groupBy('hari')
-            ->orderBy('hari')
+            ->groupBy(DB::raw("DATE_FORMAT(created_at, '{$dateFormat}')"))
+            ->orderBy(DB::raw('MIN(created_at)'))
             ->get();
 
         $chartLabels = $grafik->pluck('hari');

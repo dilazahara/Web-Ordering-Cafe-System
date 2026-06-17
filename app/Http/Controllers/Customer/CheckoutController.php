@@ -40,9 +40,19 @@ class CheckoutController extends Controller
         $hasCash        = $kasirMethod && $kasirMethod->aktif;
         $hasMidtrans    = $midtransMethod && $midtransMethod->aktif;
 
+        // ✅ TAKE AWAY: Tentukan apakah user bisa memilih Take Away.
+        // User bisa pilih Take Away SELALU (tidak perlu scan meja).
+        // User bisa pilih Dine In hanya jika ada session meja aktif.
+        $canDineIn   = ! empty($tableNumber);
+        $canTakeAway = true;
+
+        // Default order type: dine_in jika ada meja, take_away jika tidak
+        $defaultOrderType = $canDineIn ? 'dine_in' : 'take_away';
+
         return view('customer.checkout', compact(
             'paymentMethods', 'tableNumber',
-            'hasCash', 'hasMidtrans', 'midtransMethod'
+            'hasCash', 'hasMidtrans', 'midtransMethod',
+            'canDineIn', 'canTakeAway', 'defaultOrderType'
         ));
     }
 }

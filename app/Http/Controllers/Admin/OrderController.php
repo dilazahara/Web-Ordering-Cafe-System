@@ -37,12 +37,14 @@ class OrderController extends Controller
         $request->validate([
             'cart'           => 'required|string',
             'payment_method' => ['required', 'string', 'in:' . implode(',', $activeKodes)],
+            'order_type'     => 'nullable|string|in:dine_in,take_away',
             'table_number'   => 'nullable|string|max:10',
             'note'           => 'nullable|string|max:500',
         ], [
             'cart.required'           => 'Keranjang tidak boleh kosong.',
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
             'payment_method.in'       => 'Metode pembayaran tidak valid atau tidak aktif.',
+            'order_type.in'           => 'Tipe pesanan tidak valid.',
         ]);
 
         $cart = json_decode($request->cart, true);
@@ -85,16 +87,20 @@ class OrderController extends Controller
 
             $queueNumber = 'A-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
+            $orderType = $request->input('order_type', 'dine_in');
+
             $order = Order::create([
                 'queue_number'   => $queueNumber,
-                'table_number'   => $request->table_number,
+                'order_type'     => $orderType,
+                'table_number'   => $orderType === 'dine_in' ? $request->table_number : null,
                 'note'           => $request->note,
                 'payment_method' => $request->payment_method,
                 'status'         => $status,
                 'total'          => $total,
             ]);
 
-            if ($request->table_number) {
+            // Hanya update status meja untuk Dine In
+            if ($orderType === 'dine_in' && $request->table_number) {
                 Meja::where('nomor_meja', $request->table_number)
                     ->update(['status' => 'terisi']);
             }
@@ -207,7 +213,8 @@ class OrderController extends Controller
         $order->status = 'delivered';
         $order->save();
 
-        if ($order->table_number) {
+        // Hanya kosongkan meja untuk Dine In
+        if (!$order->isTakeAway() && $order->table_number) {
             Meja::where('nomor_meja', $order->table_number)
                 ->update(['status' => 'kosong']);
         }

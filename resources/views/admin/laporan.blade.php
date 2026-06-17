@@ -4,29 +4,7 @@
 
 @push('styles')
 <style>
-*{ margin:0; padding:0; box-sizing:border-box; }
-body{ font-family:'Inter',sans-serif; background:#f1f5f9; color:#0f172a; }
-
-/* TOPBAR */
-.topbar{ position:fixed; top:0; left:0; right:0; height:80px; background:rgba(255,255,255,.95); backdrop-filter:blur(18px); border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; padding:0 30px; z-index:1000; }
-.topbar-left{ display:flex; align-items:center; gap:18px; }
-.topbar-left i{ width:24px; height:24px; cursor:pointer; color:#475569; }
-
-/* SIDEBAR */
-.sidebar{ width:240px; height:100vh; position:fixed; top:0; left:0; background:linear-gradient(180deg,#0f172a,#1e1b4b); padding:30px; padding-top:100px; overflow-y:auto; transform:translateX(-100%); transition:.3s; z-index:999; }
-.sidebar.show{ transform:translateX(0); }
-.menu-section{ font-size:11px; letter-spacing:1px; color:#a78bfa; margin:18px 10px 8px; }
-.sidebar a{ display:flex; align-items:center; gap:14px; padding:12px 14px; border-radius:12px; color:#94a3b8; text-decoration:none; transition:.2s; margin-bottom:6px; }
-.sidebar a:hover{ background:rgba(255,255,255,.05); color:white; }
-.sidebar a.active{ background:rgba(139,92,246,.20); color:#c4b5fd; }
-
-/* MAIN */
-.main{ padding:120px 30px 40px; }
-.page-header{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; gap:20px; flex-wrap:wrap; }
-.page-header h1{ font-size:34px; font-weight:800; margin-bottom:8px; }
-.page-header p{ color:#64748b; font-size:15px; }
-
-/* ANALYTICS */
+/* ANALYTICS CARDS */
 .analytics-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:30px; }
 .analytics-card{ background:white; border-radius:22px; padding:24px; box-shadow:0 4px 10px rgba(0,0,0,.04); position:relative; overflow:hidden; border:1px solid #e2e8f0; }
 .analytics-card::before{ content:''; position:absolute; top:0; left:0; width:100%; height:4px; }
@@ -51,7 +29,7 @@ body{ font-family:'Inter',sans-serif; background:#f1f5f9; color:#0f172a; }
 .green .analytics-sub{ color:#22c55e; }
 .purple .analytics-sub{ color:#8b5cf6; }
 
-/* FILTER */
+/* FILTER BOX */
 .filter-box{ background:white; padding:25px; border-radius:24px; margin-bottom:30px; box-shadow:0 4px 10px rgba(0,0,0,.04); }
 .filter-form{ display:flex; gap:15px; flex-wrap:wrap; align-items:center; }
 .filter-form select, .filter-form input{ padding:12px 16px; border:1px solid #dbe2ea; border-radius:14px; font-size:14px; min-width:160px; background:white; }
@@ -59,7 +37,7 @@ body{ font-family:'Inter',sans-serif; background:#f1f5f9; color:#0f172a; }
 .filter-btn{ background:#3b82f6; }
 .export-btn{ background:#ef4444; }
 
-/* TABLE */
+/* TABLE MANAGEMENT */
 .table-box{ background:white; border-radius:24px; padding:25px; box-shadow:0 4px 10px rgba(0,0,0,.04); }
 .table-title-wrap{ display:flex; align-items:center; gap:14px; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #f1f5f9; }
 .table-title-icon{ width:44px; height:44px; border-radius:14px; background:#eff6ff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
@@ -67,7 +45,7 @@ body{ font-family:'Inter',sans-serif; background:#f1f5f9; color:#0f172a; }
 .table-title-text h2{ font-size:20px; font-weight:700; color:#0f172a; line-height:1.2; }
 .table-title-text p{ font-size:13px; color:#64748b; margin-top:3px; }
 
-/* TOOLBAR */
+/* TOOLBAR & SEARCH */
 .table-toolbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px; padding:14px 18px; background:#f8fafc; border-radius:14px; border:1px solid #f1f5f9; }
 .toolbar-left{ display:flex; align-items:center; gap:10px; }
 .toolbar-label{ font-size:13px; color:#64748b; font-weight:500; }
@@ -87,7 +65,7 @@ body{ font-family:'Inter',sans-serif; background:#f1f5f9; color:#0f172a; }
 .empty-state h3{ font-size:17px; font-weight:700; color:#334155; margin-bottom:8px; }
 .empty-state p{ font-size:14px; color:#94a3b8; max-width:320px; line-height:1.6; }
 
-/* TABLE */
+/* TABLE CONTEXT */
 .table-wrapper{ overflow-x:auto; }
 table{ width:100%; border-collapse:collapse; min-width:950px; }
 thead{ background:#f8fafc; }
@@ -110,7 +88,7 @@ tbody tr:hover{ background:#f8fafc; }
 /* TOTAL ROW */
 .total-row td{ border-top:2px solid #3b82f6; font-weight:800; font-size:15px; }
 
-/* PAGINATION */
+/* PAGINATION SYSTEM */
 .pagination-wrap{ display:flex; align-items:center; justify-content:space-between; margin-top:20px; padding-top:16px; border-top:1px solid #f1f5f9; flex-wrap:wrap; gap:12px; }
 .pagination-info{ font-size:13px; color:#64748b; }
 .pagination-info span{ font-weight:700; color:#0f172a; }
@@ -133,10 +111,11 @@ tbody tr:hover{ background:#f8fafc; }
 .breakdown-val{ font-size:14px; font-weight:800; color:#0f172a; }
 .breakdown-count{ font-size:11px; color:#94a3b8; margin-top:2px; }
 
+/* KEYFRAMES */
 @keyframes spin  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
 @media(max-width:768px){
-    .main{ padding:110px 18px 30px; }
     .analytics-grid{ grid-template-columns:1fr 1fr; }
     .filter-form{ flex-direction:column; align-items:stretch; }
     .filter-form select, .filter-form input{ width:100%; }
@@ -184,7 +163,6 @@ $midtransUsed = collect($midtransDetail)->filter(
     </div>
 </div>
 
-<!-- ANALYTICS -->
 <div class="analytics-grid">
     <div class="analytics-card orange">
         <div class="icon-box"><i data-lucide="wallet"></i></div>
@@ -238,15 +216,17 @@ $midtransUsed = collect($midtransDetail)->filter(
 </div>
 @endif
 
-<!-- FILTER -->
 <div class="filter-box">
     <form method="GET" action="{{ route('admin.laporan.index') }}" class="filter-form" id="filterForm">
 
         <select name="filter" id="filterPeriode" onchange="onFilterChange()">
             <option value="">-- Pilih Periode --</option>
-            <option value="hari"  {{ request('filter') == 'hari'  ? 'selected' : '' }}>Hari Ini</option>
-            <option value="bulan" {{ request('filter') == 'bulan' ? 'selected' : '' }}>Bulan Ini</option>
-            <option value="tahun" {{ request('filter') == 'tahun' ? 'selected' : '' }}>Tahun Ini</option>
+            <option value="hari"         {{ request('filter') == 'hari' ? 'selected' : '' }}>Hari Ini</option>
+            <option value="last_7_days"  {{ request('filter') == 'last_7_days' ? 'selected' : '' }}>7 Hari Terakhir</option>
+            <option value="last_30_days" {{ request('filter') == 'last_30_days' ? 'selected' : '' }}>30 Hari Terakhir</option>
+            <option value="bulan"        {{ request('filter') == 'bulan' ? 'selected' : '' }}>Bulan Ini</option>
+            <option value="tahun"        {{ request('filter') == 'tahun' ? 'selected' : '' }}>Tahun Ini</option>
+            <option value="all"          {{ request('filter') == 'all' ? 'selected' : '' }}>Semua Data</option>
         </select>
 
         <span style="color:#cbd5e1;font-size:13px;font-weight:600;white-space:nowrap;">atau pilih tanggal</span>
@@ -272,7 +252,7 @@ $midtransUsed = collect($midtransDetail)->filter(
             </span>
         </a>
 
-        {{-- Overlay Loading --}}
+        {{-- Overlay Loading Download PDF --}}
         <div id="downloadOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,22,35,.48);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
             <div style="background:#fff;border-radius:24px;padding:36px 44px;box-shadow:0 24px 64px rgba(0,0,0,.22);text-align:center;min-width:280px;max-width:340px;">
 
@@ -307,10 +287,16 @@ $midtransUsed = collect($midtransDetail)->filter(
         <span style="font-size:12px;color:#64748b;font-weight:600;">Filter aktif:</span>
         @if(request('filter') == 'hari')
             <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 Hari Ini</span>
+        @elseif(request('filter') == 'last_7_days')
+            <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 7 Hari Terakhir</span>
+        @elseif(request('filter') == 'last_30_days')
+            <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 30 Hari Terakhir</span>
         @elseif(request('filter') == 'bulan')
             <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 Bulan Ini — {{ now()->translatedFormat('F Y') }}</span>
         @elseif(request('filter') == 'tahun')
             <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 Tahun {{ now()->year }}</span>
+        @elseif(request('filter') == 'all')
+            <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 Semua Data</span>
         @elseif(request('tanggal'))
             <span style="background:#dbeafe;color:#1e40af;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;">📅 {{ \Carbon\Carbon::parse(request('tanggal'))->translatedFormat('d F Y') }}</span>
         @endif
@@ -319,7 +305,6 @@ $midtransUsed = collect($midtransDetail)->filter(
     @endif
 </div>
 
-<!-- TABLE -->
 <div class="table-box">
 
     <div class="table-title-wrap">
@@ -331,7 +316,6 @@ $midtransUsed = collect($midtransDetail)->filter(
     </div>
 
     @if($orders->isNotEmpty())
-    <!-- TOOLBAR -->
     <div class="table-toolbar">
         <div class="toolbar-left">
             <span class="toolbar-label">Tampilkan</span>
@@ -364,7 +348,7 @@ $midtransUsed = collect($midtransDetail)->filter(
                     <th>Waktu</th>
                     <th>ID Order</th>
                     <th>Nama Pemesan</th>
-                    <th>Meja</th>
+                    <th>Tipe & Meja</th>
                     <th>Detail Pesanan</th>
                     <th>Status</th>
                     <th>Metode Bayar</th>
@@ -395,7 +379,7 @@ $midtransUsed = collect($midtransDetail)->filter(
                 <tr data-search="{{ strtolower(
                     ($order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT))
                     . ' ' . ($order->customer_name ?? '')
-                    . ' ' . ($order->table_number ? 'meja '.$order->table_number : 'take away')
+                    . ' ' . ($order->isTakeAway() ? 'take away' : 'dine in meja '.$order->table_number)
                     . ' ' . $order->status
                     . ' ' . $order->payment_method
                     . ' ' . $order->created_at->format('d M Y')
@@ -409,7 +393,13 @@ $midtransUsed = collect($midtransDetail)->filter(
                         {{ $order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT) }}
                     </td>
                     <td style="font-weight:600;color:#1e293b;">{{ $order->customer_name ?: '—' }}</td>
-                    <td>{{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}</td>
+                    <td>
+                        @if($order->isTakeAway())
+                            🛍️ Take Away
+                        @else
+                            🪑 Dine In{{ $order->table_number ? ' — Meja '.$order->table_number : '' }}
+                        @endif
+                    </td>
                     <td style="min-width:220px;">
                         @foreach($order->items->take(2) as $item)
                         <div>{{ $item->qty }}x {{ $item->menu->name ?? '-' }}</div>
@@ -462,7 +452,6 @@ $midtransUsed = collect($midtransDetail)->filter(
     </div>
 
     @if($orders->isNotEmpty())
-    <!-- PAGINATION -->
     <div class="pagination-wrap" id="paginationWrap">
         <div class="pagination-info" id="paginationInfo"></div>
         <div class="pagination-btns" id="paginationBtns"></div>
@@ -618,7 +607,6 @@ function onTanggalChange() {
 
 /* ── DOWNLOAD PDF FEEDBACK ── */
 function startDownload(e, btn) {
-    // Blok navigasi browser — download dipicu manual setelah overlay siap
     e.preventDefault();
     var url = btn.getAttribute('href');
 
@@ -645,12 +633,10 @@ function startDownload(e, btn) {
         progBar.style.width = progress + '%';
     }, 280);
 
-    // Trigger download setelah overlay tampil
     setTimeout(function() {
         window.location.href = url;
     }, 800);
 
-    // Selesai animasi: progress 100% → state sukses
     setTimeout(function() {
         clearInterval(interval);
         progBar.style.width = '100%';

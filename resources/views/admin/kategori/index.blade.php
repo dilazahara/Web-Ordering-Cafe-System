@@ -4,104 +4,6 @@
 
 @push('styles')
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
-
-/* =======================
-   TOPBAR
-======================= */
-.topbar {
-    position: fixed; top: 0; left: 0; right: 0; height: 80px;
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid #e2e8f0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 30px; z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.topbar-left { display: flex; align-items: center; gap: 20px; }
-.topbar-left i {
-    width: 24px; height: 24px; padding: 8px; border-radius: 12px;
-    color: #475569; cursor: pointer; transition: all 0.3s ease;
-}
-.topbar-left i:hover { background: #f1f5f9; color: #1e293b; transform: scale(1.05); }
-
-/* =======================
-   SIDEBAR
-======================= */
-.sidebar {
-    width: 240px; height: 100vh; position: fixed;
-    background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px; padding-top: 100px;
-    color: white; overflow-y: auto;
-    transform: translateX(-100%);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-    display: flex; flex-direction: column; gap: 8px;
-}
-.menu-section {
-    font-size: 11px; letter-spacing: 1px;
-    color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
-}
-.sidebar.show { transform: translateX(0); }
-
-/* =======================
-   SIDEBAR MENU
-======================= */
-.sidebar a,
-.menu-parent {
-    display: flex; align-items: center; gap: 15px;
-    padding: 12px 14px; border-radius: 12px;
-    text-decoration: none; color: #94a3b8;
-    font-weight: 400; font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar i { width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd; }
-.menu-parent { cursor: pointer; }
-.menu-parent:hover,
-.sidebar a:hover { background: rgba(255,255,255,0.06); color: white; transform: translateX(4px); }
-.sidebar a.active {
-    background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
-    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
-}
-
-/* =======================
-   SUBMENU
-======================= */
-.submenu {
-    display: none; flex-direction: column;
-    margin-left: 35px; gap: 5px;
-    animation: slideDown 0.3s ease;
-}
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.submenu-item {
-    padding: 12px 16px; border-radius: 12px;
-    font-size: 14px; color: #cbd5e1;
-    text-decoration: none; display: block; transition: all 0.3s ease;
-}
-.submenu-item:hover { background: #334155; color: white; padding-left: 20px; }
-.submenu-item.active { background: #3b82f6; color: white; }
-.arrow { margin-left: auto; transition: all 0.4s ease; }
-.arrow.rotate { transform: rotate(180deg); }
-
-/* =======================
-   MAIN
-======================= */
-.main { padding: 110px 30px 30px; max-width: 1100px; margin: 0 auto; }
-
-/* =======================
-   PAGE HEADER
-======================= */
-.page-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-}
-.page-header h1 { font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-.page-header p  { font-size: 14px; color: #64748b; }
-
 /* =======================
    BUTTON
 ======================= */
@@ -129,7 +31,7 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 }
 
 /* =======================
-   CARD
+   CARD & TABLE
 ======================= */
 .card {
     background: white; border-radius: 20px;
@@ -138,9 +40,6 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
     overflow: hidden;
 }
 
-/* =======================
-   TABLE
-======================= */
 .tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 thead { background: #f8fafc; }
@@ -177,7 +76,7 @@ tbody tr:hover { background: #f8fafc; }
 .empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
 
 /* =======================
-   MODAL — ✅ display:none by default, NO animation on load
+   MODAL
 ======================= */
 .modal-backdrop {
     display: none;
@@ -190,7 +89,6 @@ tbody tr:hover { background: #f8fafc; }
     background: white; border-radius: 24px; width: 100%; max-width: 400px;
     padding: 32px 28px 28px; text-align: center;
     box-shadow: 0 24px 60px rgba(0,0,0,0.2);
-    /* ✅ Animasi HANYA aktif saat .open ditambahkan, bukan saat halaman load */
     animation: none;
 }
 .modal-backdrop.open .modal-hapus {
@@ -231,7 +129,7 @@ tbody tr:hover { background: #f8fafc; }
 
 {{-- PAGE HEADER --}}
 <div class="page-header">
-    <div>
+    <div class="page-title">
         <h1>Kategori Menu</h1>
         <p>Kelola semua kategori menu cafe</p>
     </div>
@@ -292,7 +190,7 @@ tbody tr:hover { background: #f8fafc; }
     </div>
 </div>
 
-{{-- ════ MODAL HAPUS KATEGORI — ✅ DIPINDAH KE DALAM @section('content') ════ --}}
+{{-- MODAL HAPUS KATEGORI --}}
 <div class="modal-backdrop" id="modalHapusKat">
     <div class="modal-hapus">
         <div class="mh-icon-wrap">

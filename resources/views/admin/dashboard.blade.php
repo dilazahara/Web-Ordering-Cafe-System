@@ -4,480 +4,344 @@
 
 @push('styles')
 <style>
-/* ══════════════════════════════════════
-           CSS VARIABLES — sumber kebenaran tunggal
-        ══════════════════════════════════════ */
+        /* ── ROOT & BASE VARIABLES ── */
         :root {
-            /* Font */
-            --font: 'Inter', sans-serif;
-            --text-xs:   11px;
-            --text-sm:   12px;
-            --text-base: 13px;
-            --text-md:   14px;
-            --text-lg:   15px;
-            --text-xl:   17px;
-            --text-2xl:  22px;
-            --text-3xl:  26px;
-            --text-4xl:  32px;
-
-            /* Warna Utama */
-            --primary:        #6366f1;
-            --primary-hover:  #4f46e5;
-            --primary-light:  #eff0fe;
-            --primary-dark:   #7c3aed;
-
-            /* Teks */
-            --text-dark:   #0f172a;
-            --text-base-c: #1e293b;
-            --text-mid:    #334155;
-            --text-light:  #64748b;
-            --text-muted:  #94a3b8;
-
-            /* Background */
-            --bg:          #f8fafc;
-            --bg-white:    #ffffff;
-            --border:      #e2e8f0;
-            --border-light:#f1f5f9;
-
-            /* Spacing konsisten */
-            --space-xs:  4px;
-            --space-sm:  8px;
-            --space-md:  16px;
-            --space-lg:  22px;
-            --space-xl:  28px;
-            --space-2xl: 36px;
-
-            /* Border Radius konsisten */
-            --radius-sm:   8px;
-            --radius-md:   10px;
-            --radius-lg:   12px;
-            --radius-xl:   14px;
-            --radius-2xl:  18px;
-            --radius-3xl:  20px;
-            --radius-full: 999px;
-
-            /* Shadow */
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow-md: 0 2px 10px rgba(0,0,0,0.05);
-            --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
-
-            /* Topbar */
-            --topbar-h: 68px;
+            --pos-primary: #4f46e5;
+            --pos-primary-dark: #3730a3;
+            --pos-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --shadow-premium: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
         }
 
-        /* ── RESET ── */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: var(--font); font-size: var(--text-md); background: var(--bg); color: var(--text-base-c); }
+        /* ── HEADER/BANNER PREMIUM MODERN ── */
+        .pos-header {
+            background: var(--pos-gradient);
+            border-radius: var(--radius-2xl, 20px);
+            padding: 32px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px -10px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-left .greeting { font-size: 26px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .header-left .date { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.85); display: flex; align-items: center; gap: 8px; }
 
-        /* ── TOPBAR ── */
-        .topbar {
-            position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
-            background: rgba(255,255,255,0.97); backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 var(--space-xl); z-index: 1000;
-            box-shadow: var(--shadow-sm);
-        }
-        .topbar-left { display: flex; align-items: center; gap: var(--space-md); }
-        .menu-btn {
-            width: 38px; height: 38px; border-radius: var(--radius-lg);
-            border: none; background: var(--border-light); color: var(--text-dark);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.2s;
-        }
-        .menu-btn:hover { background: var(--border); }
-
-        /* Clock */
-        .live-clock {
-            display: flex; align-items: center; gap: 7px;
-            background: var(--bg); border: 1px solid var(--border);
-            padding: 6px 12px; border-radius: var(--radius-lg);
-            font-size: var(--text-base); font-weight: 700;
-            color: var(--text-dark); letter-spacing: 0.5px;
-        }
-
-        /* Profile dropdown */
-        .topbar-right { display: flex; align-items: center; gap: var(--space-sm); }
-        .profile-wrap { position: relative; }
-        .user-btn {
-            display: flex; align-items: center; gap: 9px;
-            padding: 5px 10px 5px 5px; border: 1px solid #c7d2e0;
-            border-radius: var(--radius-lg); background: var(--bg);
-            cursor: pointer; transition: all 0.18s; user-select: none;
-        }
-        .user-btn.open { border-color: var(--primary-dark); background: #f5f3ff; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
-        .user-avatar {
-            width: 30px; height: 30px; border-radius: var(--radius-md);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: var(--text-xs); font-weight: 800; flex-shrink: 0; overflow: hidden;
-        }
-        .user-avatar.has-photo { background: none; }
-        .user-avatar:not(.has-photo) { background: linear-gradient(135deg, #818cf8, #4f46e5); }
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
-        .user-name { font-size: var(--text-base); font-weight: 700; color: var(--text-dark); }
-        .user-role { font-size: var(--text-xs); color: var(--text-muted); }
-        .chevron { width: 14px; height: 14px; stroke: var(--text-muted); fill: none; stroke-width: 2.5; transition: transform .2s; }
-        .user-btn.open .chevron { transform: rotate(180deg); }
-
-        .dropdown {
-            position: absolute; top: calc(100% + 8px); right: 0; width: 230px;
-            background: var(--bg-white); border: 1px solid var(--border);
-            border-radius: var(--radius-2xl);
-            box-shadow: 0 16px 48px rgba(0,0,0,.13); overflow: hidden;
-            opacity: 0; transform: translateY(-8px) scale(.97);
-            pointer-events: none; transition: opacity .18s, transform .18s; z-index: 200;
-        }
-        .dropdown.show { opacity: 1; transform: none; pointer-events: all; }
-        .dp-head {
-            padding: var(--space-md); background: linear-gradient(135deg,#eef2ff,#f5f3ff);
-            border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 11px;
-        }
-        .dp-av {
-            width: 38px; height: 38px; border-radius: 11px;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: var(--text-md); font-weight: 800;
-            box-shadow: 0 2px 8px rgba(79,70,229,.28); overflow: hidden; flex-shrink: 0;
-        }
-        .dp-av.has-photo { background: none; }
-        .dp-av:not(.has-photo) { background: linear-gradient(135deg,#818cf8,#4f46e5); }
-        .dp-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; }
-        .dp-nm { font-size: var(--text-base); font-weight: 800; color: var(--text-dark); }
-        .dp-rl { font-size: var(--text-xs); color: var(--text-light); margin-top: 1px; }
-        .dp-body { padding: 7px; }
-        .dp-item {
-            display: flex; align-items: center; gap: var(--space-sm);
-            padding: 9px 11px; border-radius: var(--radius-md); text-decoration: none;
-            font-size: var(--text-base); font-weight: 600; color: var(--text-dark);
-            transition: all .15s; border: none; background: none; width: 100%;
-            cursor: pointer; font-family: var(--font); text-align: left;
-        }
-        .dp-item:hover { background: var(--bg); }
-        .dp-ico {
-            width: 30px; height: 30px; border-radius: var(--radius-sm);
-            background: var(--border-light);
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .dp-ico svg { width: 15px; height: 15px; stroke: var(--text-light); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .dp-divider { height: 1px; background: var(--border-light); margin: 5px 7px; }
-        .dp-item.danger { color: #dc2626; }
-        .dp-item.danger:hover { background: #fef2f2; }
-        .dp-item.danger .dp-ico { background: #fef2f2; }
-        .dp-item.danger .dp-ico svg { stroke: #dc2626; }
-
-        /* ── SIDEBAR ── */
-        .sidebar {
-            width: 240px; height: 100vh; position: fixed;
-            background: linear-gradient(180deg, #0f172a, #1e1b4b);
-            padding: 30px; padding-top: 100px; color: white;
-            overflow-y: auto; transform: translateX(-100%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-            display: flex; flex-direction: column; gap: var(--space-xs);
-        }
-        .sidebar.show { transform: translateX(0); }
-        .menu-section {
-            font-size: var(--text-xs); letter-spacing: 1px; color: #a78bfa;
-            margin: var(--space-md) 10px var(--space-sm); opacity: 0.7; font-weight: 700;
-        }
-        .sidebar a {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 12px; border-radius: var(--radius-lg); text-decoration: none;
-            color: #94a3b8; font-weight: 500; font-size: var(--text-md);
-            transition: all 0.25s;
-        }
-        .sidebar a:hover { background: rgba(255,255,255,0.08); color: white; }
-        .sidebar a.active {
-            background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
-            box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
-        }
-        .sidebar i { width: 18px; height: 18px; stroke-width: 2.2; flex-shrink: 0; }
-
-        /* ── OVERLAY ── */
-        .overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(0,0,0,.35); z-index: 998; backdrop-filter: blur(2px);
-        }
-        .overlay.show { display: block; }
-
-        /* ── MAIN ── */
-        .main { padding: 92px var(--space-xl) var(--space-2xl); }
-
-        /* ── PAGE TITLE ── */
-        .page-title h1 { font-size: var(--text-3xl); font-weight: 800; color: var(--text-dark); letter-spacing: -0.4px; }
-        .page-title p { font-size: var(--text-md); color: var(--text-light); margin-top: 3px; }
-
-        /* ── STATS GRID ── */
-        .stats-grid {
+        /* ── LAYOUT GRID SYSTEM ── */
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: var(--space-md); margin-top: var(--space-lg);
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
         }
-        .stat-card {
-            background: var(--bg-white); border-radius: var(--radius-2xl);
-            padding: 20px var(--space-lg);
-            border: 1px solid var(--border-light); box-shadow: var(--shadow-md);
-            display: flex; align-items: center; gap: var(--space-md);
-            position: relative; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+        .full-width-box {
+            width: 100%;
+            margin-bottom: 24px;
         }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-        .stat-card::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-        }
-        .stat-card.orange::after { background: linear-gradient(90deg, #f97316, #fb923c); }
-        .stat-card.blue::after   { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .stat-card.cyan::after   { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
-        .stat-card.green::after  { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .stat-card.purple::after { background: linear-gradient(90deg, #7c3aed, #a855f7); }
-        .stat-card.red::after    { background: linear-gradient(90deg, #ef4444, #f87171); }
-        .stat-card.dark::after   { background: linear-gradient(90deg, #334155, #475569); }
-        .stat-card.pink::after   { background: linear-gradient(90deg, #ec4899, #f472b6); }
 
-        .stat-icon {
-            width: 50px; height: 50px; border-radius: var(--radius-xl); flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .stat-icon i { width: 22px; height: 22px; }
-        .stat-icon.orange { background: #fff7ed; color: #f97316; }
-        .stat-icon.blue   { background: #eff6ff; color: #3b82f6; }
-        .stat-icon.cyan   { background: #ecfeff; color: #06b6d4; }
-        .stat-icon.green  { background: #f0fdf4; color: #22c55e; }
-        .stat-icon.purple { background: #f3e8ff; color: #7c3aed; }
-        .stat-icon.red    { background: #fef2f2; color: #ef4444; }
-        .stat-icon.dark   { background: #e2e8f0; color: #334155; }
-        .stat-icon.pink   { background: #fdf2f8; color: #ec4899; }
-
-        .stat-val  { font-size: var(--text-2xl); font-weight: 800; color: var(--text-dark); letter-spacing: -0.5px; }
-        .stat-lbl  { font-size: var(--text-sm); color: var(--text-light); font-weight: 500; margin-top: 2px; }
-        .stat-trend { font-size: var(--text-xs); font-weight: 700; margin-top: 4px; }
-        .stat-trend.up      { color: #22c55e; }
-        .stat-trend.neutral { color: var(--text-muted); }
-
-        /* ── CONTENT GRID ── */
-        .content-grid {
-            display: grid; grid-template-columns: 2fr 1fr;
-            gap: 20px; margin-top: 20px;
-        }
+        /* ── BASIC CARD BOX ── */
         .box {
-            background: var(--bg-white); border-radius: var(--radius-2xl);
-            border: 1px solid var(--border-light); box-shadow: var(--shadow-md);
+            background: #ffffff; 
+            border-radius: var(--radius-2xl, 20px);
+            border: 1px solid var(--border-light, #f1f5f9); 
+            box-shadow: var(--shadow-premium);
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
         }
         .box-header {
-            padding: var(--space-md) var(--space-lg);
-            border-bottom: 1px solid var(--border-light);
-            display: flex; align-items: center; justify-content: space-between;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-light, #f1f5f9);
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: space-between; 
+            flex-wrap: wrap; 
+            gap: 14px;
         }
-        .box-header h3 { font-size: var(--text-lg); font-weight: 700; color: var(--text-dark); }
-        .box-body { padding: var(--space-md) var(--space-lg); }
-        .chart-wrap { position: relative; height: 220px; }
+        .box-header h3 { font-size: 16px; font-weight: 800; color: var(--text-dark, #0f172a); display: flex; align-items: center; gap: 8px; margin: 0; }
+        .box-body { padding: 24px; flex: 1; }
+        
+        /* ── RINGKASAN AKTIVITAS LIST ── */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f8fafc;
+            transition: all 0.2s ease;
+            border-radius: 12px;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-item:hover {
+            background: #f8fafc;
+            transform: translateX(4px);
+        }
+        .activity-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .activity-icon i {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+        }
+        
+        /* Tema Warna Icon Ringkasan */
+        .activity-icon.orange { background: #fff7ed; color: #f97316; }
+        .activity-icon.blue   { background: #eff6ff; color: #3b82f6; }
+        .activity-icon.cyan   { background: #ecfeff; color: #06b6d4; }
+        .activity-icon.green  { background: #f0fdf4; color: #22c55e; }
+        .activity-icon.purple { background: #f5f3ff; color: #7c3aed; }
+        .activity-icon.red    { background: #fef2f2; color: #ef4444; }
+        .activity-icon.dark   { background: #f1f5f9; color: #334155; }
+        .activity-icon.pink   { background: #fdf2f8; color: #ec4899; }
 
-        /* ── TABLE ── */
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .rtable { width: 100%; min-width: 800px; border-collapse: collapse; white-space: nowrap; }
-        .rtable thead th {
-            background: var(--bg); padding: 11px var(--space-md);
-            font-size: var(--text-xs); font-weight: 700;
-            text-transform: uppercase; letter-spacing: 0.7px;
-            color: var(--text-light); text-align: left;
-            border-bottom: 1px solid var(--border-light);
+        .activity-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
         }
-        .rtable tbody tr { border-bottom: 1px solid var(--border-light); transition: background .15s; }
-        .rtable tbody tr:last-child { border-bottom: none; }
-        .rtable tbody tr:hover { background: #fafbff; }
-        .rtable td { padding: 13px var(--space-md); font-size: var(--text-base); color: var(--text-mid); vertical-align: middle; }
-
-        /* ── BADGE ── */
-        .badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 4px 10px; border-radius: var(--radius-full);
-            font-size: var(--text-xs); font-weight: 700;
-        }
-        .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
-        .badge.pending  { background: #fef3c7; color: #92400e; }
-        .badge.pending .badge-dot  { background: #f59e0b; }
-        .badge.proses   { background: #dbeafe; color: #1e40af; }
-        .badge.proses .badge-dot   { background: #3b82f6; }
-        .badge.selesai  { background: #dcfce7; color: #15803d; }
-        .badge.selesai .badge-dot  { background: #22c55e; }
-        .badge.diantar  { background: #f0fdf4; color: #15803d; }
-        .badge.diantar .badge-dot  { background: #22c55e; }
-
-        /* ── DATATABLES CUSTOM ── */
-        .dataTables_wrapper { padding: 0 0 var(--space-md); }
-        .dataTables_filter, .dataTables_length { display: none !important; }
-        .dataTables_info {
-            font-size: var(--text-base) !important; color: var(--text-light) !important;
-            padding: var(--space-md) var(--space-lg) 0 !important; font-weight: 500;
-        }
-        .dataTables_paginate {
-            padding: 12px var(--space-lg) 0 !important;
-            display: flex !important; align-items: center; gap: var(--space-xs);
-        }
-        .paginate_button {
-            border-radius: var(--radius-md) !important; border: 1px solid var(--border) !important;
-            padding: 6px 13px !important; margin: 0 2px !important;
-            background: var(--bg-white) !important; color: var(--text-light) !important;
-            font-size: var(--text-base) !important; font-weight: 600 !important;
-            cursor: pointer !important; transition: all .15s !important;
-            font-family: var(--font) !important;
-        }
-        .paginate_button:hover:not(.current):not(.disabled) {
-            background: #eff6ff !important; color: #2563eb !important; border-color: #bfdbfe !important;
-        }
-        .paginate_button.current, .paginate_button.current:hover {
-            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
-            color: white !important; border-color: #7c3aed !important;
-            box-shadow: 0 2px 8px rgba(124,58,237,0.3) !important;
-        }
-        .paginate_button.disabled, .paginate_button.disabled:hover {
-            color: #cbd5e1 !important; cursor: default !important;
+        .activity-badge {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            background: #f8fafc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
         }
 
-        /* ── MENU TERLARIS ── */
+        /* ── CHART STYLING ── */
+        .chart-stats-wrap { display: flex; gap: 16px; }
+        .c-stat-badge { background: #f8fafc; padding: 8px 14px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .c-stat-badge .l { font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .c-stat-badge .v { font-size: 14px; color: #0f172a; font-weight: 800; margin-top: 2px; }
+        .chart-wrap { position: relative; height: 280px; width: 100%; }
+
+        /* ── MENU TERLARIS STYLING ── */
+        .menu-header-stats {
+            background: #f5f3ff; border: 1px dashed #c4b5fd; padding: 12px 16px; 
+            border-radius: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .menu-header-stats .txt { font-size: 13px; font-weight: 600; color: #5b21b6; }
+        .menu-header-stats .qty { font-size: 16px; font-weight: 800; color: #4c1d95; background: white; padding: 2px 10px; border-radius: 8px; }
+
         .menu-rank { display: flex; flex-direction: column; gap: 12px; }
         .menu-rank-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px; border-radius: var(--radius-xl);
-            background: var(--bg); transition: all .2s; border: 1px solid var(--border-light);
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px; border-radius: 16px;
+            background: #ffffff; transition: all .2s; border: 1px solid #e2e8f0;
         }
-        .menu-rank-item:hover {
-            background: var(--bg-white); transform: translateY(-1px);
-            box-shadow: 0 4px 14px rgba(0,0,0,.06);
-        }
+        .menu-rank-item:hover { transform: scale(1.02); box-shadow: var(--shadow-card); border-color: #cbd5e1; }
         .rank-num {
-            width: 28px; height: 28px; border-radius: var(--radius-md); flex-shrink: 0;
+            width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: var(--text-sm); font-weight: 800; color: white;
+            font-size: 14px; font-weight: 800; color: white;
         }
-        .rank-num.r1 { background: linear-gradient(135deg, #f59e0b, #f97316); }
-        .rank-num.r2 { background: linear-gradient(135deg, #94a3b8, #64748b); }
-        .rank-num.r3 { background: linear-gradient(135deg, #b45309, #92400e); }
-        .rank-num.rn { background: var(--border); color: var(--text-light); }
-        .rank-img { width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-lg); flex-shrink: 0; border: 1px solid var(--border-light); }
+        .rank-num.r1 { background: linear-gradient(135deg, #f59e0b, #ea580c); }
+        .rank-num.r2 { background: linear-gradient(135deg, #94a3b8, #475569); }
+        .rank-num.r3 { background: linear-gradient(135deg, #d97706, #92400e); }
+        .rank-num.rn { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+        
+        .rank-img { width: 52px; height: 52px; object-fit: cover; border-radius: 12px; flex-shrink: 0; }
         .rank-info { flex: 1; min-width: 0; }
-        .rank-name { font-size: var(--text-base); font-weight: 700; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .rank-sub  { font-size: var(--text-xs); color: var(--text-muted); margin-top: 3px; }
-        .rank-qty  { font-size: var(--text-md); font-weight: 800; color: #7c3aed; flex-shrink: 0; }
+        .rank-name { font-size: 14px; font-weight: 800; color: var(--text-dark, #0f172a); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .rank-sub  { font-size: 12px; font-weight: 600; color: var(--text-muted, #64748b); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+        .rank-qty  { font-size: 15px; font-weight: 800; color: #7c3aed; flex-shrink: 0; background: #f5f3ff; padding: 6px 12px; border-radius: 10px; }
 
-        /* ── RESPONSIVE ── */
-        @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 780px) {
-            .content-grid { grid-template-columns: 1fr; }
-            .main { padding: 88px var(--space-md) 30px; }
+        /* ── RESPONSIVE RESPONSES ── */
+        @media (max-width: 1100px) { 
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
-        @media (max-width: 540px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 780px) {
+            .pos-header { padding: 24px; }
+            .chart-stats-wrap { flex-direction: column; gap: 8px; width: 100%; }
+        }
 </style>
 @endpush
 
 @section('content')
-<div class="page-title">
-    <h1>Selamat datang, {{ auth()->user()->name }}! 👋</h1>
-    <p>Berikut ringkasan aktivitas cafe hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</p>
-</div>
 
-{{-- Stats Grid --}}
-<div class="stats-grid">
-    <div class="stat-card orange">
-        <div class="stat-icon orange"><i data-lucide="banknote"></i></div>
-        <div>
-            <div class="stat-val">Rp {{ number_format($totalPenjualan,0,',','.') }}</div>
-            <div class="stat-lbl">Total Penjualan</div>
-            <div class="stat-trend neutral">💰 Kumulatif transaksi selesai</div>
-        </div>
-    </div>
-    <div class="stat-card blue">
-        <div class="stat-icon blue"><i data-lucide="shopping-bag"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalOrder }}</div>
-            <div class="stat-lbl">Total Order</div>
-            <div class="stat-trend up">📦 Semua status</div>
-        </div>
-    </div>
-    <div class="stat-card cyan">
-        <div class="stat-icon cyan"><i data-lucide="chef-hat"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalDiproses }}</div>
-            <div class="stat-lbl">Sedang Diproses</div>
-            <div class="stat-trend neutral">🔥 Di dapur sekarang</div>
-        </div>
-    </div>
-    <div class="stat-card green">
-        <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalSelesai }}</div>
-            <div class="stat-lbl">Order Selesai</div>
-            <div class="stat-trend up">✅ Berhasil diantar</div>
-        </div>
-    </div>
-    <div class="stat-card purple">
-        <div class="stat-icon purple"><i data-lucide="armchair"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalMeja }}</div>
-            <div class="stat-lbl">Total Meja</div>
-            <div class="stat-trend neutral">🪑 Meja tersedia</div>
-        </div>
-    </div>
-    <div class="stat-card red">
-        <div class="stat-icon red"><i data-lucide="receipt"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalTransaksi }}</div>
-            <div class="stat-lbl">Total Transaksi</div>
-            <div class="stat-trend up">💳 Semua transaksi</div>
-        </div>
-    </div>
-    <div class="stat-card dark">
-        <div class="stat-icon dark"><i data-lucide="users"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalUser }}</div>
-            <div class="stat-lbl">Total User</div>
-            <div class="stat-trend neutral">👤 Pengguna sistem</div>
-        </div>
-    </div>
-    <div class="stat-card pink">
-        <div class="stat-icon pink"><i data-lucide="utensils"></i></div>
-        <div>
-            <div class="stat-val">{{ $totalMenu }}</div>
-            <div class="stat-lbl">Total Menu</div>
-            <div class="stat-trend up">🍔 Menu tersedia</div>
+@php
+    /* --- KALKULASI DATA PENDUKUNG DASHBOARD POS --- */
+    $chartDataArr = is_string($chartData) ? json_decode($chartData, true) : json_decode(json_encode($chartData), true);
+    $totalMingguIni = is_array($chartDataArr) ? array_sum($chartDataArr) : 0;
+    $rataRataPerHari = is_array($chartDataArr) && count($chartDataArr) > 0 ? $totalMingguIni / count($chartDataArr) : 0;
+
+    $totalItemTerjual = $menuTerlaris->sum('total_qty');
+
+    $menungguBayar = max(0, $totalOrder - ($totalDiproses + $totalSelesai));
+    $persenTunggu  = $totalOrder > 0 ? ($menungguBayar / $totalOrder) * 100 : 0;
+    $persenProses  = $totalOrder > 0 ? ($totalDiproses / $totalOrder) * 100 : 0;
+    $persenSelesai = $totalOrder > 0 ? ($totalSelesai / $totalOrder) * 100 : 0;
+
+    $targetBase = 5000000; 
+    $targetPenjualan = $totalPenjualan > $targetBase ? (ceil($totalPenjualan / 5000000) * 5000000) : $targetBase;
+    $progressTarget = $targetPenjualan > 0 ? min(100, ($totalPenjualan / $targetPenjualan) * 100) : 0;
+
+    // ─── UPDATE: KALKULASI LABEL DINAMIS BERDASARKAN FILTER PERIODE ───
+    $periodeLabel = match(request('periode')) {
+        '30_days' => '30 Hari Terakhir',
+        'this_month' => 'Bulan Ini',
+        'this_year' => 'Tahun Ini',
+        'all' => 'Semua Data',
+        default => '7 Hari Terakhir'
+    };
+
+    $totalBadgeLabel = match(request('periode')) {
+        '30_days' => 'Total 30 Hari',
+        'this_month' => 'Total Bulan Ini',
+        'this_year' => 'Total Tahun Ini',
+        'all' => 'Total Semua',
+        default => 'Total Minggu Ini'
+    };
+
+    $avgBadgeLabel = match(request('periode')) {
+        'this_year', 'all' => 'Rata-rata / Bulan',
+        default => 'Rata-rata / Hari'
+    };
+@endphp
+
+{{-- 1. BANNER SELAMAT DATANG (MINIMALIS & ELEGAN) --}}
+<div class="pos-header">
+    <div class="header-left">
+        <div class="greeting">Halo, {{ auth()->user()->name }}! 👋</div>
+        <div class="date">
+            <i data-lucide="calendar" style="width:16px;height:16px;"></i> 
+            {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
         </div>
     </div>
 </div>
 
-{{-- Content Grid --}}
-<div class="content-grid">
-    <div class="box">
-        <div class="box-header">
-            <div>
-                <h3>Grafik Penjualan 7 Hari Terakhir</h3>
-            </div>
-            <div style="font-size:var(--text-sm);color:var(--text-muted);font-weight:600;">
-                Hari ini: Rp {{ number_format($totalPenjualan,0,',','.') }}
-            </div>
-        </div>
-        <div class="box-body">
-            <div class="chart-wrap">
-                <canvas id="chartPenjualan"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="box">
-        {{-- ✅ HEADER MENU TERLARIS — DIUBAH DI SINI --}}
-        <div class="box-header">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#f59e0b,#f97316); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <i data-lucide="trophy" style="width:17px; height:17px; stroke:white; stroke-width:2.2;"></i>
-                </div>
+<div class="dashboard-grid">
+    {{-- WRAPPER SISI KIRI UNTUK OPERASIONAL & INFORMASI SISTEM --}}
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        {{-- 2. RINGKASAN OPERASIONAL HARI INI --}}
+        <div class="box">
+            <div class="box-header">
                 <div>
-                    <h3 style="font-size:var(--text-lg); font-weight:700; color:var(--text-dark); line-height:1.2;">Menu Terlaris</h3>
-                    <p style="font-size:var(--text-xs); color:var(--text-muted); font-weight:500; margin-top:1px;">Minggu ini</p>
+                    <h3><i data-lucide="activity" style="color:#4f46e5;"></i> Ringkasan Operasional Hari Ini</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 500;">Pantau performa dan aktivitas cafe pada hari ini.</p>
                 </div>
             </div>
+            <div class="box-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon orange"><i data-lucide="banknote"></i></div>
+                            <span class="activity-label">Total Pendapatan</span>
+                        </div>
+                        <div class="activity-badge" style="color: #ea580c; background: #fff7ed;">Rp {{ number_format($totalPenjualan,0,',','.') }}</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon blue"><i data-lucide="shopping-bag"></i></div>
+                            <span class="activity-label">Total Order Masuk</span>
+                        </div>
+                        <div class="activity-badge">{{ $totalOrder }} Order</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon cyan"><i data-lucide="chef-hat"></i></div>
+                            <span class="activity-label">Sedang Diproses</span>
+                        </div>
+                        <div class="activity-badge" style="color: #0891b2; background: #ecfeff;">{{ $totalDiproses }} Order</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon green"><i data-lucide="check-circle-2"></i></div>
+                            <span class="activity-label">Order Selesai</span>
+                        </div>
+                        <div class="activity-badge" style="color: #16a34a; background: #f0fdf4;">{{ $totalSelesai }} Order</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- 3. INFORMASI SISTEM (DATA MASTER) --}}
+        <div class="box">
+            <div class="box-header">
+                <div>
+                    <h3><i data-lucide="database" style="color:#4f46e5;"></i> Informasi Sistem</h3>
+                    <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b; font-weight: 500;">Data master yang digunakan dalam operasional aplikasi.</p>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon purple"><i data-lucide="armchair"></i></div>
+                            <span class="activity-label">Total Meja</span>
+                        </div>
+                        <div class="activity-badge">{{ $totalMeja }} Meja</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon dark"><i data-lucide="users"></i></div>
+                            <span class="activity-label">Total Pengguna</span>
+                        </div>
+                        <div class="activity-badge">{{ $totalUser }} User</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-left">
+                            <div class="activity-icon pink"><i data-lucide="utensils"></i></div>
+                            <span class="activity-label">Total Menu</span>
+                        </div>
+                        <div class="activity-badge">{{ $totalMenu }} Menu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- 4. MENU TERLARIS --}}
+    <div class="box">
+        <div class="box-header">
+            <h3><i data-lucide="award" style="color:#f59e0b;"></i> Menu Terlaris</h3>
         </div>
         <div class="box-body">
             @if($menuTerlaris->isEmpty())
-                <p style="color:var(--text-muted);font-size:var(--text-base);text-align:center;padding:20px 0;">Belum ada data minggu ini</p>
+                <div style="text-align:center; padding:40px 0;">
+                    <div style="background:#f1f5f9; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+                        <i data-lucide="inbox" style="width:32px; height:32px; color:#94a3b8;"></i>
+                    </div>
+                    <p style="color:#64748b; font-weight:600; margin:0;">Belum ada data penjualan</p>
+                </div>
             @else
+                <div class="menu-header-stats">
+                    <span class="txt">Total Item Terjual:</span>
+                    <span class="qty">{{ $totalItemTerjual }} Porsi</span>
+                </div>
+                
                 <div class="menu-rank">
                     @foreach($menuTerlaris as $i => $item)
                     <div class="menu-rank-item">
@@ -485,7 +349,9 @@
                         <img src="{{ !empty($item->menu?->image) ? asset('storage/'.$item->menu->image) : 'https://via.placeholder.com/60' }}" alt="{{ $item->menu->name ?? 'Menu' }}" class="rank-img">
                         <div class="rank-info">
                             <div class="rank-name">{{ $item->menu->name ?? 'Menu Tidak Ditemukan' }}</div>
-                            <div class="rank-sub">Terlaris minggu ini</div>
+                            <div class="rank-sub">
+                                <i data-lucide="tag" style="width:12px; height:12px;"></i> Produk Aktif
+                            </div>
                         </div>
                         <div class="rank-qty">{{ $item->total_qty }}x</div>
                     </div>
@@ -496,22 +362,67 @@
     </div>
 </div>
 
+{{-- 5. GRAFIK PENJUALAN DENGAN FILTER PERIODE --}}
+<div class="box full-width-box">
+    <div class="box-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div>
+            <h3><i data-lucide="bar-chart-3" style="color:#4f46e5;"></i> Analisis Pendapatan ({{ $periodeLabel }})</h3>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <form method="GET" action="{{ url()->current() }}" id="filterForm">
+                <select name="periode" onchange="this.form.submit()" style="padding: 8px 14px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 13px; font-weight: 700; color: #475569; background: #ffffff; cursor: pointer; outline: none; box-shadow: var(--shadow-card);">
+                    <option value="7_days" {{ request('periode') == '7_days' || !request('periode') ? 'selected' : '' }}>7 Hari Terakhir</option>
+                    <option value="30_days" {{ request('periode') == '30_days' ? 'selected' : '' }}>30 Hari Terakhir</option>
+                    <option value="this_month" {{ request('periode') == 'this_month' ? 'selected' : '' }}>Bulan Ini</option>
+                    <option value="this_year" {{ request('periode') == 'this_year' ? 'selected' : '' }}>Tahun Ini</option>
+                    <option value="all" {{ request('periode') == 'all' ? 'selected' : '' }}>Semua Data</option>
+                </select>
+            </form>
+
+            <div class="chart-stats-wrap">
+                <div class="c-stat-badge">
+                    <div class="l">{{ $totalBadgeLabel }}</div>
+                    <div class="v" style="color:#10b981;">Rp {{ number_format($totalMingguIni,0,',','.') }}</div>
+                </div>
+                <div class="c-stat-badge">
+                    <div class="l">{{ $avgBadgeLabel }}</div>
+                    <div class="v">Rp {{ number_format($rataRataPerHari,0,',','.') }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="chart-wrap">
+            <canvas id="chartPenjualan"></canvas>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
+{{-- Script Chart Existing --}}
 <script>
 const ctx = document.getElementById('chartPenjualan').getContext('2d');
+
+let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+gradient.addColorStop(0, 'rgba(79, 70, 229, 0.15)');   
+gradient.addColorStop(1, 'rgba(79, 70, 229, 0.01)');
+
 new Chart(ctx, {
     type: 'line',
     data: {
         labels: {!! json_encode($chartLabels) !!},
         datasets: [{
-            label: 'Penjualan',
+            label: 'Penjualan Kotor',
             data: {!! json_encode($chartData) !!},
-            borderColor: '#7c3aed',
-            backgroundColor: 'rgba(124,58,237,0.08)',
-            borderWidth: 2.5,
-            pointBackgroundColor: '#7c3aed',
+            borderColor: '#4f46e5',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#4f46e5',
+            pointBorderWidth: 2,
             pointRadius: 5,
             pointHoverRadius: 7,
             fill: true,
@@ -521,37 +432,55 @@ new Chart(ctx, {
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: { 
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 12,
+                titleFont: { family: 'Inter', size: 13 },
+                bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                callbacks: {
+                    label: function(context) {
+                        let value = context.raw || 0;
+                        return ' Rp ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                    }
+                }
+            }
+        },
         scales: {
             y: {
                 beginAtZero: true,
-                grid: { color: '#f1f5f9' },
+                grid: { color: '#f8fafc', drawBorder: false },
                 ticks: {
-                    color: '#94a3b8', font: { size: 11, family: 'Inter' },
-                    callback: v => 'Rp ' + (v/1000).toFixed(0) + 'rb'
+                    color: '#94a3b8', font: { size: 11, family: 'Inter', weight: 600 },
+                    callback: v => 'Rp ' + (v/1000).toFixed(0) + 'k'
                 }
             },
             x: {
-                grid: { display: false },
-                ticks: { color: '#94a3b8', font: { size: 11, family: 'Inter' } }
+                grid: { display: false, drawBorder: false },
+                ticks: { color: '#64748b', font: { size: 12, family: 'Inter', weight: 600 } }
             }
         }
     }
 });
 </script>
+
+{{-- Datatables Databinding Existing --}}
 <script>
 $(document).ready(function () {
-    $('#recentOrdersTable').DataTable({
-        pageLength: 10,
-        lengthChange: false,
-        searching: false,
-        ordering: false,
-        language: {
-            info:     "Showing _START_ to _END_ of _TOTAL_ entries",
-            paginate: { previous: "Previous", next: "Next" },
-            emptyTable: "Belum ada pesanan hari ini"
-        }
-    });
+    if ($('#recentOrdersTable').length > 0) {
+        $('#recentOrdersTable').DataTable({
+            pageLength: 10,
+            lengthChange: false,
+            searching: false,
+            ordering: false,
+            language: {
+                info:     "Menampilkan _START_ sampai _END_ dari _TOTAL_ pesanan",
+                paginate: { previous: "Sebelumnya", next: "Selanjutnya" },
+                emptyTable: "Belum ada pesanan hari ini"
+            }
+        });
+    }
 });
 </script>
 @endpush

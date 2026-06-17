@@ -56,9 +56,19 @@
     $subtotal     = $order->items->sum(fn($i) => $i->price * $i->qty);
     $biayaLayanan = max(0, $order->total - $subtotal);
 
-    $isPaid      = in_array($order->status, ['process', 'done', 'delivered', 'completed']);
-    $isWaiting   = $order->status === 'waiting_payment';
-    $isCancelled = $order->status === 'cancelled';
+    // ✅ FIX: Cek paid berdasarkan order.status (alur dapur) ATAU payment_status = 'paid'
+    // Sebelumnya hanya cek order.status, sehingga jika CheckStatus berhasil update status='process'
+    // tapi payment_status belum terupdate, struk masih tampil "Menunggu Verifikasi".
+    // Sekarang: cukup salah satu kondisi terpenuhi → dianggap LUNAS.
+    $isPaid = in_array($order->status, ['process', 'done', 'delivered', 'completed'])
+           || ($order->payment_status ?? '') === 'paid';
+
+    $isWaiting   = ! $isPaid && $order->status === 'waiting_payment';
+    $isCancelled = ! $isPaid && $order->status === 'cancelled';
+
+    // ✅ FIX: Gunakan payment_method_label jika tersedia (lebih deskriptif untuk kasir/admin)
+    // Fallback ke label dari array $methodIcons jika kolom belum ada.
+    $displayLabel = $order->payment_method_label ?? $methodInfo['label'];
 
     $headerColor = $methodInfo['color'];
     if ($isWaiting)   $headerColor = '#d97706';
@@ -88,7 +98,7 @@
                 @else Transaksi Gagal
                 @endif
             </h1>
-            <p class="text-white/70 text-xs mt-1">via {{ $methodInfo['icon'] }} {{ $methodInfo['label'] }}</p>
+            <p class="text-white/70 text-xs mt-1">via {{ $methodInfo['icon'] }} {{ $displayLabel }}</p>
         </div>
 
         {{-- NOMOR ANTRIAN --}}
@@ -155,6 +165,13 @@
                         <span class="font-bold text-red-500">❌ BATAL</span>
                     @endif
                 </div>
+                {{-- ✅ FIX: Tampilkan metode pembayaran detail (BCA VA, GoPay, dll) --}}
+                @if($isPaid && $displayLabel)
+                <div class="flex justify-between items-center text-xs text-gray-400">
+                    <span>Metode</span>
+                    <span class="font-semibold text-gray-600">{{ $methodInfo['icon'] }} {{ $displayLabel }}</span>
+                </div>
+                @endif
                 <div class="flex justify-between items-center text-xs text-gray-400">
                     <span>ID Transaksi</span>
                     <span class="font-mono text-gray-500">#{{ $order->id }}</span>
@@ -173,7 +190,7 @@
                 </div>
 
             @elseif($isWaiting)
-                {{-- ✅ FIX: Tampilkan info menunggu + polling JS smart (bukan reload setiap 3 detik) --}}
+                {{-- ✅ FIX: Polling JSON pintar — bukan reload setiap 3 detik --}}
                 <div class="bg-amber-50 rounded-xl p-3 text-center" id="waitingBox">
                     <p class="text-sm font-bold text-amber-700">
                         <span class="spin">🔄</span> Menunggu konfirmasi pembayaran...
@@ -213,10 +230,11 @@
 </div>
 
 @if($isWaiting)
-{{-- ✅ FIX: Ganti setTimeout reload() dengan polling JSON ke endpoint confirm --}}
-{{-- Lebih hemat battery & data dibanding reload halaman penuh setiap 3 detik --}}
+{{-- ✅ FIX: Polling JSON ke endpoint confirm — lebih hemat vs reload halaman penuh --}}
 <script>
-const CONFIRM_URL = @json(route('customer.order.midtrans.confirm', $order->id));
+const CONFIRM_URL =
+    window.location.origin +
+    '/customer/order/midtrans/{{ $order->id }}/confirm';
 const RECEIPT_URL = @json(route('customer.order.midtrans.receipt', $order->id));
 const CSRF_TOKEN  = @json(csrf_token());
 
@@ -365,9 +383,10 @@ document.addEventListener('visibilitychange', () => {
 
         @php
             $mIcons2  = ['gopay'=>'💚','ovo'=>'💜','dana'=>'💙','shopeepay'=>'🧡','bca'=>'🏦','bni'=>'🏦','bri'=>'🏦','mandiri'=>'🏦','permata'=>'🏦','credit_card'=>'💳','midtrans'=>'💳','qris'=>'📱'];
+            // ✅ FIX: Gunakan payment_method_label dari DB jika ada (lebih akurat setelah Midtrans confirm)
             $mLabels2 = ['gopay'=>'GoPay (Midtrans)','ovo'=>'OVO (Midtrans)','dana'=>'DANA (Midtrans)','shopeepay'=>'ShopeePay (Midtrans)','bca'=>'BCA Virtual Account','bni'=>'BNI Virtual Account','bri'=>'BRI Virtual Account','mandiri'=>'Mandiri Virtual Account','permata'=>'Permata Virtual Account','credit_card'=>'Kartu Kredit (Midtrans)','midtrans'=>'Online (Midtrans)','qris'=>'QRIS'];
             $mIcon2   = $mIcons2[$order->payment_method]  ?? '💳';
-            $mLabel2  = $mLabels2[$order->payment_method] ?? strtoupper($order->payment_method);
+            $mLabel2  = $order->payment_method_label ?? ($mLabels2[$order->payment_method] ?? strtoupper($order->payment_method));
             $subtotalStruk = $order->items->sum(fn($i) => $i->price * $i->qty);
             $serviceStruk  = max(0, $order->total - $subtotalStruk);
         @endphp
@@ -422,7 +441,7 @@ document.addEventListener('visibilitychange', () => {
                     </tr>
                 </table>
 
-                {{-- ── Info Lunas Online (meniru sMidtransBlock kasir) ── --}}
+                {{-- ── Info Lunas Online ── --}}
                 <div style="margin-top:6px;">
                     <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px 10px;text-align:center;font-family:'Poppins',sans-serif;">
                         <span style="font-size:11px;font-weight:700;color:#065f46;">✅ Lunas via Online Payment ({{ $mLabel2 }})</span>

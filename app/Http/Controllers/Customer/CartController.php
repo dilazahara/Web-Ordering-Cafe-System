@@ -53,9 +53,22 @@ class CartController extends Controller
                 continue;
             }
 
-            // Cek apakah harga dari client cocok dengan harga di DB
-            if ((int) $item['price'] !== (int) $menu->price) {
-                $errors[] = "Harga menu '{$menu->name}' sudah berubah (Rp " . number_format($menu->price, 0, ',', '.') . "). Silakan refresh halaman.";
+            // ✅ FIX: Harga final item = base price menu + total addon price.
+            // Sebelumnya hanya membandingkan dengan $menu->price (base price),
+            // sehingga order dengan addon selalu gagal validasi karena
+            // harga cart (misal 27.000) tidak sama dengan base price (26.000).
+            $addonPrice = 0;
+            if (isset($item['addons']) && is_array($item['addons'])) {
+                foreach ($item['addons'] as $addon) {
+                    $addonPrice += (int) ($addon['price'] ?? 0);
+                }
+            }
+            $expectedPrice = (int) $menu->price + $addonPrice;
+
+            if ((int) $item['price'] !== $expectedPrice) {
+                $errors[] = "Harga menu '{$menu->name}' tidak sesuai (Rp "
+                    . number_format($menu->price, 0, ',', '.')
+                    . "). Silakan refresh halaman.";
             }
         }
 

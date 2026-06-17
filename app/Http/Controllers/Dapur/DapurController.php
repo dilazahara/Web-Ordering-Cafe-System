@@ -42,7 +42,12 @@ class DapurController extends Controller
 
         $orders = $query->get();
 
-        $totalSelesaiHariIni = Order::where('status', 'done')
+        $totalSelesaiHariIni = Order::whereIn('status', [
+    'ready_delivery',
+    'ready_pickup',
+    'delivered',
+    'completed',
+])
             ->whereDate('created_at', today())
             ->count();
 
@@ -52,7 +57,12 @@ class DapurController extends Controller
             Schema::hasColumn('orders', 'process_at') &&
             Schema::hasColumn('orders', 'done_at')
         ) {
-            $selesaiHariIni = Order::where('status', 'done')
+            $selesaiHariIni = Order::whereIn('status', [
+    'ready_delivery',
+    'ready_pickup',
+    'delivered',
+    'completed',
+])
                 ->whereDate('created_at', today())
                 ->whereNotNull('process_at')
                 ->whereNotNull('done_at')
@@ -79,9 +89,14 @@ class DapurController extends Controller
 
     public function selesaiView()
     {
-        $query = Order::with(['items.menu'])
-            ->where('status', 'done')
-            ->whereDate('created_at', today());
+$query = Order::with(['items.menu'])
+    ->whereIn('status', [
+        'ready_delivery',
+        'ready_pickup',
+        'delivered',
+        'completed',
+    ])
+    ->whereDate('created_at', today());
 
         if (Schema::hasColumn('orders', 'done_at')) {
             $query->orderBy('done_at', 'desc');
@@ -104,9 +119,15 @@ class DapurController extends Controller
             'Pesanan belum diproses.'
         );
 
-        $updateData = [
-            'status' => 'done',
-        ];
+        if (($order->order_type ?? 'dine_in') === 'take_away') {
+    $updateData = [
+        'status' => 'ready_pickup',
+    ];
+} else {
+    $updateData = [
+        'status' => 'ready_delivery',
+    ];
+}
 
         if (Schema::hasColumn('orders', 'done_at')) {
             $updateData['done_at'] = now();
@@ -116,17 +137,25 @@ class DapurController extends Controller
 
         if (class_exists(Notification::class)) {
             try {
-                Notification::kirim(
-                    'pelayan',
-                    'order_done',
-                    '🍽️ Makanan Siap Diantar',
-                    "Pesanan {$order->queue_number}" .
-                    ($order->table_number
-                        ? " meja {$order->table_number}"
-                        : '') .
-                    " sudah selesai dimasak.",
-                    $order
-                );
+               if (($order->order_type ?? 'dine_in') === 'take_away') {
+    Notification::kirim(
+        'kasir',
+        'order_done',
+        '🛍️ Take Away Siap Diambil',
+        "Pesanan {$order->queue_number} (Take Away) selesai dimasak dan siap diambil customer.",
+        $order
+    );
+} else {
+    Notification::kirim(
+        'pelayan',
+        'order_done',
+        '🍽️ Makanan Siap Diantar',
+        "Pesanan {$order->queue_number}" .
+        ($order->table_number ? " meja {$order->table_number}" : '') .
+        " sudah selesai dimasak.",
+        $order
+    );
+}
             } catch (\Throwable $e) {
                 // skip
             }
@@ -222,7 +251,12 @@ class DapurController extends Controller
             ->select('id')
             ->get();
 
-        $totalSelesai = Order::where('status', 'done')
+        $totalSelesai = Order::whereIn('status', [
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ])
             ->whereDate('created_at', today())
             ->count();
 
@@ -232,7 +266,12 @@ class DapurController extends Controller
             Schema::hasColumn('orders', 'process_at') &&
             Schema::hasColumn('orders', 'done_at')
         ) {
-            $selesaiHariIni = Order::where('status', 'done')
+            $selesaiHariIni = Order::whereIn('status', [
+                'ready_delivery',
+                'ready_pickup',
+                'delivered',
+                'completed',
+            ])
                 ->whereDate('created_at', today())
                 ->whereNotNull('process_at')
                 ->whereNotNull('done_at')

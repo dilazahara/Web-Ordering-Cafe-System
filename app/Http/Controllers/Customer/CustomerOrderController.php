@@ -23,27 +23,48 @@ class CustomerOrderController extends Controller
         'credit_card', 'midtrans', 'qris',
     ];
 
+    private const PAYMENT_METHOD_LABELS = [
+        'gopay'       => 'GoPay',
+        'ovo'         => 'OVO',
+        'dana'        => 'DANA',
+        'shopeepay'   => 'ShopeePay',
+        'bca'         => 'BCA Virtual Account',
+        'bni'         => 'BNI Virtual Account',
+        'bri'         => 'BRI Virtual Account',
+        'mandiri'     => 'Mandiri Virtual Account',
+        'permata'     => 'Permata Virtual Account',
+        'credit_card' => 'Kartu Kredit',
+        'qris'        => 'QRIS',
+        'midtrans'    => 'Online (Midtrans)',
+    ];
+
     // =========================================================================
     // STORE — Buat pesanan baru
     // =========================================================================
     public function store(Request $request)
     {
-        // ✅ SECURITY: Nomor meja WAJIB dari session, bukan dari request user.
-        // Dengan ini, user tidak bisa mengirim nomor meja palsu.
-        $tableNumber = session('table_number');
-
-        if (empty($tableNumber)) {
-            // Middleware seharusnya sudah menangkap ini, tapi double-check di sini
-            return redirect()->route('customer.scan.required')
-                ->with('error', 'Silakan scan QR meja terlebih dahulu.');
+        $orderType = $request->input('order_type', 'dine_in');
+        if (! in_array($orderType, ['dine_in', 'take_away'])) {
+            $orderType = 'dine_in';
         }
 
-        // ✅ SECURITY: Verifikasi meja benar-benar ada di DB
-        $meja = Meja::where('nomor_meja', $tableNumber)->first();
-        if (! $meja) {
-            session()->forget('table_number');
-            return redirect()->route('customer.scan.required')
-                ->with('error', 'Session meja tidak valid. Silakan scan QR meja lagi.');
+        $tableNumber = null;
+        $meja        = null;
+
+        if ($orderType === 'dine_in') {
+            $tableNumber = session('table_number');
+
+            if (empty($tableNumber)) {
+                return redirect()->route('customer.scan.required')
+                    ->with('error', 'Silakan scan QR meja terlebih dahulu.');
+            }
+
+            $meja = Meja::where('nomor_meja', $tableNumber)->first();
+            if (! $meja) {
+                session()->forget('table_number');
+                return redirect()->route('customer.scan.required')
+                    ->with('error', 'Session meja tidak valid. Silakan scan QR meja lagi.');
+            }
         }
 
         $activeKodes = PaymentMethod::where('aktif', true)->pluck('kode')->toArray();
@@ -52,10 +73,9 @@ class CustomerOrderController extends Controller
         $request->validate([
             'cart'           => 'required|string',
             'payment_method' => ['required', 'string', 'in:' . implode(',', $validKodes)],
-            // ✅ SECURITY: 'table_number' DIHAPUS dari validasi request.
-            // Tidak boleh ada input nomor meja dari user.
             'note'           => 'nullable|string|max:500',
             'customer_name'  => 'required|string|max:100',
+            'order_type'     => 'nullable|string|in:dine_in,take_away',
         ]);
 
         $paymentMethod = $request->payment_method;
@@ -78,12 +98,15 @@ class CustomerOrderController extends Controller
             if (! $menu) {
                 return back()->withErrors(['cart' => 'Menu tidak ditemukan.']);
             }
-            $subtotal += $menu->price * (int) $item['quantity'];
+            $itemPrice = isset($item['price']) && (int)$item['price'] >= (int)$menu->price
+                ? (int) $item['price']
+                : (int) $menu->price;
+            $subtotal += $itemPrice * (int) $item['quantity'];
         }
 
-        $total = $subtotal + 2000; // biaya layanan Rp 2.000
+        $total = $subtotal + 2000;
 
-        $order = DB::transaction(function () use ($request, $cart, $total, $tableNumber, $paymentMethod) {
+        $order = DB::transaction(function () use ($request, $cart, $total, $tableNumber, $paymentMethod, $orderType, $meja) {
             $lastOrder  = Order::lockForUpdate()->latest()->first();
             $nextNumber = 1;
 
@@ -94,36 +117,52 @@ class CustomerOrderController extends Controller
 
             $queueNumber = 'A-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
-            // ✅ SECURITY: table_number SELALU dari session, tidak dari $request
             $order = Order::create([
                 'queue_number'   => $queueNumber,
                 'table_number'   => $tableNumber,
                 'customer_name'  => $request->customer_name,
+                'order_type'     => $orderType,
                 'note'           => $request->note,
                 'payment_method' => $paymentMethod,
                 'status'         => 'pending',
                 'total'          => $total,
             ]);
 
-            Meja::where('nomor_meja', $tableNumber)->update(['status' => 'terisi']);
+            if ($meja) {
+                $meja->update(['status' => 'terisi']);
+            }
 
             foreach ($cart as $item) {
                 $menu = Menu::find($item['id']);
+                $itemPrice = isset($item['price']) && (int)$item['price'] >= (int)$menu->price
+                    ? (int) $item['price']
+                    : (int) $menu->price;
+
+                $basePrice    = (int) $menu->price;
+                $addonDetails = (isset($item['addons']) && is_array($item['addons']))
+                    ? array_map(fn($a) => [
+                        'id'    => (int)   ($a['id']    ?? 0),
+                        'name'  => (string)($a['name']  ?? ''),
+                        'price' => (int)   ($a['price'] ?? 0),
+                      ], $item['addons'])
+                    : [];
+
                 OrderItem::create([
-                    'order_id' => $order->id,
-                    'menu_id'  => $menu->id,
-                    'name'     => $menu->name,
-                    'qty'      => (int) $item['quantity'],
-                    'price'    => $menu->price,
-                    'subtotal' => $menu->price * (int) $item['quantity'],
-                    'notes'    => $item['notes'] ?? '',
+                    'order_id'      => $order->id,
+                    'menu_id'       => $menu->id,
+                    'name'          => $menu->name,
+                    'qty'           => (int) $item['quantity'],
+                    'price'         => $itemPrice,
+                    'base_price'    => $basePrice,
+                    'addon_details' => $addonDetails ?: null,
+                    'subtotal'      => $itemPrice * (int) $item['quantity'],
+                    'notes'         => $item['notes'] ?? '',
                 ]);
             }
 
             return $order;
         });
 
-        // Routing berdasarkan metode pembayaran
         if (in_array($paymentMethod, self::MIDTRANS_METHODS)) {
             return $this->createMidtransTransaction($order);
         }
@@ -194,7 +233,7 @@ class CustomerOrderController extends Controller
             return redirect()->route('customer.order.midtrans.payment', $order->id);
 
         } catch (\Exception $e) {
-            Log::error('Midtrans error: ' . $e->getMessage(), ['order_id' => $order->id]);
+            Log::error('Midtrans createTransaction error: ' . $e->getMessage(), ['order_id' => $order->id]);
 
             return redirect()->route('customer.order.bill', $order->id)
                 ->with('error', 'Gagal terhubung ke Midtrans. Silakan bayar ke kasir. (' . $e->getMessage() . ')');
@@ -203,19 +242,19 @@ class CustomerOrderController extends Controller
 
     // =========================================================================
     // HELPER: Validasi kepemilikan order oleh session meja saat ini
-    // Mencegah IDOR — user tidak boleh mengakses order meja lain
     // =========================================================================
     private function authorizeOrderBySession(Order $order): bool
     {
+        if (($order->order_type ?? 'dine_in') === 'take_away') {
+            return true;
+        }
+
         $sessionTable = session('table_number');
 
         if (empty($sessionTable)) {
             return false;
         }
 
-        // ✅ BUG FIX: Cast keduanya ke string untuk menghindari mismatch tipe
-        // antara session (selalu string) dan kolom DB (bisa int/bigint di Eloquent).
-        // Sebelumnya: $order->table_number === $sessionTable → false jika tipe beda.
         return (string) $order->table_number === (string) $sessionTable;
     }
 
@@ -235,7 +274,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items.menu')->findOrFail($id);
 
-        // ✅ IDOR Fix: Validasi order milik meja dari session ini
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke tagihan ini.');
         }
@@ -254,7 +292,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items')->findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke halaman pembayaran ini.');
         }
@@ -291,7 +328,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items.menu')->findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke struk ini.');
         }
@@ -304,18 +340,35 @@ class CustomerOrderController extends Controller
     }
 
     // =========================================================================
-    // MIDTRANS CHECK STATUS (polling AJAX)
+// MIDTRANS CONFIRM ALIAS
+// =========================================================================
+public function midtransConfirm(Request $request, int $id)
+{
+    return $this->midtransCheckStatus($request, $id);
+}
+
+    // =========================================================================
+    // MIDTRANS CHECK STATUS (dipanggil dari onSuccess blade via AJAX)
+    // ✅ FIX: Pisahkan catch DB error vs API error supaya tidak silent fail
     // =========================================================================
     public function midtransCheckStatus(Request $request, int $id)
     {
+        Log::info('[CheckStatus] START', [
+            'order_id'      => $id,
+            'ip'            => $request->ip(),
+            'session_table' => session('table_number'),
+        ]);
+
         $order = Order::findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
+            Log::warning('[CheckStatus] FORBIDDEN', ['order_id' => $id]);
             return response()->json(['error' => 'forbidden'], 403);
         }
 
+        // Sudah diproses sebelumnya — langsung kembalikan redirect
         if (in_array($order->status, ['process', 'done', 'completed', 'delivered'])) {
+            Log::info('[CheckStatus] Already processed', ['order_id' => $id, 'status' => $order->status]);
             return response()->json([
                 'status'   => 'ok',
                 'redirect' => route('customer.order.midtrans.receipt', $order->id),
@@ -327,6 +380,7 @@ class CustomerOrderController extends Controller
         }
 
         if (! $order->midtrans_order_id) {
+            Log::warning('[CheckStatus] No midtrans_order_id', ['order_id' => $id]);
             return response()->json(['status' => 'pending']);
         }
 
@@ -334,28 +388,53 @@ class CustomerOrderController extends Controller
             \Midtrans\Config::$serverKey    = config('midtrans.server_key');
             \Midtrans\Config::$isProduction = config('midtrans.is_production', false);
 
+            Log::info('[CheckStatus] Calling Midtrans API', [
+                'order_id'           => $order->id,
+                'midtrans_order_id'  => $order->midtrans_order_id,
+            ]);
+
             $status = \Midtrans\Transaction::status($order->midtrans_order_id);
 
             $transactionStatus = $status->transaction_status ?? 'pending';
             $fraudStatus       = $status->fraud_status       ?? 'accept';
 
-            Log::info('Midtrans CheckStatus', [
+            Log::info('[CheckStatus] API Response', [
                 'order_id'           => $order->id,
                 'transaction_status' => $transactionStatus,
                 'fraud_status'       => $fraudStatus,
+                'payment_type'       => $status->payment_type ?? null,
             ]);
 
             if ($transactionStatus === 'settlement'
                 || ($transactionStatus === 'capture' && $fraudStatus === 'accept')
             ) {
+                Log::info('[CheckStatus] SETTLEMENT → markAsProcessed', ['order_id' => $order->id]);
+
+                $paymentType    = $status->payment_type ?? null;
                 $resolvedMethod = $this->resolveFromFields(
-                    $status->payment_type  ?? null,
+                    $paymentType,
                     $status->va_numbers[0]->bank ?? null,
-                    $status->issuer  ?? null,
+                    $status->issuer   ?? null,
                     $status->acquirer ?? null,
                 );
 
-                $this->markAsProcessed($order, $resolvedMethod);
+                // ✅ FIX: Tangkap DB error secara terpisah — jangan biarkan
+                // exception dari markAsProcessed() tertelan oleh catch luar
+                // yang hanya return 'pending', menyebabkan silent fail.
+                try {
+                    $this->markAsProcessed($order, $resolvedMethod, $paymentType, $resolvedMethod);
+                    Log::info('[CheckStatus] markAsProcessed OK', ['order_id' => $order->id]);
+                } catch (\Exception $dbErr) {
+                    Log::error('[CheckStatus] markAsProcessed FAILED', [
+                        'order_id' => $order->id,
+                        'error'    => $dbErr->getMessage(),
+                        'sql'      => method_exists($dbErr, 'getSql') ? $dbErr->getSql() : null,
+                    ]);
+                    return response()->json([
+                        'status'  => 'db_error',
+                        'message' => $dbErr->getMessage(),
+                    ], 500);
+                }
 
                 return response()->json([
                     'status'   => 'ok',
@@ -364,25 +443,34 @@ class CustomerOrderController extends Controller
             }
 
             if (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
-                $order->update(['status' => 'cancelled']);
-                Meja::where('nomor_meja', $order->table_number)->update(['status' => 'kosong']);
+                $order->update(['status' => 'cancelled', 'payment_status' => 'failed']);
+                if ($order->table_number) {
+                    Meja::where('nomor_meja', $order->table_number)->update(['status' => 'kosong']);
+                }
+                Log::info('[CheckStatus] CANCELLED', ['order_id' => $order->id, 'reason' => $transactionStatus]);
                 return response()->json(['status' => 'cancelled']);
             }
 
+            Log::info('[CheckStatus] Still pending', [
+                'order_id'           => $order->id,
+                'transaction_status' => $transactionStatus,
+            ]);
             return response()->json(['status' => 'pending']);
 
         } catch (\Exception $e) {
-            Log::warning('Midtrans CheckStatus error: ' . $e->getMessage(), ['order_id' => $order->id]);
+            // Hanya untuk Midtrans API error (404, timeout, network) — bukan DB error
+            Log::warning('[CheckStatus] Midtrans API error: ' . $e->getMessage(), ['order_id' => $order->id]);
             return response()->json(['status' => 'pending']);
         }
     }
 
     // =========================================================================
     // MIDTRANS WEBHOOK — Single Source of Truth status Pembayaran
-    // Route ini sengaja di luar middleware table.session karena dipanggil server Midtrans
     // =========================================================================
     public function webhook(Request $request)
     {
+        Log::info('[Webhook] Request masuk', ['ip' => $request->ip()]);
+
         $serverKey = config('midtrans.server_key');
         \Midtrans\Config::$serverKey    = $serverKey;
         \Midtrans\Config::$isProduction = config('midtrans.is_production', false);
@@ -397,49 +485,54 @@ class CustomerOrderController extends Controller
             $grossAmount       = $notification->gross_amount;
             $signatureKey      = $notification->signature_key;
 
-            // Validasi Signature Key
             $localSignature = hash('sha512', $midtransOrderId . $statusCode . $grossAmount . $serverKey);
             if ($localSignature !== $signatureKey) {
-                Log::error('Webhook Security Alert: Invalid Signature Key.', ['midtrans_order_id' => $midtransOrderId]);
+                Log::error('[Webhook] Invalid Signature', ['midtrans_order_id' => $midtransOrderId]);
                 return response()->json(['message' => 'Invalid Signature Key'], 403);
             }
 
             $order = Order::where('midtrans_order_id', $midtransOrderId)->first();
             if (! $order) {
-                Log::warning('Webhook: Order tidak ditemukan', ['midtrans_order_id' => $midtransOrderId]);
+                Log::warning('[Webhook] Order tidak ditemukan', ['midtrans_order_id' => $midtransOrderId]);
                 return response()->json(['message' => 'Order not found'], 404);
             }
 
-            Log::info('Midtrans Webhook Received', [
+            Log::info('[Webhook] Midtrans Webhook Received', [
                 'order_id'           => $order->id,
                 'transaction_status' => $transactionStatus,
                 'payment_type'       => $notification->payment_type ?? null,
             ]);
 
             $resolvedMethod = $this->resolvePaymentMethod($notification);
+            $paymentType    = $notification->payment_type ?? null;
 
             if ($transactionStatus === 'capture') {
                 if ($fraudStatus === 'challenge') {
-                    $order->update(['status' => 'waiting_payment']);
+                    $order->update(['status' => 'waiting_payment', 'payment_status' => 'pending']);
                 } elseif ($fraudStatus === 'accept') {
-                    $this->markAsProcessed($order, $resolvedMethod);
+                    $this->markAsProcessed($order, $resolvedMethod, $paymentType, $resolvedMethod);
                 }
             } elseif ($transactionStatus === 'settlement') {
-                $this->markAsProcessed($order, $resolvedMethod);
+                $this->markAsProcessed($order, $resolvedMethod, $paymentType, $resolvedMethod);
             } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
-                $order->update(['status' => 'cancelled']);
+                $order->update(['status' => 'cancelled', 'payment_status' => 'failed']);
                 if ($order->table_number) {
                     Meja::where('nomor_meja', $order->table_number)->update(['status' => 'kosong']);
                 }
             } elseif ($transactionStatus === 'pending') {
                 $order->update([
-                    'status'         => 'waiting_payment',
-                    'payment_method' => $resolvedMethod,
+                    'status'          => 'waiting_payment',
+                    'payment_method'  => $resolvedMethod,
+                    'payment_status'  => 'pending',
+                    'payment_type'    => $paymentType,
+                    'payment_channel' => $resolvedMethod,
                 ]);
             }
 
+            Log::info('[Webhook] Selesai diproses', ['order_id' => $order->id, 'new_status' => $order->fresh()->status]);
+
         } catch (\Exception $e) {
-            Log::error('Midtrans webhook error: ' . $e->getMessage());
+            Log::error('[Webhook] Error: ' . $e->getMessage());
             return response()->json(['message' => 'Error'], 500);
         }
 
@@ -453,7 +546,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items')->findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke halaman pembayaran ini.');
         }
@@ -462,8 +554,8 @@ class CustomerOrderController extends Controller
             return redirect()->route('customer.order.success', $order->id);
         }
 
-        $amount   = (int) $order->total;
-        $orderId  = 'ORDER-' . $order->id . '-' . time();
+        $amount     = (int) $order->total;
+        $orderId    = 'ORDER-' . $order->id . '-' . time();
         $qrisString = '00020101021226670016ID.CO.TELKOM.WWW01189360089893600009150'
             . str_pad($order->id, 4, '0', STR_PAD_LEFT)
             . '0215ID' . strtoupper(substr(md5($orderId), 0, 10))
@@ -478,7 +570,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             return response()->json(['error' => 'forbidden'], 403);
         }
@@ -504,7 +595,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items.menu')->findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke struk ini.');
         }
@@ -520,7 +610,6 @@ class CustomerOrderController extends Controller
     {
         $order = Order::with('items.menu')->findOrFail($id);
 
-        // ✅ IDOR Fix
         if (! $this->authorizeOrderBySession($order)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
@@ -540,13 +629,25 @@ class CustomerOrderController extends Controller
     // HELPERS PRIVATE
     // =========================================================================
 
-    private function markAsProcessed(Order $order, string $paymentMethod): void
+    private function markAsProcessed(Order $order, string $paymentMethod, ?string $paymentType = null, ?string $paymentChannel = null): void
     {
         $updateData = [
             'status'         => 'process',
             'payment_method' => $paymentMethod,
         ];
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'payment_status')) {
+            $updateData['payment_status'] = 'paid';
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'payment_type')) {
+            $updateData['payment_type'] = $paymentType;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'payment_channel')) {
+            $updateData['payment_channel'] = $paymentChannel ?? $paymentMethod;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'payment_method_label')) {
+            $updateData['payment_method_label'] = self::PAYMENT_METHOD_LABELS[$paymentMethod] ?? ucfirst($paymentMethod);
+        }
         if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'confirmed_at')) {
             $updateData['confirmed_at'] = now();
         }
@@ -557,14 +658,6 @@ class CustomerOrderController extends Controller
         $order->update($updateData);
     }
 
-    /**
-     * Refresh QR token meja setelah transaksi benar-benar selesai (status = delivered).
-     * Dipanggil dari KasirController::selesai() — bukan di sini —
-     * agar token hanya di-refresh sekali saat kasir konfirmasi selesai,
-     * bukan saat pembayaran masuk (karena tamu masih makan).
-     *
-     * Method ini disediakan sebagai helper publik jika diperlukan di tempat lain.
-     */
     public static function refreshMejaToken(string $tableNumber): void
     {
         if (empty($tableNumber)) return;

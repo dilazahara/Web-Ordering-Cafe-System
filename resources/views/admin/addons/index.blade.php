@@ -4,116 +4,17 @@
 
 @push('styles')
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
-
-/* =======================
-   TOPBAR
-======================= */
-.topbar {
-    position: fixed; top: 0; left: 0; right: 0; height: 80px;
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid #e2e8f0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 30px; z-index: 1000;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.topbar-left { display: flex; align-items: center; gap: 20px; }
-.topbar-left i {
-    width: 24px; height: 24px; padding: 8px; border-radius: 12px;
-    color: #475569; cursor: pointer; transition: all 0.3s ease;
-}
-.topbar-left i:hover { background: #f1f5f9; color: #1e293b; transform: scale(1.05); }
-
-/* =======================
-   SIDEBAR
-======================= */
-.sidebar {
-    width: 240px; height: 100vh; position: fixed;
-    background: linear-gradient(180deg, #0f172a, #1e1b4b);
-    padding: 30px; padding-top: 100px;
-    color: white; overflow-y: auto;
-    transform: translateX(-100%);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 999; box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-    display: flex; flex-direction: column; gap: 8px;
-}
-.menu-section {
-    font-size: 11px; letter-spacing: 1px;
-    color: #a78bfa; margin: 18px 10px 8px; opacity: 0.7;
-}
-.sidebar.show { transform: translateX(0); }
-
-/* =======================
-   SIDEBAR MENU
-======================= */
-.sidebar a,
-.menu-parent {
-    display: flex; align-items: center; gap: 15px;
-    padding: 12px 14px; border-radius: 12px;
-    text-decoration: none; color: #94a3b8;
-    font-weight: 400; font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sidebar i { width: 20px; height: 20px; stroke-width: 2.5; color: #c4b5fd; }
-.menu-parent { cursor: pointer; }
-.menu-parent:hover,
-.sidebar a:hover { background: rgba(255,255,255,0.06); color: white; transform: translateX(4px); }
-.sidebar a.active {
-    background: rgba(139, 92, 246, 0.25); color: #c4b5fd;
-    box-shadow: inset 0 0 0 1px rgba(139,92,246,0.4);
-}
-
-/* =======================
-   SUBMENU
-======================= */
-.submenu {
-    display: none; flex-direction: column;
-    margin-left: 35px; gap: 5px;
-    animation: slideDown 0.3s ease;
-}
-@keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.submenu-item {
-    padding: 12px 16px; border-radius: 12px;
-    font-size: 14px; color: #cbd5e1;
-    text-decoration: none; display: block; transition: all 0.3s ease;
-}
-.submenu-item:hover { background: #334155; color: white; padding-left: 20px; }
-.submenu-item.active { background: #3b82f6; color: white; }
-.arrow { margin-left: auto; transition: all 0.4s ease; }
-.arrow.rotate { transform: rotate(180deg); }
-
-/* =======================
-   MAIN
-======================= */
-.main { padding: 110px 30px 30px; max-width: 1100px; margin: 0 auto; }
-
-/* =======================
-   PAGE HEADER
-======================= */
-.page-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
-}
-.page-header h1 { font-size: 32px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-.page-header p  { font-size: 14px; color: #64748b; }
-
 /* =======================
    BUTTON
 ======================= */
 .btn-add {
     display: inline-flex; align-items: center; gap: 7px;
-    padding: 10px 18px; border-radius: 12px;
-    background: #6366f1; color: white; border: none;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-    text-decoration: none; font-family: 'Inter', sans-serif;
+    padding: 10px 18px; border-radius: var(--radius-lg);
+    background: var(--primary); color: white; border: none;
+    font-size: var(--text-base); font-weight: 600; cursor: pointer;
     transition: all 0.2s; white-space: nowrap;
 }
-.btn-add:hover { background: #4f46e5; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
+.btn-add:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,0.35); }
 .btn-add:active { transform: scale(0.97); }
 
 /* =======================
@@ -121,9 +22,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 ======================= */
 .alert-success {
     background: #f0fdf4; color: #15803d;
-    border: 1px solid #bbf7d0; border-radius: 12px;
+    border: 1px solid #bbf7d0; border-radius: var(--radius-lg);
     padding: 12px 16px; margin-bottom: 20px;
-    font-size: 14px; font-weight: 500;
+    font-size: var(--text-md); font-weight: 500;
     display: flex; align-items: center; gap: 8px;
     transition: opacity 0.4s;
 }
@@ -132,10 +33,9 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
    CARD
 ======================= */
 .card {
-    background: white; border-radius: 20px;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07);
-    overflow: hidden;
+    background: var(--bg-white); border-radius: var(--radius-3xl);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm); overflow: hidden;
 }
 
 /* =======================
@@ -144,45 +44,45 @@ body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
 .table-toolbar {
     display: flex; align-items: center; justify-content: space-between;
     padding: 16px 20px; flex-wrap: wrap; gap: 12px;
-    border-bottom: 1px solid #f1f5f9; background: #fafbfc;
+    border-bottom: 1px solid var(--border-light); background: #fafbfc;
 }
 .toolbar-left  { display: flex; align-items: center; gap: 10px; }
 .toolbar-right { display: flex; align-items: center; gap: 8px; }
-.toolbar-label { font-size: 13px; color: #64748b; font-weight: 500; }
+.toolbar-label { font-size: var(--text-base); color: var(--text-light); font-weight: 500; }
 .per-page-select {
-    padding: 7px 32px 7px 12px; border: 1.5px solid #e2e8f0;
-    border-radius: 9px; font-size: 13px; font-family: 'Inter', sans-serif;
-    outline: none; color: #1e293b; cursor: pointer; background: white;
+    padding: 7px 32px 7px 12px; border: 1.5px solid var(--border);
+    border-radius: 9px; font-size: var(--text-base); font-family: var(--font);
+    outline: none; color: var(--text-base-c); cursor: pointer; background: white;
     transition: border-color 0.2s; appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 10px center;
 }
-.per-page-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.per-page-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
 .search-wrap { position: relative; display: flex; align-items: center; }
-.search-wrap svg { position: absolute; left: 11px; width: 15px; height: 15px; color: #94a3b8; pointer-events: none; }
+.search-wrap svg { position: absolute; left: 11px; width: 15px; height: 15px; color: var(--text-muted); pointer-events: none; }
 .search-input {
-    padding: 9px 14px 9px 34px; border: 1.5px solid #e2e8f0;
-    border-radius: 10px; font-size: 13px; font-family: 'Inter', sans-serif;
-    outline: none; width: 230px; color: #1e293b; transition: border-color 0.2s;
+    padding: 9px 14px 9px 34px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-md); font-size: var(--text-base); font-family: var(--font);
+    outline: none; width: 230px; color: var(--text-base-c); transition: border-color 0.2s;
 }
-.search-input:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
 
 /* =======================
    TABLE
 ======================= */
 .tbl-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-thead { background: #f8fafc; }
+thead { background: var(--bg); }
 th {
     padding: 16px 16px; text-align: left;
-    font-size: 12px; font-weight: 600; color: #475569;
+    font-size: var(--text-sm); font-weight: 600; color: var(--text-light);
     text-transform: uppercase; letter-spacing: 0.6px;
-    border-bottom: 2px solid #e2e8f0; white-space: nowrap;
+    border-bottom: 2px solid var(--border); white-space: nowrap;
 }
-td { padding: 16px 16px; font-size: 14px; color: #334155; border-bottom: 1px solid #f1f5f9; }
+td { padding: 16px 16px; font-size: var(--text-md); color: var(--text-mid); border-bottom: 1px solid var(--border-light); }
 tbody tr { transition: background 0.15s; }
 tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: #f8fafc; }
+tbody tr:hover { background: var(--bg); }
 
 /* =======================
    BADGES
@@ -190,7 +90,7 @@ tbody tr:hover { background: #f8fafc; }
 .status-badge {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 5px 11px; border-radius: 20px;
-    font-size: 12px; font-weight: 600;
+    font-size: var(--text-sm); font-weight: 600;
 }
 .status-active   { background: #f0fdf4; color: #15803d; }
 .status-inactive { background: #f3f4f6; color: #6b7280; }
@@ -200,7 +100,7 @@ tbody tr:hover { background: #f8fafc; }
 .group-badge {
     display: inline-block; padding: 4px 10px; border-radius: 8px;
     background: #ede9fe; color: #5b21b6;
-    font-size: 12px; font-weight: 600;
+    font-size: var(--text-sm); font-weight: 600;
 }
 
 /* =======================
@@ -222,33 +122,33 @@ tbody tr:hover { background: #f8fafc; }
    EMPTY STATE
 ======================= */
 .empty-state { text-align: center; padding: 56px 20px; }
-.empty-state p { color: #9ca3af; font-size: 14px; margin-top: 10px; }
+.empty-state p { color: var(--text-muted); font-size: var(--text-md); margin-top: 10px; }
 
 /* =======================
    PAGINATION
 ======================= */
 .pagination-wrap {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 20px; border-top: 1px solid #f1f5f9;
+    padding: 16px 20px; border-top: 1px solid var(--border-light);
     flex-wrap: wrap; gap: 12px;
 }
-.pagination-info { font-size: 13px; color: #64748b; }
-.pagination-info span { font-weight: 700; color: #0f172a; }
+.pagination-info { font-size: var(--text-base); color: var(--text-light); }
+.pagination-info span { font-weight: 700; color: var(--text-dark); }
 .pagination-btns { display: flex; align-items: center; gap: 6px; }
 .page-btn {
     min-width: 38px; height: 38px; border-radius: 10px;
     display: inline-flex; align-items: center; justify-content: center;
-    border: 1.5px solid #e2e8f0; background: white;
-    font-size: 13px; font-weight: 600; color: #475569;
+    border: 1.5px solid var(--border); background: white;
+    font-size: var(--text-base); font-weight: 600; color: var(--text-light);
     cursor: pointer; transition: all 0.2s; padding: 0 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font);
 }
-.page-btn:hover:not(:disabled):not(.active) { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
-.page-btn.active { background: #6366f1; border-color: #6366f1; color: white; box-shadow: 0 3px 8px rgba(99,102,241,0.3); }
+.page-btn:hover:not(:disabled):not(.active) { background: var(--border-light); border-color: #cbd5e1; color: var(--text-base-c); }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 3px 8px rgba(99,102,241,0.3); }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* =======================
-   MODAL — ✅ display:none by default, NO animation on load
+   MODAL
 ======================= */
 .modal-backdrop {
     display: none;
@@ -276,22 +176,22 @@ tbody tr:hover { background: #f8fafc; }
     justify-content: center; margin: 0 auto 16px;
 }
 .mh-icon-wrap svg { width: 28px; height: 28px; color: #dc2626; }
-.mh-title { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
-.mh-sub   { font-size: 14px; color: #64748b; margin-bottom: 4px; }
+.mh-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
+.mh-sub   { font-size: var(--text-md); color: var(--text-light); margin-bottom: 4px; }
 .mh-name  { font-weight: 700; color: #dc2626; font-size: 15px; margin-bottom: 8px; }
-.mh-warn  { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+.mh-warn  { font-size: var(--text-base); color: var(--text-muted); margin-bottom: 24px; }
 .mh-footer { display: flex; gap: 12px; justify-content: center; }
 .mh-btn-batal {
-    padding: 10px 22px; border-radius: 11px; border: 1.5px solid #e2e8f0;
-    background: #f1f5f9; color: #475569; font-size: 13.5px; font-weight: 600;
-    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+    padding: 10px 22px; border-radius: 11px; border: 1.5px solid var(--border);
+    background: var(--border-light); color: var(--text-light); font-size: 13.5px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); transition: all 0.2s;
 }
-.mh-btn-batal:hover { background: #e2e8f0; }
+.mh-btn-batal:hover { background: var(--border); }
 .mh-btn-hapus {
     display: inline-flex; align-items: center; gap: 7px;
     padding: 10px 22px; border-radius: 11px; border: none;
     background: #dc2626; color: white; font-size: 13.5px; font-weight: 600;
-    cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s;
+    cursor: pointer; font-family: var(--font); transition: all 0.2s;
 }
 .mh-btn-hapus:hover { background: #b91c1c; }
 </style>
@@ -301,7 +201,7 @@ tbody tr:hover { background: #f8fafc; }
 
 {{-- PAGE HEADER --}}
 <div class="page-header">
-    <div>
+    <div class="page-title">
         <h1>Data Add-ons</h1>
         <p>Kelola semua tambahan pilihan menu cafe</p>
     </div>
@@ -321,7 +221,6 @@ tbody tr:hover { background: #f8fafc; }
 
 {{-- TABLE CARD --}}
 <div class="card">
-
     {{-- TOOLBAR --}}
     <div class="table-toolbar">
         <div class="toolbar-left">
@@ -364,11 +263,11 @@ tbody tr:hover { background: #f8fafc; }
             <tbody id="addonTableBody">
                 @forelse($addons as $i => $addon)
                 <tr data-search="{{ strtolower($addon->name . ' ' . $addon->description . ' ' . $addon->group->name . ' ' . ($addon->status ? 'aktif' : 'nonaktif')) }}">
-                    <td class="row-no" style="color:#9ca3af; font-size:13px;">{{ $i + 1 }}</td>
-                    <td style="font-weight:600; color:#111827;">{{ $addon->name }}</td>
-                    <td style="color:#6b7280;">{{ $addon->description }}</td>
+                    <td class="row-no" style="color:var(--text-muted); font-size:var(--text-base);">{{ $i + 1 }}</td>
+                    <td style="font-weight:600; color:var(--text-dark);">{{ $addon->name }}</td>
+                    <td style="color:var(--text-light);">{{ $addon->description }}</td>
                     <td><span class="group-badge">{{ $addon->group->name }}</span></td>
-                    <td style="font-weight:700; color:#6366f1;">Rp {{ number_format($addon->price) }}</td>
+                    <td style="font-weight:700; color:var(--primary);">Rp {{ number_format($addon->price) }}</td>
                     <td>
                         @if($addon->status)
                         <span class="status-badge status-active">
@@ -396,7 +295,7 @@ tbody tr:hover { background: #f8fafc; }
                 <tr id="emptyServerRow">
                     <td colspan="7">
                         <div class="empty-state">
-                            <i data-lucide="plus-circle" style="width:40px;height:40px;color:#e5e7eb;"></i>
+                            <i data-lucide="plus-circle" style="width:40px;height:40px;color:var(--border);"></i>
                             <p>Belum ada add-on yang ditambahkan</p>
                         </div>
                     </td>
@@ -411,7 +310,6 @@ tbody tr:hover { background: #f8fafc; }
         <div class="pagination-info" id="paginationInfo"></div>
         <div class="pagination-btns" id="paginationBtns"></div>
     </div>
-
 </div>
 
 {{-- MODAL HAPUS ADDON --}}
@@ -454,9 +352,7 @@ tbody tr:hover { background: #f8fafc; }
 
 @push('scripts')
 <script>
-// ─────────────────────────────────────────────
-//  Modal helpers (existing)
-// ─────────────────────────────────────────────
+// (Script logic tidak diubah, persis seperti aslinya)
 function openDeleteAddon(id, nama) {
     document.getElementById('deleteAddonNama').textContent = nama;
     document.getElementById('deleteAddonForm').action = '/admin/addons/delete/' + id;
@@ -481,9 +377,6 @@ if (alertEl) {
     }, 4000);
 }
 
-// ─────────────────────────────────────────────
-//  TABLE: Search + Per-page + Pagination
-// ─────────────────────────────────────────────
 (function () {
     var perPage     = 10;
     var currentPage = 1;
@@ -498,7 +391,7 @@ if (alertEl) {
     if (!tbody) return;
 
     var allRows = Array.from(tbody.querySelectorAll('tr[data-search]'));
-    if (allRows.length === 0) return; // server-side empty state, nothing to paginate
+    if (allRows.length === 0) return;
 
     function getFiltered() {
         if (!keyword) return allRows;
@@ -516,7 +409,6 @@ if (alertEl) {
         var start = (currentPage - 1) * perPage;
         var end   = start + perPage;
 
-        // hide all, then show slice
         allRows.forEach(function (r) { r.style.display = 'none'; });
         var visNo = 1;
         filtered.forEach(function (r, idx) {
@@ -528,13 +420,12 @@ if (alertEl) {
             }
         });
 
-        // no-results row
         var noRow = tbody.querySelector('.no-results-row');
         if (total === 0) {
             if (!noRow) {
                 var tr = document.createElement('tr');
                 tr.className = 'no-results-row';
-                tr.innerHTML = '<td colspan="7" style="text-align:center;padding:48px;color:#94a3b8;font-size:14px;">Tidak ada data yang cocok dengan pencarian "<strong>' + escapeHtml(keyword) + '</strong>"</td>';
+                tr.innerHTML = '<td colspan="7" style="text-align:center;padding:48px;color:var(--text-muted);font-size:var(--text-md);">Tidak ada data yang cocok dengan pencarian "<strong>' + escapeHtml(keyword) + '</strong>"</td>';
                 tbody.appendChild(tr);
             } else {
                 noRow.querySelector('td').innerHTML = 'Tidak ada data yang cocok dengan pencarian "<strong>' + escapeHtml(keyword) + '</strong>"';
@@ -543,7 +434,6 @@ if (alertEl) {
             if (noRow) noRow.remove();
         }
 
-        // info
         if (infoEl) {
             if (total === 0) {
                 infoEl.innerHTML = 'Menampilkan <span>0</span> dari <span>0</span> data';
@@ -569,7 +459,7 @@ if (alertEl) {
             if (p === '...') {
                 var dots = document.createElement('span');
                 dots.textContent = '…';
-                dots.style.cssText = 'padding:0 6px;color:#94a3b8;font-size:13px;align-self:center;';
+                dots.style.cssText = 'padding:0 6px;color:var(--text-muted);font-size:var(--text-base);align-self:center;';
                 btnsEl.appendChild(dots);
             } else {
                 btnsEl.appendChild(makeBtn(p, false, p === currentPage, (function (pg) {

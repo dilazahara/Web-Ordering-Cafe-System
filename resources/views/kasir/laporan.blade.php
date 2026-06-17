@@ -502,7 +502,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         <th>Waktu Transaksi</th>
                         <th>ID Order</th>
                         <th>Nama Pemesan</th>
-                        <th>Meja</th>
+                        <th>Tipe & Meja</th>
                         <th>Detail Pesanan</th>
                         <th>Metode Bayar</th>
                         <th>Status</th>
@@ -515,7 +515,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                 <tr data-search="{{ strtolower(
                     ($order->queue_number ?: 'A-' . str_pad($order->id,3,'0',STR_PAD_LEFT))
                     . ' ' . ($order->customer_name ?? '')
-                    . ' ' . ($order->table_number ? 'meja '.$order->table_number : 'take away')
+                    . ' ' . (($order->order_type ?? 'dine_in') === 'take_away' ? 'take away takeaway' : ('meja ' . ($order->table_number ?? '')))
                     . ' ' . $order->status
                     . ' ' . $order->payment_method
                     . ' ' . $order->created_at->format('d M Y')
@@ -540,9 +540,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         @endif
                     </td>
                     <td>
-                        <span style="background:var(--surface-2); padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:var(--text-secondary); white-space:nowrap;">
-                            {{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
-                        </span>
+                        @if(($order->order_type ?? 'dine_in') === 'take_away')
+                            <span style="background:#eff6ff; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; color:#2563eb; display:inline-block; margin-bottom:3px;">🛍️ Take Away</span>
+                        @else
+                            <span style="background:#fff7ed; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; color:#ea580c; display:inline-block; margin-bottom:3px;">🪑 Dine In</span>
+                            <br>
+                            <span style="background:var(--surface-2); padding:3px 10px; border-radius:8px; font-size:12px; font-weight:700; color:var(--text-secondary); white-space:nowrap;">
+                                Meja {{ $order->table_number ?? '—' }}
+                            </span>
+                        @endif
                     </td>
                     <td>
                         @if($order->items && $order->items->count() > 0)

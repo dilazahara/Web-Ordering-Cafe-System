@@ -391,7 +391,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                             ID Order <span class="sort-icon" data-col="0">↕</span>
                         </th>
                         <th>Nama Pemesan</th>
-                        <th>Meja</th>
+                        <th>Tipe & Meja</th>
                         <th>Item</th>
                         <th style="cursor:pointer;" data-col="4">
                             Total <span class="sort-icon" data-col="4">↕</span>
@@ -420,9 +420,13 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                     }
                     $itemsForStruk = $order->items ? $order->items->map(function($i) {
                         return [
-                            'name'     => !empty($i->name) ? $i->name : ($i->menu->name ?? '-'),
-                            'qty'      => $i->qty ?? 1,
-                            'subtotal' => $i->subtotal > 0 ? $i->subtotal : (($i->price ?? 0) * ($i->qty ?? 1)),
+                            'name'         => !empty($i->name) ? $i->name : ($i->menu->name ?? '-'),
+                            'qty'          => $i->qty ?? 1,
+                            'subtotal'     => $i->subtotal > 0 ? $i->subtotal : (($i->price ?? 0) * ($i->qty ?? 1)),
+                            'base_price'   => $i->base_price ?? $i->price ?? 0,
+                            'addon_price'  => $i->addon_price ?? 0,
+                            'addon_details'=> $i->addon_details ?? [],
+                            'notes'        => $i->notes ?? '',
                         ];
                     })->values()->toArray() : [];
                 @endphp
@@ -443,9 +447,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                         @endif
                     </td>
                     <td>
-                        <span style="background:#f1f5f9; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; color:#475569;">
-                            {{ $order->table_number ? 'Meja '.$order->table_number : 'Take Away' }}
-                        </span>
+                        @if(($order->order_type ?? 'dine_in') === 'take_away')
+                            <span style="background:#eff6ff; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; color:#2563eb; display:inline-block; margin-bottom:3px;">🛍️ Take Away</span>
+                        @else
+                            <span style="background:#fff7ed; padding:3px 8px; border-radius:8px; font-size:11px; font-weight:700; color:#ea580c; display:inline-block; margin-bottom:3px;">🪑 Dine In</span>
+                            <br>
+                            <span style="background:#f1f5f9; padding:3px 10px; border-radius:8px; font-size:12px; font-weight:700; color:#475569;">
+                                Meja {{ $order->table_number ?? '—' }}
+                            </span>
+                        @endif
                     </td>
                     <td>
                         @if($order->items && $order->items->count() > 0)
@@ -509,7 +519,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
                           onclick="openStrukModal(
                             {{ $order->id }},
                             '{{ $order->queue_number ?: 'A-'.str_pad($order->id,3,'0',STR_PAD_LEFT) }}',
-                            '{{ $order->table_number ?? '' }}',
+                            '{{ ($order->order_type ?? 'dine_in') === 'take_away' ? '' : ($order->table_number ?? '') }}',
                             {{ $order->total ?? 0 }},
                             '{{ $order->payment_method ?? 'cash' }}',
                             '{{ $order->created_at->format('d/m/Y H:i') }}',
@@ -952,10 +962,31 @@ function openStrukModal(id, queueNum, meja, total, metode, waktu, items, uangDit
     if (items && items.length > 0) {
         items.forEach(function(item) {
             var sub = Number(item.subtotal || 0);
+            // ✅ FIX: tampilkan nama add-on jika ada
+            var addonLine = '';
+            if (item.addon_details && item.addon_details.length > 0) {
+                var addonNames = item.addon_details.map(function(a){ return a.name; }).join(', ');
+                addonLine = '<div style="font-size:10px;color:#f97316;font-family:\'Poppins\',sans-serif;margin-top:1px;">🧩 ' + addonNames + '</div>';
+            }
+            // ✅ FIX: tampilkan harga dasar + addon price jika ada
+            var priceDetail = '';
+            if (item.addon_price && Number(item.addon_price) > 0) {
+                priceDetail = '<div style="font-size:10px;color:#94a3b8;font-family:\'Poppins\',sans-serif;">Rp ' + Number(item.base_price||0).toLocaleString('id-ID') + ' +Rp ' + Number(item.addon_price).toLocaleString('id-ID') + '</div>';
+            }
+            // Catatan item
+            var notesLine = '';
+            if (item.notes) {
+                notesLine = '<div style="font-size:10px;color:#94a3b8;font-style:italic;font-family:\'Poppins\',sans-serif;">📝 ' + item.notes + '</div>';
+            }
             itemsHtml +=
-                '<div style="display:flex;justify-content:space-between;margin-bottom:5px;font-family:\'Poppins\',sans-serif;">' +
-                    '<span style="flex:1;padding-right:8px;">' + (item.qty || 1) + 'x ' + (item.name || '-') + '</span>' +
-                    '<span style="white-space:nowrap;font-weight:600;">Rp ' + sub.toLocaleString('id-ID') + '</span>' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-family:\'Poppins\',sans-serif;">' +
+                    '<div style="flex:1;padding-right:8px;">' +
+                        '<span>' + (item.qty || 1) + 'x ' + (item.name || '-') + '</span>' +
+                        addonLine +
+                        notesLine +
+                        priceDetail +
+                    '</div>' +
+                    '<span style="white-space:nowrap;font-weight:600;align-self:flex-start;">Rp ' + sub.toLocaleString('id-ID') + '</span>' +
                 '</div>';
         });
     } else {

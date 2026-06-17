@@ -1,79 +1,94 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tambah User</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
+@extends('layouts.admin')
 
-.container { max-width: 520px; margin: auto; }
+@section('title', 'Tambah User')
+
+@push('styles')
+<style>
+/* ════ CSS KHUSUS HALAMAN CREATE USER ════ */
+.create-container { max-width: 680px; margin: auto; padding: 20px 0; }
 
 /* BACK LINK */
 .back-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13px; font-weight: 600; color: #6b7280;
-    text-decoration: none; margin-bottom: 20px; transition: color .15s;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: var(--text-base); font-weight: 600; color: var(--text-light);
+    text-decoration: none; margin-bottom: 24px; transition: all .2s;
 }
-.back-link:hover { color: #111827; }
-.back-link i { width: 15px; height: 15px; }
+.back-link:hover { color: var(--text-dark); transform: translateX(-2px); }
 
-/* CARD */
-.card {
-    background: white; padding: 32px;
-    border-radius: 24px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+/* HEADER HALAMAN */
+.page-header { margin-bottom: 28px; }
+.page-header h2 { font-size: var(--text-3xl); color: var(--text-dark); font-weight: 800; }
+.page-header p  { margin-top: 5px; color: var(--text-light); font-size: 14px; }
+
+/* SECTION CARD */
+.form-section-card {
+    background: var(--bg-white); 
+    padding: 28px;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    margin-bottom: 24px;
+    transition: box-shadow 0.3s ease;
+}
+.form-section-card:hover {
+    box-shadow: var(--shadow-md);
 }
 
-/* TITLE */
-.title { margin-bottom: 28px; }
-.title h2 { font-size: 26px; color: #111827; font-weight: 800; }
-.title p  { margin-top: 5px; color: #6b7280; font-size: 13.5px; }
-
-/* DIVIDER */
-.divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 24px 0;
+/* CARD HEADER */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-light);
 }
-.divider span { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .8px; white-space: nowrap; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
+.section-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+    color: var(--text-mid);
+}
+.section-title h3 {
+    font-size: var(--text-md);
+    font-weight: 700;
+    color: var(--text-dark);
+}
+.section-title p {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
 
-/* FORM */
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; color: #111827; }
+/* FORM ELEMENTS */
+.form-group { margin-bottom: 20px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; margin-bottom: 8px; font-size: var(--text-base); font-weight: 700; color: var(--text-dark); }
 
 .input-wrap { position: relative; }
 .form-input {
     width: 100%; padding: 12px 16px;
-    border-radius: 12px; border: 1.5px solid #e5e7eb;
-    background: #f9fafb; font-size: 14px; color: #111827;
-    outline: none; transition: .2s;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    border-radius: var(--radius-lg); border: 1.5px solid var(--border);
+    background: var(--bg); font-size: var(--text-md); color: var(--text-dark);
+    outline: none; transition: .2s; font-family: var(--font);
 }
 .form-input:focus {
     border-color: #f97316; background: white;
     box-shadow: 0 0 0 3px rgba(249,115,22,0.1);
 }
-.form-input::placeholder { color: #9ca3af; }
+.form-input::placeholder { color: var(--text-muted); }
+.form-input.is-error { border-color: #ef4444 !important; background: #fef2f2 !important; box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important; }
 
-/* INPUT ERROR STATE */
-.form-input.is-error {
-    border-color: #ef4444 !important;
-    background: #fef2f2 !important;
-    box-shadow: 0 0 0 3px rgba(239,68,68,0.1) !important;
-}
-
-/* FIELD ERROR MESSAGE */
+/* ERRORS */
 .field-error {
     display: flex; align-items: center; gap: 5px;
-    margin-top: 6px; font-size: 12px; font-weight: 600; color: #dc2626;
+    margin-top: 6px; font-size: var(--text-sm); font-weight: 600; color: #dc2626;
     animation: slideDown .2s ease-out;
 }
-.field-error i { width: 13px; height: 13px; flex-shrink: 0; }
-
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-4px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -81,277 +96,304 @@ body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
 
 .eye-btn {
     position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; color: #9ca3af;
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
     display: flex; align-items: center;
 }
-.eye-btn i { width: 16px; height: 16px; }
 
 /* ROLE CARDS */
-.role-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin-bottom: 28px;
-}
+.role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .role-opt { position: relative; cursor: pointer; }
 .role-opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
 .role-card {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px; border-radius: 14px;
-    border: 2px solid #e5e7eb; background: #f9fafb;
+    padding: 16px; border-radius: var(--radius-xl);
+    border: 2px solid var(--border); background: var(--bg);
     transition: all .18s; cursor: pointer;
+    height: 100%;
 }
 .role-icon {
-    width: 36px; height: 36px; border-radius: 10px;
+    width: 40px; height: 40px; border-radius: var(--radius-lg);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.role-icon i { width: 18px; height: 18px; }
-.role-label { font-size: 13.5px; font-weight: 700; color: #374151; }
-.role-desc   { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.role-label { font-size: 14px; font-weight: 700; color: var(--text-mid); }
+.role-desc   { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
 
-.role-opt.r-admin  input:checked + .role-card  { border-color: #6366f1; background: #eef2ff; }
+.role-opt.r-admin  input:checked + .role-card  { border-color: var(--primary); background: var(--primary-light); }
 .role-opt.r-kasir  input:checked + .role-card  { border-color: #f97316; background: #fff7ed; }
 .role-opt.r-dapur  input:checked + .role-card  { border-color: #22c55e; background: #f0fdf4; }
 .role-opt.r-pelayan input:checked + .role-card { border-color: #06b6d4; background: #ecfeff; }
 
-.role-opt.r-admin   .role-icon { background: #eef2ff; }
-.role-opt.r-kasir   .role-icon { background: #fff7ed; }
-.role-opt.r-dapur   .role-icon { background: #f0fdf4; }
-.role-opt.r-pelayan .role-icon { background: #ecfeff; }
-
-.role-opt.r-admin   .role-icon i { stroke: #6366f1; }
-.role-opt.r-kasir   .role-icon i { stroke: #f97316; }
-.role-opt.r-dapur   .role-icon i { stroke: #22c55e; }
-.role-opt.r-pelayan .role-icon i { stroke: #06b6d4; }
+.role-opt.r-admin   .role-icon { background: var(--primary-light); color: var(--primary); }
+.role-opt.r-kasir   .role-icon { background: #fff7ed; color: #f97316; }
+.role-opt.r-dapur   .role-icon { background: #f0fdf4; color: #22c55e; }
+.role-opt.r-pelayan .role-icon { background: #ecfeff; color: #06b6d4; }
 
 .role-check {
     margin-left: auto; width: 18px; height: 18px;
-    border-radius: 50%; border: 2px solid #e5e7eb;
+    border-radius: 50%; border: 2px solid var(--border);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; transition: all .18s;
 }
-.role-opt.r-admin   input:checked + .role-card .role-check { border-color: #6366f1; background: #6366f1; }
+.role-opt.r-admin   input:checked + .role-card .role-check { border-color: var(--primary); background: var(--primary); }
 .role-opt.r-kasir   input:checked + .role-card .role-check { border-color: #f97316; background: #f97316; }
 .role-opt.r-dapur   input:checked + .role-card .role-check { border-color: #22c55e; background: #22c55e; }
 .role-opt.r-pelayan input:checked + .role-card .role-check { border-color: #06b6d4; background: #06b6d4; }
-.role-check i { width: 10px; height: 10px; stroke: white; display: none; }
+.role-check i { width: 10px; height: 10px; color: white; display: none; }
 .role-opt input:checked + .role-card .role-check i { display: block; }
 
-/* ROLE ERROR STATE */
-.role-grid.is-error .role-card {
-    border-color: #fca5a5;
-}
+.role-grid.is-error .role-card { border-color: #fca5a5; }
 .role-error {
     display: flex; align-items: center; gap: 5px;
-    margin-top: -20px; margin-bottom: 20px;
-    font-size: 12px; font-weight: 600; color: #dc2626;
-    animation: slideDown .2s ease-out;
+    margin-top: 12px;
+    font-size: var(--text-sm); font-weight: 600; color: #dc2626;
 }
-.role-error i { width: 13px; height: 13px; flex-shrink: 0; }
 
-/* ALERT GLOBAL */
+/* ALERTS */
 .alert-error {
     background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-    border-radius: 12px; padding: 14px 16px; font-size: 13px;
-    font-weight: 600; margin-bottom: 20px;
+    border-radius: var(--radius-lg); padding: 14px 16px; font-size: var(--text-base);
+    font-weight: 600; margin-bottom: 24px;
     display: flex; align-items: flex-start; gap: 10px; line-height: 1.5;
 }
-.alert-error i { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
 .alert-error ul { margin: 4px 0 0 4px; padding-left: 16px; }
-.alert-error ul li { margin-bottom: 2px; }
 
-/* BUTTONS */
-.button-group { display: flex; gap: 12px; }
+/* ACTION BUTTONS CARD */
+.action-card {
+    background: var(--bg-white);
+    padding: 20px 28px;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.button-group { display: flex; gap: 12px; width: 100%; max-width: 320px; margin-left: auto; }
 .btn {
-    flex: 1; padding: 13px; border-radius: 14px; border: none;
-    font-size: 14px; font-weight: 700; cursor: pointer;
+    flex: 1; padding: 13px; border-radius: var(--radius-xl); border: none;
+    font-size: var(--text-md); font-weight: 700; cursor: pointer;
     text-decoration: none; text-align: center; transition: all .2s;
     display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: var(--font);
 }
-.btn i { width: 16px; height: 16px; }
 .btn-save {
     background: linear-gradient(135deg, #f97316, #ea580c);
-    color: white; box-shadow: 0 8px 20px rgba(249,115,22,0.25);
+    color: white; box-shadow: 0 4px 12px rgba(249,115,22,0.2);
 }
-.btn-save:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(249,115,22,0.3); }
-.btn-back { background: white; color: #374151; border: 1.5px solid #e5e7eb; }
-.btn-back:hover { background: #f9fafb; }
+.btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(249,115,22,0.3); }
+.btn-back { background: white; color: var(--text-mid); border: 1.5px solid var(--border); }
+.btn-back:hover { background: var(--bg); }
+
+/* STATUS CARD QUICK FIX */
+.status-badge-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f0fdf4;
+    padding: 12px 16px;
+    border-radius: var(--radius-lg);
+    border: 1px solid #bbf7d0;
+    color: #16a34a;
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
 
 @media(max-width:480px) {
     .role-grid { grid-template-columns: 1fr; }
-    .button-group { flex-direction: column; }
+    .action-card { padding: 20px; }
+    .button-group { flex-direction: column; max-width: 100%; }
 }
 </style>
-</head>
-<body>
+@endpush
 
-<div class="container">
+@section('content')
+<div class="create-container">
 
-    <a href="/admin/user" class="back-link">
-    </a>
+    <div class="page-header">
+        <h2>Tambah User Baru</h2>
+        <p>Silakan isi informasi detail di bawah ini untuk membuat akun baru.</p>
+    </div>
 
-    <div class="card">
-
-        <div class="title">
-            <h2>Tambah User</h2>
-            <p>Buat akun baru dan tentukan role-nya</p>
+    @if($errors->any())
+    <div class="alert-error">
+        <i data-lucide="alert-circle" style="width:18px;height:18px;flex-shrink:0;"></i>
+        <div>
+            <strong>Gagal menyimpan! Periksa isian berikut:</strong>
+            <ul>
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
+    </div>
+    @endif
 
-        {{-- ALERT GLOBAL — tampil jika ada error --}}
-        @if($errors->any())
-        <div class="alert-error">
-            <i data-lucide="alert-circle"></i>
-            <div>
-                <strong>Gagal menyimpan! Periksa isian berikut:</strong>
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        </div>
-        @endif
-
-        <form action="/admin/user/store" method="POST" id="userCreateForm" novalidate>
+    <form action="/admin/user/store" method="POST" id="userCreateForm" novalidate>
         @csrf
 
-        <div class="divider"><span>Data Akun</span></div>
-
-        <!-- NAMA -->
-        <div class="form-group">
-            <label class="form-label">Nama Lengkap <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="name" id="fieldName"
-    class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
-    placeholder="Contoh: Tegar"
-    value="{{ old('name') }}">
-            @error('name')
-                <div class="field-error">
-                    <i data-lucide="alert-circle"></i> {{ $message }}
+        <div class="form-section-card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i data-lucide="user" style="width:18px;height:18px;"></i>
                 </div>
-            @enderror
+                <div class="section-title">
+                    <h3>Informasi Pengguna</h3>
+                    <p>Nama lengkap dari user yang akan didaftarkan</p>
+                </div>
+            </div>
 
-            <div class="field-error" id="errorName" style="display:none;">
-    <i data-lucide="alert-circle"></i> <span></span>
-</div>
+            <div class="form-group">
+                <label class="form-label">Nama Lengkap <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="name" id="fieldName"
+                    class="form-input {{ $errors->has('name') ? 'is-error' : '' }}"
+                    placeholder="Contoh: Tegar" value="{{ old('name') }}">
+                
+                @error('name')
+                    <div class="field-error"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> {{ $message }}</div>
+                @enderror
+                <div class="field-error" id="errorName" style="display:none;"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> <span></span></div>
+            </div>
         </div>
 
-        <!-- EMAIL -->
-        <div class="form-group">
-            <label class="form-label">Email <span style="color:#ef4444;">*</span></label>
-            <input type="email" name="email" id="fieldEmail"
-    class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
-    placeholder="Contoh: tegar@example.com"
-    value="{{ old('email') }}">
-            @error('email')
-                <div class="field-error">
-                    <i data-lucide="alert-circle"></i> {{ $message }}
+        <div class="form-section-card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i data-lucide="key-round" style="width:18px;height:18px;"></i>
                 </div>
-            @enderror
+                <div class="section-title">
+                    <h3>Data Kredensial Akun</h3>
+                    <p>Digunakan untuk kebutuhan autentikasi masuk ke sistem</p>
+                </div>
+            </div>
 
-            <div class="field-error" id="errorEmail" style="display:none;">
-    <i data-lucide="alert-circle"></i> <span></span>
-</div>
+            <div class="form-group">
+                <label class="form-label">Email <span style="color:#ef4444;">*</span></label>
+                <input type="email" name="email" id="fieldEmail"
+                    class="form-input {{ $errors->has('email') ? 'is-error' : '' }}"
+                    placeholder="Contoh: tegar@example.com" value="{{ old('email') }}">
+                
+                @error('email')
+                    <div class="field-error"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> {{ $message }}</div>
+                @enderror
+                <div class="field-error" id="errorEmail" style="display:none;"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> <span></span></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
+                <div class="input-wrap">
+                    <input type="password" name="password" id="pwInput"
+                        class="form-input {{ $errors->has('password') ? 'is-error' : '' }}"
+                        style="padding-right:42px;" placeholder="Minimal 6 karakter">
+                    <button type="button" class="eye-btn" onclick="togglePw()">
+                        <i data-lucide="eye" id="eyeIcon" style="width:16px;height:16px;"></i>
+                    </button>
+                </div>
+                
+                @error('password')
+                    <div class="field-error"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> {{ $message }}</div>
+                @enderror
+                <div class="field-error" id="errorPassword" style="display:none;"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> <span></span></div>
+            </div>
         </div>
 
-        <!-- PASSWORD -->
-        <div class="form-group">
-            <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
-            <div class="input-wrap">
-                <input type="password" name="password" id="pwInput"
-                    class="form-input {{ $errors->has('password') ? 'is-error' : '' }}"
-                    style="padding-right:42px;"
-                    placeholder="Minimal 6 karakter">
-                <button type="button" class="eye-btn" onclick="togglePw()">
-                    <i data-lucide="eye" id="eyeIcon"></i>
+        <div class="form-section-card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i data-lucide="fingerprint" style="width:18px;height:18px;"></i>
+                </div>
+                <div class="section-title">
+                    <h3>Role Pengguna</h3>
+                    <p>Pilih hak akses kontrol yang sesuai untuk user ini</p>
+                </div>
+            </div>
+
+            <div class="role-grid {{ $errors->has('role') ? 'is-error' : '' }}">
+                <label class="role-opt r-admin">
+                    <input type="radio" name="role" value="admin" {{ old('role') == 'admin' ? 'checked' : '' }}>
+                    <div class="role-card">
+                        <div class="role-icon"><i data-lucide="shield-check" style="width:18px;height:18px;"></i></div>
+                        <div>
+                            <div class="role-label">Admin</div>
+                            <div class="role-desc">Akses penuh</div>
+                        </div>
+                        <div class="role-check"><i data-lucide="check"></i></div>
+                    </div>
+                </label>
+
+                <label class="role-opt r-kasir">
+                    <input type="radio" name="role" value="kasir" {{ old('role', 'kasir') == 'kasir' ? 'checked' : '' }}>
+                    <div class="role-card">
+                        <div class="role-icon"><i data-lucide="credit-card" style="width:18px;height:18px;"></i></div>
+                        <div>
+                            <div class="role-label">Kasir</div>
+                            <div class="role-desc">Transaksi & bayar</div>
+                        </div>
+                        <div class="role-check"><i data-lucide="check"></i></div>
+                    </div>
+                </label>
+
+                <label class="role-opt r-dapur">
+                    <input type="radio" name="role" value="dapur" {{ old('role') == 'dapur' ? 'checked' : '' }}>
+                    <div class="role-card">
+                        <div class="role-icon"><i data-lucide="chef-hat" style="width:18px;height:18px;"></i></div>
+                        <div>
+                            <div class="role-label">Dapur</div>
+                            <div class="role-desc">Kelola pesanan masuk</div>
+                        </div>
+                        <div class="role-check"><i data-lucide="check"></i></div>
+                    </div>
+                </label>
+
+                <label class="role-opt r-pelayan">
+                    <input type="radio" name="role" value="pelayan" {{ old('role') == 'pelayan' ? 'checked' : '' }}>
+                    <div class="role-card">
+                        <div class="role-icon"><i data-lucide="user-check" style="width:18px;height:18px;"></i></div>
+                        <div>
+                            <div class="role-label">Pelayan</div>
+                            <div class="role-desc">Antar & layani meja</div>
+                        </div>
+                        <div class="role-check"><i data-lucide="check"></i></div>
+                    </div>
+                </label>
+            </div>
+
+            @error('role')
+                <div class="role-error"><i data-lucide="alert-circle" style="width:13px;height:13px;"></i> {{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="form-section-card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i data-lucide="activity" style="width:18px;height:18px;"></i>
+                </div>
+                <div class="section-title">
+                    <h3>Status Pengguna</h3>
+                    <p>Status default untuk user baru yang dibuat</p>
+                </div>
+            </div>
+            
+            <div class="status-badge-wrapper">
+                <i data-lucide="check-circle" style="width: 18px; height: 18px;"></i>
+                <span>Secara default, akun baru yang dibuat akan langsung berstatus Aktif.</span>
+            </div>
+        </div>
+
+        <div class="action-card">
+            <div class="button-group">
+                <a href="/admin/user" class="btn btn-back">Batal</a>
+                <button type="submit" class="btn btn-save">
+                    <i data-lucide="user-plus" style="width:16px;height:16px;"></i> Buat Akun
                 </button>
             </div>
-            @error('password')
-                <div class="field-error">
-                    <i data-lucide="alert-circle"></i> {{ $message }}
-                </div>
-            @enderror
+        </div>
 
-            <div class="field-error" id="errorPassword" style="display:none;">
-    <i data-lucide="alert-circle"></i> <span></span>
+    </form>
 </div>
+@endsection
 
-        </div>
-
-        <div class="divider"><span>Pilih Role</span></div>
-
-        <!-- ROLE CARDS -->
-        <div class="role-grid {{ $errors->has('role') ? 'is-error' : '' }}">
-
-            <label class="role-opt r-admin">
-                <input type="radio" name="role" value="admin" {{ old('role') == 'admin' ? 'checked' : '' }}>
-                <div class="role-card">
-                    <div class="role-icon"><i data-lucide="shield-check"></i></div>
-                    <div>
-                        <div class="role-label">Admin</div>
-                        <div class="role-desc">Akses penuh</div>
-                    </div>
-                    <div class="role-check"><i data-lucide="check"></i></div>
-                </div>
-            </label>
-
-            <label class="role-opt r-kasir">
-                <input type="radio" name="role" value="kasir" {{ old('role', 'kasir') == 'kasir' ? 'checked' : '' }}>
-                <div class="role-card">
-                    <div class="role-icon"><i data-lucide="credit-card"></i></div>
-                    <div>
-                        <div class="role-label">Kasir</div>
-                        <div class="role-desc">Transaksi & bayar</div>
-                    </div>
-                    <div class="role-check"><i data-lucide="check"></i></div>
-                </div>
-            </label>
-
-            <label class="role-opt r-dapur">
-                <input type="radio" name="role" value="dapur" {{ old('role') == 'dapur' ? 'checked' : '' }}>
-                <div class="role-card">
-                    <div class="role-icon"><i data-lucide="chef-hat"></i></div>
-                    <div>
-                        <div class="role-label">Dapur</div>
-                        <div class="role-desc">Kelola pesanan masuk</div>
-                    </div>
-                    <div class="role-check"><i data-lucide="check"></i></div>
-                </div>
-            </label>
-
-            <label class="role-opt r-pelayan">
-                <input type="radio" name="role" value="pelayan" {{ old('role') == 'pelayan' ? 'checked' : '' }}>
-                <div class="role-card">
-                    <div class="role-icon"><i data-lucide="user-check"></i></div>
-                    <div>
-                        <div class="role-label">Pelayan</div>
-                        <div class="role-desc">Antar & layani meja</div>
-                    </div>
-                    <div class="role-check"><i data-lucide="check"></i></div>
-                </div>
-            </label>
-
-        </div>
-
-        @error('role')
-            <div class="role-error">
-                <i data-lucide="alert-circle"></i> {{ $message }}
-            </div>
-        @enderror
-
-        <div class="button-group">
-            <button type="submit" class="btn btn-save">
-                <i data-lucide="user-plus"></i>
-                Buat Akun
-            </button>
-            <a href="/admin/user" class="btn btn-back">Batal</a>
-        </div>
-
-        </form>
-    </div>
-</div>
-
+@push('scripts')
 <script>
-lucide.createIcons();
-
 function togglePw() {
     const input = document.getElementById('pwInput');
     const icon  = document.getElementById('eyeIcon');
@@ -372,7 +414,6 @@ document.getElementById('userCreateForm').addEventListener('submit', function(e)
     function setError(inputId, errorId, msg) {
         const input = document.getElementById(inputId);
         const error = document.getElementById(errorId);
-        // Hanya tampilkan error JS jika belum ada error backend
         if (error && error.style.display === 'none') {
             if (msg) {
                 input.classList.add('is-error');
@@ -386,7 +427,7 @@ document.getElementById('userCreateForm').addEventListener('submit', function(e)
         }
     }
 
-    // Reset error JS (jangan sentuh yg dari backend)
+    // Reset error JS
     ['errorName','errorEmail','errorPassword'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = 'none';
@@ -426,7 +467,5 @@ document.getElementById('userCreateForm').addEventListener('submit', function(e)
         }
     });
 });
-
 </script>
-</body>
-</html>
+@endpush

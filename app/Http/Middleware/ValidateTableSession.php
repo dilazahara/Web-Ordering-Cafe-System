@@ -11,6 +11,12 @@ class ValidateTableSession
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // ✅ TAKE AWAY: Jika request POST dengan order_type=take_away,
+        // skip validasi meja karena tidak perlu nomor meja.
+        if ($request->isMethod('POST') && $request->input('order_type') === 'take_away') {
+            return $next($request);
+        }
+
         $tableNumber  = session('table_number');
         $sessionToken = session('table_scan_token');
 

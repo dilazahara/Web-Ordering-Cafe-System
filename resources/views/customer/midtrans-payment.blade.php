@@ -213,7 +213,9 @@
 
 <script>
 const SNAP_TOKEN  = @json($snapToken);
-const CONFIRM_URL = @json(route('customer.order.midtrans.confirm', $order->id));
+const CONFIRM_URL =
+    window.location.origin +
+    '/customer/order/midtrans/{{ $order->id }}/confirm';
 const RECEIPT_URL = @json(route('customer.order.midtrans.receipt', $order->id));
 const CSRF_TOKEN  = @json(csrf_token());
 
@@ -234,6 +236,34 @@ function tampilSukses(redirectUrl) {
     }, 2000);
 }
 
+// ── Helper: panggil CheckStatus ke server lalu update DB ──────────────────
+// ✅ FIX: Dipanggil di onSuccess agar status order berubah ke 'process'
+//         sebelum user diarahkan ke receipt page. Tanpa ini, receipt akan
+//         menampilkan "Menunggu Verifikasi" karena order masih 'waiting_payment'.
+async function konfirmasiKeBayar() {
+    try {
+        const res = await fetch(CONFIRM_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': CSRF_TOKEN,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+            // DB sudah terupdate — redirect ke URL yang diberikan server
+            tampilSukses(data.redirect || RECEIPT_URL);
+            return;
+        }
+    } catch(e) {
+        // Jaringan error atau server error — tetap lanjut ke receipt,
+        // polling di receipt page yang akan mengurus update status.
+    }
+    // Fallback: langsung ke receipt, polling di sana yang akan handle
+    tampilSukses(RECEIPT_URL);
+}
+
 // ── Buka Snap ─────────────────────────────────────────────────────────────
 function bukaSnap() {
     if (!SNAP_TOKEN || typeof window.snap === 'undefined') {
@@ -244,9 +274,13 @@ function bukaSnap() {
 
     window.snap.pay(SNAP_TOKEN, {
 
-        // User klik OK setelah "Payment successfully" di simulator
-        onSuccess: function(result) {
-            tampilSukses(RECEIPT_URL);
+        // ✅ FIX: Sebelumnya hanya tampilSukses(RECEIPT_URL) — langsung redirect
+        //         tanpa memanggil server. Akibatnya order.status masih 'waiting_payment'
+        //         saat receipt page dibuka, sehingga tampil "Menunggu Verifikasi".
+        //         Sekarang: panggil konfirmasiKeBayar() yang hit endpoint CheckStatus,
+        //         barulah server mengubah status ke 'process' dan mengembalikan redirect URL.
+        onSuccess: async function(result) {
+            await konfirmasiKeBayar();
         },
 
         // Pembayaran pending (VA Bank dll) — mulai polling di background
@@ -293,10 +327,15 @@ function bersihkanCart() {
 }
 
 // ── Polling untuk pembayaran pending (VA Bank) ────────────────────────────
+let sedangCheck = false;
+
 async function cekKonfirmasi() {
-    if (paymentDone) return;
+    if (paymentDone || sedangCheck) return;
+
+    sedangCheck = true;
+
     try {
-        const res  = await fetch(CONFIRM_URL, {
+        const res = await fetch(CONFIRM_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -304,6 +343,7 @@ async function cekKonfirmasi() {
                 'Accept': 'application/json'
             }
         });
+
         const data = await res.json();
 
         if (data.status === 'ok') {
@@ -311,11 +351,26 @@ async function cekKonfirmasi() {
         } else if (data.status === 'cancelled') {
             window.location.href = '/';
         }
-    } catch(e) { /* abaikan error jaringan sementara */ }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        sedangCheck = false;
+    }
 }
+let pollingTimer = null;
 
 function mulaiPolling() {
-    setInterval(cekKonfirmasi, 5000);
+    if (pollingTimer) return;
+
+    pollingTimer = setInterval(() => {
+        if (paymentDone) {
+            clearInterval(pollingTimer);
+            pollingTimer = null;
+            return;
+        }
+
+        cekKonfirmasi();
+    }, 5000);
 }
 
 // Cek saat user balik ke tab (e.g. setelah bayar di GoPay)

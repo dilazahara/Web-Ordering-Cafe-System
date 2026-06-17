@@ -36,7 +36,7 @@
                 <th width="12%">Waktu Transaksi</th>
                 <th width="8%">ID Order</th>
                 <th width="11%">Nama Pemesan</th>
-                <th width="9%">Meja</th>
+                <th width="9%">Tipe & Meja</th>
                 <th width="22%">Detail Pesanan</th>
                 <th width="9%">Metode</th>
                 <th width="9%">Status</th>
@@ -87,14 +87,25 @@
                 <td>{{ $order->customer_name ?: '—' }}</td>
 
                 <td class="text-center">
-                    {{ $order->table_number ? 'Meja ' . $order->table_number : 'Take Away' }}
+                    @if(($order->order_type ?? 'dine_in') === 'take_away')
+                        Take Away
+                    @else
+                        Dine In<br>
+                        <span style="color:#888;">Meja {{ $order->table_number ?? '—' }}</span>
+                    @endif
                 </td>
 
                 <td>
                     @if($order->items && $order->items->count() > 0)
                         <ul class="item-list">
                             @foreach($order->items as $item)
-                                <li>{{ $item->qty ?? $item->quantity ?? 1 }}x {{ $item->menu->name ?? $item->name ?? $item->menu_name ?? '-' }}</li>
+                                <li>
+                                    {{ $item->qty ?? $item->quantity ?? 1 }}x {{ $item->menu->name ?? $item->name ?? $item->menu_name ?? '-' }}
+                                    {{-- ✅ FIX: tampilkan add-on di laporan PDF --}}
+                                    @if(!empty($item->addon_details))
+                                    <span style="color:#f97316;font-size:9px;"> ({{ collect($item->addon_details)->pluck('name')->join(', ') }})</span>
+                                    @endif
+                                </li>
                             @endforeach
                         </ul>
                     @else

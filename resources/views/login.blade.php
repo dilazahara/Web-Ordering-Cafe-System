@@ -798,9 +798,7 @@
             </button>
         </form>
 
-        <div class="register">
-            Belum punya akun? <a href="#">Hubungi Admin</a>
-        </div>
+      
     </div>{{-- end modal-box --}}
 </div>{{-- end modal-overlay --}}
 

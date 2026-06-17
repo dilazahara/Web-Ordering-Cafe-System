@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,8 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Force HTTPS saat diakses via ngrok
-        if (str_contains(request()->getHost(), 'ngrok-free.dev')) {
+        if (app()->environment('production')) {
             URL::forceScheme('https');
         }
     }

@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
 Route::post('/midtrans/webhook', [CustomerOrderController::class, 'webhook'])
     ->name('midtrans.webhook');
 
+
 // ══════════════════════════════════════════════════════
 // CUSTOMER
 // ══════════════════════════════════════════════════════
@@ -110,6 +111,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/order/midtrans/{id}',          [CustomerOrderController::class, 'midtransPayment'])->name('order.midtrans.payment');
         Route::post('/order/midtrans/{id}/confirm', [CustomerOrderController::class, 'midtransCheckStatus'])->name('order.midtrans.confirm');
         Route::get('/order/midtrans/{id}/receipt',  [CustomerOrderController::class, 'midtransReceipt'])->name('order.midtrans.receipt');
+        Route::post('order/{id}/midtrans/confirm',[CustomerOrderController::class, 'midtransConfirm'])->name('customer.order.midtrans.confirm');
 
         // ── Success (fallback cash) ───────────────────────────────────────
         Route::get('/order/success/{id}', [CustomerOrderController::class, 'success'])->name('order.success');
@@ -156,6 +158,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/addons/edit/{id}',    [AddOnsController::class, 'edit'])->name('addons.edit');
     Route::put('/addons/update/{id}',  [AddOnsController::class, 'update'])->name('addons.update');
     Route::post('/addons/delete/{id}', [AddOnsController::class, 'destroy'])->name('addons.delete');
+    Route::get('/addon-groups/{id}/edit', [AddonGroupController::class, 'edit'])->name('addon-groups.edit');
+    Route::put('/addon-groups/{id}', [AddonGroupController::class, 'update'])->name('addon-groups.update');
+    Route::delete('/addon-groups/{id}', [AddonGroupController::class, 'destroy']) ->name('addon-groups.destroy');
 
     // ── MEJA ──────────────────────────────────────────
     Route::get('/meja',                [MejaController::class, 'index'])->name('meja.index');
@@ -213,6 +218,7 @@ Route::middleware(['auth', 'role:kasir'])->prefix('kasir')->name('kasir.')->grou
 
     Route::patch('/pesanan/{id}/konfirmasi', [KasirController::class, 'konfirmasi'])->name('konfirmasi');
     Route::patch('/pesanan/{id}/selesai',    [KasirController::class, 'selesai'])->name('selesai');
+    Route::patch('/pesanan/{id}/diambil', [KasirController::class, 'tandaiDiambil'])->name('diambil');
 
     Route::get('/account/profil',           [AccountKasirController::class, 'profil'])->name('account.profil');
     Route::put('/account/update',           [AccountKasirController::class, 'updateProfil'])->name('account.update');

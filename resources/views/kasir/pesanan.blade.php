@@ -499,77 +499,135 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
 
   @forelse($orders as $idx => $order)
   @php
+    /*
+     * ═══════════════════════════════════════════════════════════
+     * STATUS FLOW FINAL (semua metode pembayaran mengikuti alur ini):
+     * pending -> waiting_payment -> paid -> process
+     *   -> ready_delivery (Dine In) / ready_pickup (Take Away)
+     *   -> delivered (Dine In selesai) / completed (Take Away diambil)
+     * ═══════════════════════════════════════════════════════════
+     */
     $midtransMethods = ['gopay','ovo','dana','shopeepay','bca','bni','bri','mandiri','permata','credit_card','midtrans'];
     $isMidtrans = in_array($order->payment_method, $midtransMethods);
+    $isCash     = $order->payment_method === 'cash';
+    $isQris     = $order->payment_method === 'qris';
+    $status     = $order->status;
 
-    if ($order->payment_method === 'cash' && $order->status === 'pending') {
+    // Kelompok status — dipakai konsisten untuk semua metode pembayaran
+    $isAwaitingPayment = in_array($status, ['pending', 'waiting_payment']);
+    $isPaid            = $status === 'paid';
+    $isCooking         = $status === 'process';
+    $isReadyDelivery   = $status === 'ready_delivery';
+    $isReadyPickup     = $status === 'ready_pickup';
+    $isDelivered       = $status === 'delivered';
+    $isCompleted       = $status === 'completed';
+    $isReady           = $isReadyDelivery || $isReadyPickup;
+    $isFinished        = $isDelivered || $isCompleted;
+
+    if ($isCash && $isAwaitingPayment) {
       $cardClass   = 'is-pending-cash';
       $stripeClass = 'stripe-urgent';
       $badgeClass  = 'table-badge-urgent';
       $filterState = 'urgent pending';
-    } elseif ($order->payment_method === 'cash' && $order->status === 'process') {
+    } elseif ($isCash && ($isPaid || $isCooking)) {
       $cardClass   = 'is-cash-paid';
       $stripeClass = 'stripe-process';
       $badgeClass  = 'table-badge-process';
       $filterState = 'process';
-    } elseif ($order->payment_method === 'cash' && in_array($order->status, ['done','delivered'])) {
+    } elseif ($isCash && $isReady) {
       $cardClass   = 'is-cash-paid';
       $stripeClass = 'stripe-done';
       $badgeClass  = 'table-badge-done';
-      $filterState = 'done';
-    } elseif ($order->payment_method === 'qris' && $order->status === 'pending') {
+      $filterState = $status; // ready_delivery / ready_pickup
+    } elseif ($isCash && $isFinished) {
+      $cardClass   = 'is-cash-paid';
+      $stripeClass = 'stripe-done';
+      $badgeClass  = 'table-badge-done';
+      $filterState = $status; // delivered / completed
+    } elseif ($isQris && $isAwaitingPayment) {
       $cardClass   = 'is-qris';
       $stripeClass = 'stripe-qris';
       $badgeClass  = 'table-badge-qris';
       $filterState = 'pending';
-    } elseif ($order->payment_method === 'qris' && $order->status === 'process') {
+    } elseif ($isQris && ($isPaid || $isCooking)) {
       $cardClass   = 'is-qris';
       $stripeClass = 'stripe-process';
       $badgeClass  = 'table-badge-process';
       $filterState = 'process';
-    } elseif ($order->payment_method === 'qris' && in_array($order->status, ['done','delivered'])) {
+    } elseif ($isQris && $isReady) {
       $cardClass   = 'is-qris';
       $stripeClass = 'stripe-done';
       $badgeClass  = 'table-badge-done';
-      $filterState = 'done';
-    } elseif ($isMidtrans && $order->status === 'waiting_payment') {
+      $filterState = $status;
+    } elseif ($isQris && $isFinished) {
+      $cardClass   = 'is-qris';
+      $stripeClass = 'stripe-done';
+      $badgeClass  = 'table-badge-done';
+      $filterState = $status;
+    } elseif ($isMidtrans && $isAwaitingPayment) {
       $cardClass   = 'is-midtrans-waiting';
       $stripeClass = 'stripe-pending';
       $badgeClass  = 'table-badge-pending';
       $filterState = 'pending';
-    } elseif ($isMidtrans && $order->status === 'process') {
+    } elseif ($isMidtrans && ($isPaid || $isCooking)) {
       $cardClass   = 'is-midtrans-paid';
       $stripeClass = 'stripe-process';
       $badgeClass  = 'table-badge-process';
       $filterState = 'process';
-    } elseif ($isMidtrans && in_array($order->status, ['done','delivered'])) {
+    } elseif ($isMidtrans && $isReady) {
       $cardClass   = 'is-midtrans-paid';
       $stripeClass = 'stripe-done';
       $badgeClass  = 'table-badge-done';
-      $filterState = 'done';
+      $filterState = $status;
+    } elseif ($isMidtrans && $isFinished) {
+      $cardClass   = 'is-midtrans-paid';
+      $stripeClass = 'stripe-done';
+      $badgeClass  = 'table-badge-done';
+      $filterState = $status;
     } else {
+      // fallback untuk metode/status yang tidak terdefinisi
       $cardClass   = '';
       $stripeClass = 'stripe-pending';
       $badgeClass  = 'table-badge-pending';
       $filterState = 'pending';
     }
 
-    // Label metode pembayaran Midtrans
-    $midtransLabel = match($order->payment_method) {
-      'gopay'       => '💚 GoPay',
-      'ovo'         => '🟣 OVO',
-      'dana'        => '🔵 DANA',
-      'shopeepay'   => '🟠 ShopeePay',
-      'bca'         => '🏦 VA BCA',
-      'bni'         => '🏦 VA BNI',
-      'bri'         => '🏦 VA BRI',
-      'mandiri'     => '🏦 Mandiri',
-      'permata'     => '🏦 Permata',
-      'credit_card' => '💳 Kartu Kredit',
-      default       => '💳 Midtrans',
-    };
+    // Label metode pembayaran — gabungkan emoji bawaan + nama dari DB (fallback)
+    $pmEmoji = [
+      'gopay'       => '💚',
+      'ovo'         => '🟣',
+      'dana'        => '🔵',
+      'shopeepay'   => '🟠',
+      'bca'         => '🏦',
+      'bni'         => '🏦',
+      'bri'         => '🏦',
+      'mandiri'     => '🏦',
+      'permata'     => '🏦',
+      'credit_card' => '💳',
+      'qris'        => '📱',
+      'midtrans'    => '💳',
+    ];
+    $pmNamaDefault = [
+      'gopay'       => 'GoPay',
+      'ovo'         => 'OVO',
+      'dana'        => 'DANA',
+      'shopeepay'   => 'ShopeePay',
+      'bca'         => 'VA BCA',
+      'bni'         => 'VA BNI',
+      'bri'         => 'VA BRI',
+      'mandiri'     => 'Mandiri',
+      'permata'     => 'Permata',
+      'credit_card' => 'Kartu Kredit',
+      'qris'        => 'QRIS',
+      'midtrans'    => 'Online',
+    ];
+    $kode = $order->payment_method;
+    // Ambil nama dari DB jika ada, fallback ke nama default, fallback ke kode
+    $pmNamaDari = $paymentMethodMap[$kode]->nama ?? ($pmNamaDefault[$kode] ?? ucfirst($kode));
+    $pmEmojiDari = $pmEmoji[$kode] ?? '💳';
+    $midtransLabel = $pmEmojiDari . ' ' . $pmNamaDari;
 
-    $urgentClass = ($order->payment_method === 'cash' && $order->status === 'pending') ? ' is-new-urgent' : '';
+    $urgentClass = ($isCash && $status === 'pending') ? ' is-new-urgent' : '';
 
     $minutesAgo = $order->created_at->diffInMinutes(now());
     if ($minutesAgo < 5)       { $elapsedClass = 'elapsed-urgent'; $elapsedText = 'Baru '.$minutesAgo.'m lalu'; }
@@ -582,11 +640,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
   <div
     class="order-card {{ $cardClass }}{{ $urgentClass }}"
     data-state="{{ $filterState }}"
-    data-table="{{ $order->table_number ?? '' }}"
+    data-table="{{ ($order->order_type ?? 'dine_in') === 'take_away' ? 'take away' : ($order->table_number ?? '') }}"
     data-queue="{{ $queueNum }}"
     data-total="{{ $order->total }}"
     data-created="{{ $order->created_at->timestamp }}"
-    data-search="{{ strtolower(($order->table_number ?? '') . ' ' . $queueNum . ' ' . ($order->customer_name ?? '') . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
+    data-search="{{ strtolower((($order->order_type ?? 'dine_in') === 'take_away' ? 'take away takeaway' : ($order->table_number ?? '')) . ' ' . $queueNum . ' ' . ($order->customer_name ?? '') . ' ' . ($order->note ?? '') . ' ' . implode(' ', $order->items ? $order->items->pluck('name')->toArray() : [])) }}"
     style="animation-delay: {{ $idx * 0.05 }}s"
   >
     {{-- COLORED STATUS STRIPE --}}
@@ -600,7 +658,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
       <div class="oc-left">
         <div class="table-badge {{ $badgeClass }}">🍽️</div>
         <div class="oc-info">
-          <h3>Meja {{ $order->table_number ?? '—' }}</h3>
+          @if(($order->order_type ?? 'dine_in') === 'take_away')
+            <h3>🛍️ Take Away</h3>
+          @else
+            <h3>Meja {{ $order->table_number ?? '—' }}</h3>
+          @endif
           <div class="oc-meta">
             <span class="oc-time-inline">{{ $order->created_at->translatedFormat('H:i') }}</span>
             <span class="elapsed-badge {{ $elapsedClass }}">{{ $elapsedText }}</span>
@@ -614,9 +676,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         </div>
       </div>
       <div class="oc-right">
-        @if($order->payment_method === 'cash')
+        @if($isCash)
           <span class="pay-badge pay-cash">💵 Cash</span>
-        @elseif($order->payment_method === 'qris')
+        @elseif($isQris)
           <span class="pay-badge pay-qris">📱 QRIS</span>
         @elseif($isMidtrans)
           <span class="pay-badge" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
@@ -634,13 +696,26 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
               {{ !empty($item->name) ? $item->name : ($item->menu->name ?? '-') }}
               <span class="item-qty">×{{ $item->qty ?? 1 }}</span>
             </div>
+            @if(!empty($item->addon_details))
+              <div class="item-notes-small" style="color:#f97316;">
+                🧩 {{ collect($item->addon_details)->pluck('name')->join(', ') }}
+              </div>
+            @endif
             @if(!empty($item->notes))
               <div class="item-notes-small">📝 {{ $item->notes }}</div>
             @endif
           </div>
-          <span class="item-price">
-            Rp {{ number_format(($item->subtotal > 0 ? $item->subtotal : (($item->price ?? 0) * ($item->qty ?? 1))), 0, ',', '.') }}
-          </span>
+          <div style="text-align:right;">
+            @if(!empty($item->addon_details) && $item->addon_price > 0)
+            <div style="font-size:10px;color:#94a3b8;line-height:1.3;">
+              Rp {{ number_format($item->base_price ?? ($item->price ?? 0), 0, ',', '.') }}
+              +Rp {{ number_format($item->addon_price, 0, ',', '.') }}
+            </div>
+            @endif
+            <span class="item-price">
+              Rp {{ number_format(($item->subtotal > 0 ? $item->subtotal : (($item->price ?? 0) * ($item->qty ?? 1))), 0, ',', '.') }}
+            </span>
+          </div>
         </div>
         @endforeach
       @else
@@ -658,12 +733,20 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
     </div>
 
     {{-- STATUS BANNERS --}}
-    @if($order->payment_method === 'cash' && $order->status === 'pending')
+    @if($isCash && $isAwaitingPayment)
       <div class="cash-alert">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Customer menunjukkan bill — verifikasi nomor antrian &amp; terima uang cash sebelum konfirmasi!
       </div>
-    @elseif($order->payment_method === 'cash' && $order->status === 'process')
+    @elseif($isCash && $isPaid)
+      <div class="lunas-banner lunas-banner-cash">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">LUNAS — Menunggu Dapur Mulai Proses</div>
+          <div class="lunas-banner-sub">Pembayaran cash sudah diterima, pesanan akan segera diproses dapur</div>
+        </div>
+      </div>
+    @elseif($isCash && $isCooking)
       <div class="lunas-banner lunas-banner-cash">
         <div class="lunas-banner-icon">🍳</div>
         <div class="lunas-banner-text">
@@ -671,15 +754,23 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="lunas-banner-sub">Pembayaran cash diterima, pesanan sedang diproses dapur</div>
         </div>
       </div>
-    @elseif($order->payment_method === 'cash' && $order->status === 'done')
+    @elseif($isCash && $isReadyDelivery)
       <div class="lunas-banner lunas-banner-cash">
         <div class="lunas-banner-icon">🍽️</div>
         <div class="lunas-banner-text">
           <div class="lunas-banner-title">SIAP DIANTAR — Menunggu Pelayan</div>
-          <div class="lunas-banner-sub">Makanan sudah selesai dimasak, pelayan sedang mengantar</div>
+          <div class="lunas-banner-sub">Makanan sudah selesai dimasak, pelayan sedang mengantar.</div>
         </div>
       </div>
-    @elseif($order->payment_method === 'cash' && $order->status === 'delivered')
+    @elseif($isCash && $isReadyPickup)
+      <div class="lunas-banner lunas-banner-cash">
+        <div class="lunas-banner-icon">🛍️</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">SIAP DIAMBIL — Menunggu Customer</div>
+          <div class="lunas-banner-sub">Pesanan sudah selesai dimasak dan siap diambil customer.</div>
+        </div>
+      </div>
+    @elseif($isCash && $isDelivered)
       <div class="lunas-banner lunas-banner-cash">
         <div class="lunas-banner-icon">✅</div>
         <div class="lunas-banner-text">
@@ -687,35 +778,81 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="lunas-banner-sub">Transaksi cash selesai sempurna</div>
         </div>
       </div>
-    @elseif($order->payment_method === 'qris' && in_array($order->status, ['process','done','delivered']))
-      <div class="lunas-banner lunas-banner-qris">
-        <div class="lunas-banner-icon">
-          @if($order->status === 'process') 🍳
-          @elseif($order->status === 'done') 🍽️
-          @else ✅
-          @endif
-        </div>
+    @elseif($isCash && $isCompleted)
+      <div class="lunas-banner lunas-banner-cash">
+        <div class="lunas-banner-icon">✅</div>
         <div class="lunas-banner-text">
-          <div class="lunas-banner-title">
-            @if($order->status === 'process') LUNAS — Sedang Dimasak Dapur
-            @elseif($order->status === 'done') SIAP DIANTAR — Menunggu Pelayan
-            @else SELESAI — Pesanan Sudah Diantar
-            @endif
-          </div>
-          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+          <div class="lunas-banner-title">SELESAI — Pesanan Sudah Diambil</div>
+          <div class="lunas-banner-sub">Transaksi cash selesai sempurna</div>
         </div>
       </div>
-    @elseif($order->payment_method === 'qris' && $order->status === 'pending')
+    @elseif($isQris && $isAwaitingPayment)
       <div class="status-info-box box-cash-pending">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Menunggu konfirmasi pembayaran QRIS dari sistem...
       </div>
-    @elseif($isMidtrans && $order->status === 'waiting_payment')
+    @elseif($isQris && $isPaid)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">LUNAS — Menunggu Dapur Mulai Proses</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isQris && $isCooking)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">🍳</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">LUNAS — Sedang Dimasak Dapur</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isQris && $isReadyDelivery)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">🍽️</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">SIAP DIANTAR — Menunggu Pelayan</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isQris && $isReadyPickup)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">🛍️</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">SIAP DIAMBIL — Menunggu Customer</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isQris && $isDelivered)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">SELESAI — Pesanan Sudah Diantar</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isQris && $isCompleted)
+      <div class="lunas-banner lunas-banner-qris">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title">SELESAI — Pesanan Sudah Diambil</div>
+          <div class="lunas-banner-sub">Pembayaran QRIS terverifikasi otomatis</div>
+        </div>
+      </div>
+    @elseif($isMidtrans && $isAwaitingPayment)
       <div class="status-info-box" style="background:#fffbeb;border:1px solid #fde68a;color:#92400e;">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Menunggu pembayaran {{ $midtransLabel }} dari customer...
       </div>
-    @elseif($isMidtrans && $order->status === 'process')
+    @elseif($isMidtrans && $isPaid)
+      <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title" style="color:#065f46;">LUNAS — Menunggu Dapur Mulai Proses</div>
+          <div class="lunas-banner-sub">{{ $midtransLabel }} terverifikasi, menunggu dapur mulai proses</div>
+        </div>
+      </div>
+    @elseif($isMidtrans && $isCooking)
       <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
         <div class="lunas-banner-icon">🍳</div>
         <div class="lunas-banner-text">
@@ -723,7 +860,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="lunas-banner-sub">{{ $midtransLabel }} terverifikasi, pesanan masuk dapur</div>
         </div>
       </div>
-    @elseif($isMidtrans && $order->status === 'done')
+    @elseif($isMidtrans && $isReadyDelivery)
       <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
         <div class="lunas-banner-icon">🍽️</div>
         <div class="lunas-banner-text">
@@ -731,7 +868,15 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="lunas-banner-sub">{{ $midtransLabel }} — makanan siap, pelayan sedang mengantar</div>
         </div>
       </div>
-    @elseif($isMidtrans && $order->status === 'delivered')
+    @elseif($isMidtrans && $isReadyPickup)
+      <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
+        <div class="lunas-banner-icon">🛍️</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title" style="color:#065f46;">SIAP DIAMBIL — Menunggu Customer</div>
+          <div class="lunas-banner-sub">{{ $midtransLabel }} — pesanan sudah selesai dimasak dan siap diambil customer</div>
+        </div>
+      </div>
+    @elseif($isMidtrans && $isDelivered)
       <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
         <div class="lunas-banner-icon">✅</div>
         <div class="lunas-banner-text">
@@ -739,47 +884,81 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
           <div class="lunas-banner-sub">Pesanan sudah diantar ke pelanggan</div>
         </div>
       </div>
+    @elseif($isMidtrans && $isCompleted)
+      <div class="lunas-banner" style="background:#f0fdf4;border:1px solid #a7f3d0;">
+        <div class="lunas-banner-icon">✅</div>
+        <div class="lunas-banner-text">
+          <div class="lunas-banner-title" style="color:#065f46;">SELESAI — {{ $midtransLabel }}</div>
+          <div class="lunas-banner-sub">Pesanan sudah diambil oleh customer</div>
+        </div>
+      </div>
     @endif
 
     {{-- CARD FOOTER --}}
     <div class="order-footer">
       <div class="status-pills">
-        @if($order->payment_method === 'cash' && $order->status === 'pending')
+        @if($isCash && $isAwaitingPayment)
           <span class="pill pill-amber">⏳ Menunggu Bayar</span>
           <span class="pill pill-orange">💵 Cash</span>
-        @elseif($order->payment_method === 'cash' && $order->status === 'process')
+        @elseif($isCash && $isPaid)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-amber">🕐 Menunggu Dapur</span>
+        @elseif($isCash && $isCooking)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-blue">🍳 Diproses Dapur</span>
-        @elseif($order->payment_method === 'cash' && $order->status === 'done')
+        @elseif($isCash && $isReadyDelivery)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-indigo">🍽️ Siap Diantar</span>
-        @elseif($order->payment_method === 'cash' && $order->status === 'delivered')
+        @elseif($isCash && $isReadyPickup)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-indigo">🛍️ Siap Diambil</span>
+        @elseif($isCash && $isDelivered)
           <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
           <span class="pill pill-orange">💵 Cash</span>
-        @elseif($order->payment_method === 'qris' && $order->status === 'pending')
+        @elseif($isCash && $isCompleted)
+          <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
+          <span class="pill pill-orange">💵 Cash</span>
+        @elseif($isQris && $isAwaitingPayment)
           <span class="pill pill-amber">⏳ Menunggu QRIS</span>
           <span class="pill pill-indigo">📱 QRIS</span>
-        @elseif($order->payment_method === 'qris' && $order->status === 'process')
+        @elseif($isQris && $isPaid)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-amber">🕐 Menunggu Dapur</span>
+        @elseif($isQris && $isCooking)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-blue">🔥 Diproses Dapur</span>
-        @elseif($order->payment_method === 'qris' && $order->status === 'done')
+        @elseif($isQris && $isReadyDelivery)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-indigo">🍽️ Siap Diantar</span>
-        @elseif($order->payment_method === 'qris' && $order->status === 'delivered')
+        @elseif($isQris && $isReadyPickup)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-indigo">🛍️ Siap Diambil</span>
+        @elseif($isQris && $isDelivered)
           <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
           <span class="pill pill-indigo">📱 QRIS</span>
-        @elseif($isMidtrans && $order->status === 'waiting_payment')
+        @elseif($isQris && $isCompleted)
+          <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
+          <span class="pill pill-indigo">📱 QRIS</span>
+        @elseif($isMidtrans && $isAwaitingPayment)
           <span class="pill pill-amber">⏳ Menunggu Bayar</span>
           <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
-        @elseif($isMidtrans && $order->status === 'process')
+        @elseif($isMidtrans && $isPaid)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-amber">🕐 Menunggu Dapur</span>
+          <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
+        @elseif($isMidtrans && $isCooking)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-blue">🍳 Diproses Dapur</span>
           <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
-        @elseif($isMidtrans && $order->status === 'done')
+        @elseif($isMidtrans && $isReadyDelivery)
           <span class="pill pill-green">✅ Lunas</span>
           <span class="pill pill-indigo">🍽️ Siap Diantar</span>
           <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
-        @elseif($isMidtrans && $order->status === 'delivered')
+        @elseif($isMidtrans && $isReadyPickup)
+          <span class="pill pill-green">✅ Lunas</span>
+          <span class="pill pill-indigo">🛍️ Siap Diambil</span>
+          <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
+        @elseif($isMidtrans && ($isDelivered || $isCompleted))
           <span class="pill pill-green">✅ Lunas &amp; Selesai</span>
           <span class="pill" style="background:#f0fdf4;color:#065f46;border:1px solid #a7f3d0;">{{ $midtransLabel }}</span>
         @else
@@ -787,26 +966,35 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); colo
         @endif
       </div>
       <div class="action-btns">
-        @if($order->payment_method === 'cash' && $order->status === 'pending')
+        @if($isCash && $isAwaitingPayment)
           <button
             type="button"
             class="act-btn ab-orange"
-            onclick="openCashModal({{ $order->id }}, {{ $order->total }}, '{{ addslashes(($order->order_type ?? 'dine_in') === 'takeaway' ? 'Takeaway' : ($order->table_number ?? '-')) }}')"
+            onclick="openCashModal({{ $order->id }}, {{ $order->total }}, '{{ addslashes(($order->order_type ?? 'dine_in') === 'take_away' ? 'Take Away' : ('Meja ' . ($order->table_number ?? '-'))) }}')"
           >
             💵 Bayar Sekarang
           </button>
-        @elseif($order->status === 'done')
-          <form action="{{ url('/kasir/pesanan/' . $order->id . '/selesai') }}" method="POST" style="display:inline;" class="form-selesai">
-            @csrf
-            @method('PATCH')
-            <button type="submit" class="act-btn ab-success">✅ Selesai Diantar</button>
+        @elseif($isReadyDelivery)
+          <form action="{{ url('/kasir/pesanan/' . $order->id . '/selesai') }}"
+                method="POST"
+                style="display:inline;"
+                class="form-selesai">
+              @csrf
+              @method('PATCH')
+              <button type="submit" class="act-btn ab-success">
+                  ✅ Selesai Diantar
+              </button>
           </form>
-        @elseif($order->status === 'process')
-          <span style="font-size:11px;color:var(--text-muted);font-family:'Inter',sans-serif;">🍳 Sedang dimasak...</span>
-        @elseif($isMidtrans && $order->status === 'waiting_payment')
-          <span style="font-size:11px;color:var(--text-muted);font-family:'Inter',sans-serif;">⏳ Menunggu pembayaran online</span>
-        @elseif($order->status === 'delivered')
-          <span style="font-size:11px;color:var(--green);font-family:'Inter',sans-serif;">✅ Selesai</span>
+        @elseif($isReadyPickup)
+<form action="{{ route('kasir.diambil', $order->id) }}"
+      method="POST"
+      style="display:inline;">
+    @csrf
+    @method('PATCH')
+    <button type="submit" class="act-btn ab-success">
+        ✅ Pesanan Sudah Diambil
+    </button>
+</form>
         @endif
       </div>
     </div>
@@ -1003,9 +1191,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (state.includes('process')) {
       lane = lanes.process;
       counts.process++;
-    } else if (state.includes('done')) {
+
+    } else if (
+        state.includes('done') ||
+        state.includes('ready_delivery') ||
+        state.includes('ready_pickup') ||
+        state.includes('delivered') ||
+        state.includes('picked_up') ||
+        state.includes('completed')
+    ) {
       lane = lanes.done;
       counts.done++;
+
     } else {
       lane = lanes.pending;
       counts.pending++;
@@ -1163,7 +1360,7 @@ function openCashModal(orderId, total, tableLabel) {
   _modalTotal = total;
 
   var labelEl = document.getElementById('modalTableLabel');
-  if (labelEl) labelEl.textContent = 'Meja ' + tableLabel;
+  if (labelEl) labelEl.textContent = tableLabel;
 
   var totalEl = document.getElementById('modalTotalDisplay');
   if (totalEl) totalEl.textContent = formatRp(total);
@@ -1183,7 +1380,7 @@ function openCashModal(orderId, total, tableLabel) {
   var modal = document.getElementById('cashModal');
   if (modal) modal.classList.add('show');
 
-  ksToast('💵 Konfirmasi pembayaran — Meja ' + tableLabel, 'info', 2000);
+  ksToast('💵 Konfirmasi pembayaran — ' + tableLabel, 'info', 2000);
   setTimeout(function() { if (input) input.focus(); }, 280);
 }
 

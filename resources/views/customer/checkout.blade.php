@@ -208,33 +208,52 @@
     </div>
     @endif
 
-    <!-- Meja -->
-    <div class="card px-4 py-4 fade-up shadow-sm flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center">
-                <svg class="w-6 h-6 text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="6" width="18" height="3" rx="1.5"/><path stroke-linecap="round" d="M5 9v9m14-9v9M9 9v5m6-5v5"/>
-                </svg>
+    <!-- ✅ TAKE AWAY: Pilih Jenis Pesanan -->
+    <div class="card px-4 py-4 fade-up shadow-sm">
+        <p class="section-label mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/>
+            </svg>
+            Jenis Pesanan
+        </p>
+        <div class="flex gap-3">
+            {{-- Dine In --}}
+            <div id="opt_dine_in"
+                 onclick="selectOrderType('dine_in')"
+                 class="order-type-card flex-1 border-2 rounded-2xl p-4 cursor-pointer transition-all {{ $defaultOrderType === 'dine_in' ? 'border-orange-400 bg-orange-50' : 'border-gray-200 bg-white' }} {{ !$canDineIn ? 'opacity-40' : '' }}"
+                 @if(!$canDineIn) style="pointer-events:none" @endif>
+                <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-5 h-5 {{ $defaultOrderType === 'dine_in' ? 'text-orange-500' : 'text-gray-400' }}" id="icon_dine_in"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="6" width="18" height="3" rx="1.5"/>
+                        <path stroke-linecap="round" d="M5 9v9m14-9v9M9 9v5m6-5v5"/>
+                    </svg>
+                    <span class="font-bold text-sm {{ $defaultOrderType === 'dine_in' ? 'text-orange-600' : 'text-gray-600' }}" id="label_dine_in">Dine In</span>
+                </div>
+                <p class="text-xs text-gray-400">Makan di tempat</p>
+                @if($canDineIn)
+                    <p class="text-xs font-semibold text-orange-500 mt-1">Meja {{ $tableNumber }}</p>
+                @else
+                    <p class="text-xs text-gray-400 mt-1">Scan QR meja dulu</p>
+                @endif
             </div>
-            <div>
-                <p class="section-label mb-0.5">Nomor Meja</p>
-                <p id="tableNumberDisplay" class="font-extrabold text-lg text-gray-900">
-                    @if($tableNumber) Meja {{ $tableNumber }} @else Belum dipilih @endif
-                </p>
+
+            {{-- Take Away --}}
+            <div id="opt_take_away"
+                 onclick="selectOrderType('take_away')"
+                 class="order-type-card flex-1 border-2 rounded-2xl p-4 cursor-pointer transition-all {{ $defaultOrderType === 'take_away' ? 'border-orange-400 bg-orange-50' : 'border-gray-200 bg-white' }}">
+                <div class="flex items-center gap-2 mb-1">
+                    <svg class="w-5 h-5 {{ $defaultOrderType === 'take_away' ? 'text-orange-500' : 'text-gray-400' }}" id="icon_take_away"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z"/>
+                    </svg>
+                    <span class="font-bold text-sm {{ $defaultOrderType === 'take_away' ? 'text-orange-600' : 'text-gray-600' }}" id="label_take_away">Take Away</span>
+                </div>
+                <p class="text-xs text-gray-400">Dibawa pulang</p>
+                <p class="text-xs text-gray-400 mt-1">Tanpa nomor meja</p>
             </div>
         </div>
-        <a href="/customer/home" class="flex items-center gap-1.5 bg-orange-50 text-orange-600 font-bold text-sm px-4 py-2.5 rounded-2xl active:scale-95 transition-all">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14"/></svg>
-            Menu
-        </a>
     </div>
-
-    @if(!$tableNumber)
-    <div class="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3">
-        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z"/><path stroke-linecap="round" d="M12 15.75h.007v.008H12v-.008z"/></svg>
-        <p class="text-amber-700 text-xs font-semibold">Scan QR Code di meja kamu terlebih dahulu</p>
-    </div>
-    @endif
 
     <!-- Items pesanan -->
     <div class="card px-4 py-4 fade-up shadow-sm">
@@ -339,7 +358,7 @@
         <input type="hidden" name="customer_name"  id="customerNameHidden">
         <input type="hidden" name="payment_method" id="paymentMethodInput" value="{{ $hasCash ? 'cash' : ($hasMidtrans ? $midtransMethod->kode : '') }}">
         <input type="hidden" name="table_number"   id="tableNumberInput"   value="{{ $tableNumber ?? '' }}">
-        <input type="hidden" name="order_type"     value="dine_in">
+        <input type="hidden" name="order_type" id="orderTypeInput" value="{{ $defaultOrderType }}"> {{-- ✅ TAKE AWAY --}}
 
         @if(!$hasCash && !$hasMidtrans)
         <button type="button" disabled class="btn-submit bg-gray-200 text-gray-400 cursor-not-allowed">Tidak Dapat Memesan</button>
@@ -420,14 +439,47 @@ function toast(msg, type = 'info', ms = 2200) {
     setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),280); }, ms);
 }
 
-const serverTableNumber = @json($tableNumber ?? null);
-const hasCash     = @json($hasCash);
-const hasMidtrans = @json($hasMidtrans);
-const midtransKode = @json($hasMidtrans ? $midtransMethod->kode : 'midtrans');
+const serverTableNumber  = @json($tableNumber ?? null);
+const hasCash            = @json($hasCash);
+const hasMidtrans        = @json($hasMidtrans);
+const midtransKode       = @json($hasMidtrans ? $midtransMethod->kode : 'midtrans');
+const canDineIn          = @json($canDineIn);           // ✅ TAKE AWAY
+const defaultOrderType   = @json($defaultOrderType);    // ✅ TAKE AWAY
 
 let cart = JSON.parse(localStorage.getItem('checkoutCart')) || JSON.parse(localStorage.getItem('cart')) || [];
-let selType = hasCash ? 'kasir' : 'midtrans';
-let selKode = hasCash ? 'cash' : midtransKode;
+let selType      = hasCash ? 'kasir' : 'midtrans';
+let selKode      = hasCash ? 'cash' : midtransKode;
+let selOrderType = defaultOrderType; // ✅ TAKE AWAY
+
+// ✅ TAKE AWAY: Pilih jenis pesanan (Dine In / Take Away)
+function selectOrderType(type, silent) {
+    selOrderType = type;
+    document.getElementById('orderTypeInput').value = type;
+
+    ['dine_in', 'take_away'].forEach(t => {
+        const card  = document.getElementById('opt_' + t);
+        const icon  = document.getElementById('icon_' + t);
+        const label = document.getElementById('label_' + t);
+        if (!card) return;
+        if (t === type) {
+            card.classList.remove('border-gray-200', 'bg-white');
+            card.classList.add('border-orange-400', 'bg-orange-50');
+            if (icon)  { icon.classList.remove('text-gray-400');  icon.classList.add('text-orange-500'); }
+            if (label) { label.classList.remove('text-gray-600'); label.classList.add('text-orange-600'); }
+        } else {
+            card.classList.remove('border-orange-400', 'bg-orange-50');
+            card.classList.add('border-gray-200', 'bg-white');
+            if (icon)  { icon.classList.remove('text-orange-500'); icon.classList.add('text-gray-400'); }
+            if (label) { label.classList.remove('text-orange-600'); label.classList.add('text-gray-600'); }
+        }
+    });
+
+    // Disable tableNumberInput saat take_away agar tidak ikut terkirim ke server
+    const tnInput = document.getElementById('tableNumberInput');
+    if (tnInput) tnInput.disabled = (type === 'take_away');
+
+    if (!silent) toast(type === 'take_away' ? '🛍️ Take Away dipilih' : '🪑 Dine In dipilih', 'info', 1500);
+}
 
 // Init
 (function(){
@@ -436,6 +488,7 @@ let selKode = hasCash ? 'cash' : midtransKode;
     document.getElementById('paymentMethodInput').value = selKode;
     renderCart();
     updatePayUI(selType);
+    selectOrderType(selOrderType, true); // ✅ TAKE AWAY: terapkan default
 })();
 
 function selectPayment(kode, type) {
@@ -485,22 +538,27 @@ function renderCart() {
         detail.innerHTML = '';
         updateTotals(0); return;
     }
-    container.innerHTML = cart.map(item => {
+    container.innerHTML = cart.map((item, idx) => {
         subtotal += item.price * item.quantity;
         const img = item.image ? `/storage/${item.image}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=ffecd2&color=f97316&bold=true&size=56`;
-        return `<div class="flex gap-3 items-center py-1" id="row_${item.id}">
+        const addonLabel = item.addons && item.addons.length
+            ? `<p class="text-gray-400 text-xs mt-0.5">${item.addons.map(a=>a.name).join(', ')}</p>`
+            : '';
+        const key = esc(item.cartKey || String(item.id));
+        return `<div class="flex gap-3 items-center py-1" id="row_${key}">
             <img src="${img}" class="w-14 h-14 rounded-2xl object-cover flex-shrink-0 border border-gray-100">
             <div class="flex-1 min-w-0">
                 <p class="font-bold text-sm text-gray-900 truncate">${item.name}</p>
+                ${addonLabel}
                 <p class="text-orange-500 font-extrabold text-xs mt-0.5">Rp ${item.price.toLocaleString('id-ID')}</p>
                 <input type="text" value="${esc(item.notes||'')}" placeholder="Catatan item ini..."
-                    oninput="updateNote(${item.id}, this.value)"
+                    oninput="updateNote('${key}', this.value)"
                     class="mt-1 w-full bg-gray-50 border border-gray-200 rounded-xl px-2.5 py-1.5 text-xs focus:outline-none focus:border-orange-300 transition-colors">
             </div>
             <div class="qty-pill flex-shrink-0">
-                <button onclick="changeQty(${item.id},-1)" class="q-btn">−</button>
+                <button onclick="changeQty('${key}',-1)" class="q-btn">−</button>
                 <span class="text-sm font-extrabold text-gray-800 w-6 text-center">${item.quantity}</span>
-                <button onclick="changeQty(${item.id},1)" class="q-btn plus">+</button>
+                <button onclick="changeQty('${key}',1)" class="q-btn plus">+</button>
             </div>
         </div>`;
     }).join('');
@@ -517,14 +575,15 @@ function updateTotals(s) {
     document.getElementById('grandTotal').textContent = 'Rp ' + (s+2000).toLocaleString('id-ID');
 }
 
-function changeQty(id, d) {
-    const item = cart.find(i=>i.id===id);
+function changeQty(key, d) {
+    // Support cartKey (baru) dan id lama untuk backward-compat
+    const item = cart.find(i=>(i.cartKey||String(i.id))===String(key));
     if(!item) return;
     item.quantity += d;
-    if(item.quantity <= 0) { cart = cart.filter(i=>i.id!==id); toast('Item dihapus','warning'); }
+    if(item.quantity <= 0) { cart = cart.filter(i=>(i.cartKey||String(i.id))!==String(key)); toast('Item dihapus','warning'); }
     saveCart(); renderCart();
 }
-function updateNote(id, v) { const i = cart.find(x=>x.id===id); if(i){i.notes=v;saveCart();} }
+function updateNote(key, v) { const i = cart.find(x=>(x.cartKey||String(x.id))===String(key)); if(i){i.notes=v;saveCart();} }
 function saveCart() { localStorage.setItem('checkoutCart', JSON.stringify(cart)); localStorage.setItem('cart', JSON.stringify(cart)); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -539,8 +598,11 @@ function openConfirmPopup() {
         document.getElementById('errCustomerName').classList.add('show');
         toast('Nama pelanggan wajib diisi!','error',2800); return;
     }
-    const tn = document.getElementById('tableNumberInput').value;
-    if(!tn) { toast('Scan QR Code meja dulu!','warning',2800); return; }
+    // ✅ TAKE AWAY: Validasi meja hanya untuk Dine In
+    if (selOrderType === 'dine_in') {
+        const tn = document.getElementById('tableNumberInput').value;
+        if(!tn) { toast('Scan QR Code meja dulu untuk Dine In!','warning',2800); return; }
+    }
 
     // Sesuaikan warna & teks tombol dengan metode bayar
     const isMidtrans = selType === 'midtrans';
@@ -566,6 +628,7 @@ function doSubmitOrder() {
     document.getElementById('noteHidden').value = document.getElementById('noteInput').value;
     document.getElementById('customerNameHidden').value = document.getElementById('customerNameInput').value.trim();
     document.getElementById('paymentMethodInput').value = selKode;
+    document.getElementById('orderTypeInput').value = selOrderType; // ✅ TAKE AWAY
 
     toast(selType === 'midtrans' ? 'Mengarahkan ke pembayaran... 💳' : 'Memproses pesanan... 🍽️','success',2500);
     const btn = document.getElementById('btnSubmitOrder');

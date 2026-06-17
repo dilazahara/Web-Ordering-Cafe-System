@@ -1,135 +1,214 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Edit Kategori</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest"></script>
+@extends('layouts.admin')
+
+@section('title', 'Edit Kategori')
+
+@push('styles')
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-body { background: #f3f4f6; min-height: 100vh; padding: 50px 20px; }
+/* ── LAYOUT & CARDS ── */
+.form-page-wrap { max-width: 560px; margin: 0 auto; padding-bottom: 40px; }
+.page-header { margin-bottom: 24px; }
+.page-title h1 { font-size: 24px; font-weight: 800; color: var(--text-dark, #111827); margin: 0 0 6px; }
+.page-title p { color: var(--text-muted, #6b7280); font-size: 14.5px; margin: 0; }
 
-.container { max-width: 480px; margin: auto; }
+.form-layout { display: flex; flex-direction: column; gap: 24px; }
 
-.back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #6b7280; text-decoration: none; margin-bottom: 20px; transition: color .15s; }
-.back-link:hover { color: #111827; }
+.section-card {
+    background: var(--bg, #ffffff);
+    border: 1px solid var(--border-light, #e5e7eb);
+    border-radius: var(--radius-xl, 16px);
+    padding: 24px 28px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.2s ease;
+}
+.section-card:hover { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05); }
 
-.card { background: white; padding: 32px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+.section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 24px; padding-bottom: 16px;
+    border-bottom: 1.5px dashed var(--border-light, #e5e7eb);
+}
+.section-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: #eef2ff; color: #4f46e5;
+    display: flex; align-items: center; justify-content: center;
+}
+.section-icon svg { width: 22px; height: 22px; stroke-width: 2.2; }
+.section-title-wrap h2 { font-size: 17px; font-weight: 700; color: var(--text-dark, #1f2937); margin: 0 0 3px; }
+.section-title-wrap p { font-size: 13px; color: var(--text-muted, #6b7280); margin: 0; }
 
-.title { margin-bottom: 28px; }
-.title h2 { font-size: 26px; color: #111827; font-weight: 800; }
-.title p  { margin-top: 5px; color: #6b7280; font-size: 13.5px; }
-
-.divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; }
-.divider span { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: .8px; white-space: nowrap; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
-
-.form-group { margin-bottom: 16px; }
-.form-label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; color: #111827; }
-.form-input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1.5px solid #e5e7eb; background: #f9fafb; font-size: 14px; color: #111827; outline: none; transition: .2s; font-family: 'Plus Jakarta Sans', sans-serif; }
-.form-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+/* ── FORM ELEMENTS ── */
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 700; color: #374151; }
+.form-input {
+    width: 100%; padding: 12px 16px; border-radius: var(--radius-lg, 12px); 
+    border: 1.5px solid var(--border, #d1d5db); background: #fafafa; 
+    font-size: var(--text-md, 15px); color: var(--text-dark, #1f2937); font-family: var(--font);
+    outline: none; transition: all .2s ease;
+}
+.form-input:focus { border-color: #6366f1; background: white; box-shadow: 0 0 0 4px rgba(99,102,241,0.1); }
 .form-input::placeholder { color: #9ca3af; }
-.form-input.is-invalid { border-color: #ef4444 !important; background: #fff5f5 !important; }
-.field-error { color: #ef4444; font-size: 12px; margin-top: 5px; display: none; }
 
-/* INFO BOX */
-.info-box { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 12px; padding: 14px 16px; margin-top: 4px; }
-.info-row { display: flex; justify-content: space-between; font-size: 13px; color: #6b7280; padding: 3px 0; }
-.info-row span { font-weight: 700; color: #111827; }
+/* ── INPUT ERROR STATE ── */
+.form-input.is-invalid {
+    border-color: #ef4444 !important; background: #fff5f5 !important;
+    box-shadow: 0 0 0 4px rgba(239,68,68,0.1) !important;
+}
+.field-error {
+    color: #ef4444; font-size: 13px; margin-top: 6px; font-weight: 500;
+    display: flex; align-items: center; gap: 5px;
+}
+.field-error::before { content: '⚠'; font-size: 12px; }
 
-.alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 12px; padding: 12px 16px; font-size: 13px; font-weight: 600; margin-bottom: 20px; }
+/* ── INFO BOX ── */
+.info-box { 
+    background: #f8fafc; border: 1px dashed #cbd5e1; 
+    border-radius: var(--radius-lg, 12px); padding: 16px 18px; 
+}
+.info-row { display: flex; justify-content: space-between; font-size: 14px; color: #64748b; padding: 6px 0; }
+.info-row span { font-weight: 700; color: #334155; }
+.info-row:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
 
-.button-group { display: flex; gap: 12px; margin-top: 28px; }
-.btn { flex: 1; padding: 13px; border-radius: 14px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; transition: all .2s; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-family: 'Plus Jakarta Sans', sans-serif; }
-.btn i { width: 16px; height: 16px; }
-.btn-save { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; box-shadow: 0 8px 20px rgba(99,102,241,0.25); }
-.btn-save:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(99,102,241,0.3); }
-.btn-back { background: white; color: #374151; border: 1.5px solid #e5e7eb; }
-.btn-back:hover { background: #f9fafb; }
-.btn-delete-full { width: 100%; margin-top: 12px; padding: 12px; border-radius: 14px; border: 1.5px solid #fee2e2; background: white; color: #dc2626; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: 'Plus Jakarta Sans', sans-serif; transition: all .18s; }
-.btn-delete-full:hover { background: #fef2f2; border-color: #fca5a5; }
+/* ── BUTTONS ── */
+.btn-group { display: flex; gap: 16px; margin-top: 8px; }
+.btn-save {
+    flex: 1; padding: 14px; border-radius: var(--radius-xl, 14px); border: none;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--font);
+    background: #4f46e5;
+    color: white; box-shadow: 0 4px 12px rgba(79,70,229,.25);
+    transition: all .2s;
+}
+.btn-save:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79,70,229,.35); }
+.btn-save svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.btn-back {
+    flex: 1; padding: 14px; border-radius: var(--radius-xl, 14px);
+    border: 1.5px solid #d1d5db; font-size: 16px; font-weight: 700;
+    background: white; color: #4b5563; cursor: pointer; font-family: var(--font);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; transition: all .2s;
+}
+.btn-back:hover { background: #f3f4f6; color: #1f2937; border-color: #9ca3af; }
 
-@media(max-width:480px) { .button-group { flex-direction: column; } }
+@media(max-width:480px) {
+    .btn-group { flex-direction: column; }
+    .section-card { padding: 20px; }
+}
 </style>
-</head>
-<body>
-<div class="container">
+@endpush
 
-    <a href="/admin/kategori" class="back-link">
-    </a>
+@section('content')
+<div class="form-page-wrap">
 
-    <div class="card">
-        <div class="title">
-            <h2>Edit Kategori</h2>
-            <p>Perbarui nama kategori menu</p>
+    <div class="page-header">
+        <div class="page-title">
+            <h1>Edit Kategori</h1>
+            <p>Perbarui informasi nama kategori menu Anda.</p>
         </div>
+    </div>
 
-        @if($errors->any())
-        <div class="alert-error">{{ $errors->first() }}</div>
-        @endif
+    @if($errors->any())
+    <div class="alert alert-error" style="background:#fef2f2; color:#dc2626; border:1px solid #fee2e2; border-radius:14px; padding:16px 20px; margin-bottom:24px; box-shadow: 0 2px 10px rgba(220,38,38,0.05);">
+        <div style="font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="alert-triangle" style="width:18px; height:18px;"></i>
+            Terdapat kesalahan input:
+        </div>
+        <div style="margin:0; font-size:14px; line-height:1.6; padding-left:26px;">
+            {{ $errors->first() }}
+        </div>
+    </div>
+    @endif
 
-        <form action="/admin/kategori/update/{{ $kategori->id }}" method="POST" id="kategoriEditForm" novalidate>
+    <form action="/admin/kategori/update/{{ $kategori->id }}" method="POST" id="kategoriEditForm" novalidate>
         @csrf
         @method('PUT')
 
-        <div class="divider"><span>Informasi Kategori</span></div>
+        <div class="form-layout">
+            
+            {{-- ── CARD 1: INFORMASI KATEGORI ── --}}
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon"><i data-lucide="edit-3"></i></div>
+                    <div class="section-title-wrap">
+                        <h2>Informasi Kategori</h2>
+                        <p>Ubah nama identitas kategori menu</p>
+                    </div>
+                </div>
 
-        <div class="form-group">
-            <label class="form-label">Nama Kategori <span style="color:#ef4444;">*</span></label>
-            <input type="text" name="nama" id="fieldNama" class="form-input {{ $errors->has('nama') ? 'is-invalid' : '' }}"
-    value="{{ old('nama', $kategori->name) }}"
-    placeholder="Contoh: Minuman, Makanan Utama...">
-@error('nama')
-    <p class="field-error" style="display:block;">{{ $message }}</p>
-@enderror
-<p class="field-error" id="errorNama"></p>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Nama Kategori <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="nama" id="fieldNama" class="form-input {{ $errors->has('nama') ? 'is-invalid' : '' }}"
+                        value="{{ old('nama', $kategori->name) }}"
+                        placeholder="Contoh: Minuman, Makanan Utama...">
+                    
+                    @error('nama')
+                        <p class="field-error" style="display:flex;">{{ $message }}</p>
+                    @enderror
+                    <p class="field-error" id="errorNama" style="display:none;"></p>
+                </div>
+            </div>
+
+            {{-- ── CARD 2: DETAIL KATEGORI ── --}}
+            <div class="section-card">
+                <div class="section-header">
+                    <div class="section-icon"><i data-lucide="info"></i></div>
+                    <div class="section-title-wrap">
+                        <h2>Detail Sistem</h2>
+                        <p>Informasi rekam jejak kategori ini</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-row">ID Kategori <span>#{{ $kategori->id }}</span></div>
+                    <div class="info-row">Dibuat <span>{{ $kategori->created_at->format('d M Y') }}</span></div>
+                    <div class="info-row">Diperbarui <span>{{ $kategori->updated_at->format('d M Y') }}</span></div>
+                </div>
+            </div>
+
+            {{-- ── TOMBOL AKSI ── --}}
+            <div class="btn-group">
+                <a href="/admin/kategori" class="btn-back">
+                    <i data-lucide="x" style="width:18px;height:18px;"></i>
+                    Batal Kembali
+                </a>
+                <button type="submit" class="btn-save">
+                    <i data-lucide="save"></i>
+                    Update Kategori
+                </button>
+            </div>
+
         </div>
-
-        <div class="divider"><span>Detail</span></div>
-
-        <div class="info-box">
-            <div class="info-row">ID Kategori <span>#{{ $kategori->id }}</span></div>
-            <div class="info-row">Dibuat <span>{{ $kategori->created_at->format('d M Y') }}</span></div>
-            <div class="info-row">Diperbarui <span>{{ $kategori->updated_at->format('d M Y') }}</span></div>
-        </div>
-
-        <div class="button-group">
-            <button type="submit" class="btn btn-save">
-                <i data-lucide="save"></i>
-                Update Kategori
-            </button>
-            <a href="/admin/kategori" class="btn btn-back">Batal</a>
-        </div>
-
-        </form>
-    </div>
+    </form>
 </div>
+@endsection
 
+@push('scripts')
 <script>
-lucide.createIcons();
+    document.getElementById('kategoriEditForm').addEventListener('submit', function(e) {
+        const nama  = document.getElementById('fieldNama');
+        const error = document.getElementById('errorNama');
+        nama.classList.remove('is-invalid');
+        error.style.display = 'none';
 
-document.getElementById('kategoriEditForm').addEventListener('submit', function(e) {
-    const nama  = document.getElementById('fieldNama');
-    const error = document.getElementById('errorNama');
-    nama.classList.remove('is-invalid');
-    error.style.display = 'none';
+        if (!nama.value.trim()) {
+            e.preventDefault();
+            nama.classList.add('is-invalid');
+            error.textContent   = 'Nama kategori wajib diisi.';
+            error.style.display = 'flex'; // Disesuaikan agar icon error tampil sejajar
+            nama.focus();
+        }
+    });
 
-    if (!nama.value.trim()) {
-        e.preventDefault();
-        nama.classList.add('is-invalid');
-        error.textContent   = 'Nama kategori wajib diisi.';
-        error.style.display = 'block';
-        nama.focus();
+    document.getElementById('fieldNama').addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            document.getElementById('errorNama').style.display = 'none';
+        }
+    });
+
+    // Inisialisasi icon lucide jika tersedia
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
-});
-
-document.getElementById('fieldNama').addEventListener('input', function() {
-    if (this.value.trim()) {
-        this.classList.remove('is-invalid');
-        document.getElementById('errorNama').style.display = 'none';
-    }
-});
 </script>
-</body>
-</html>
+@endpush

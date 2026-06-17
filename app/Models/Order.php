@@ -10,10 +10,14 @@ class Order extends Model
         'queue_number',
         'table_number',
         'customer_name',
-        'order_type',
+        'order_type',        // ✅ TAKE AWAY: 'dine_in' atau 'take_away'
         'payment_method',
-        'midtrans_order_id', // ← tambah ini
-        'snap_token',        // ← tambah ini
+        'payment_status',        // ✅ FIX: status keuangan murni: pending|paid|failed
+        'payment_type',          // ✅ FIX: payment_type asli dari Midtrans (bank_transfer, gopay, qris, dll)
+        'payment_channel',       // ✅ FIX: channel spesifik (bca, bni, bri, gopay, shopeepay, qris, dst)
+        'payment_method_label',  // ✅ FIX: label deskriptif (mis. "BCA Virtual Account")
+        'midtrans_order_id',
+        'snap_token',
         'status',
         'total',
         'note',
@@ -26,5 +30,13 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Helper: Cek apakah pesanan ini adalah Take Away.
+     */
+    public function isTakeAway(): bool
+    {
+        return ($this->order_type ?? 'dine_in') === 'take_away';
     }
 }
